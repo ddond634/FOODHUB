@@ -2,7 +2,7 @@
   "version": 2,
   "name": "foodhub-frontend",
   "builds": [
-    { "src": "frontend/**", "use": "@vercel/static" }
+    { "src": "package.json", "use": "@vercel/static-build", "config": { "distDir": ".vercel_build_output/static" } }
   ],
   "routes": [
     { "src": "^/$", "dest": "/frontend/index.html" },
