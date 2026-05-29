@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rider Dashboard - Delivery Management</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/rider_dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Leaflet Map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Chart.js for performance charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+        (function() {
+            const token = localStorage.getItem('hub_access_token');
+            if (!token) {
+                window.location.href = '/loginregister.html';
+                return;
+            }
+            try {
+                const parts = token.split('.');
+                const decoded = JSON.parse(atob(parts[1]));
+                if (decoded.role !== 'rider') {
+                    alert('Access denied. Rider account required.');
+                    window.location.href = '/';
+                }
+            } catch (e) {
+                window.location.href = '/loginregister.html';
+            }
+        })();
+    </script>
+</head>
+<body>
+    <div class="rider-wrapper">
+        <!-- Sidebar Navigation -->
+        <nav class="rider-sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-brand">
+                    <span class="brand-icon">🚗</span>
+                    <span class="brand-text">RiderHub</span>
+                </div>
+                <button class="toggle-btn" id="sidebarToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+            <ul class="sidebar-menu">
+                <li class="menu-item">
+                    <a href="#" onclick="switchSection('dashboard', event); return false;" class="nav-link active" data-label="Dashboard">
+                        <span class="nav-icon"><i class="fas fa-chart-line"></i></span>
+                        <span class="nav-label">Dashboard</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="#" onclick="switchSection('deliveries', event); return false;" class="nav-link" data-label="Active Deliveries">
+                        <span class="nav-icon"><i class="fas fa-box"></i></span>
+                        <span class="nav-label">Deliveries</span>
+                        <span class="badge" id="availableOrdersBadge"></span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="#" onclick="switchSection('return-pickups', event); return false;" class="nav-link" data-label="Return Pickups">
+                        <span class="nav-icon"><i class="fas fa-rotate-left"></i></span>
+                        <span class="nav-label">Return Pickups</span>
+                        <span class="badge" id="returnPickupsBadge" style="display: none;">0</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="#" onclick="switchSection('tracking', event); return false;" class="nav-link" data-label="Live Tracking">
+                        <span class="nav-icon"><i class="fas fa-map-location-dot"></i></span>
+                        <span class="nav-label">Live Map</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="#" onclick="switchSection('earnings', event); return false;" class="nav-link" data-label="Earnings">
+                        <span class="nav-icon"><i class="fas fa-wallet"></i></span>
+                        <span class="nav-label">Earnings</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="#" onclick="switchSection('history', event); return false;" class="nav-link" data-label="Delivery History">
+                        <span class="nav-icon"><i class="fas fa-history"></i></span>
+                        <span class="nav-label">History</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="#" onclick="switchSection('stats', event); return false;" class="nav-link" data-label="Statistics">
+                        <span class="nav-icon"><i class="fas fa-chart-bar"></i></span>
+                        <span class="nav-label">Statistics</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="#" onclick="switchSection('profile', event); return false;" class="nav-link" data-label="Profile">
+                        <span class="nav-icon"><i class="fas fa-user"></i></span>
+                        <span class="nav-label">Profile</span>
+                    </a>
+                </li>
+            </ul>
+            <div class="sidebar-profile">
+                <div class="profile-avatar" id="profileAvatar">👤</div>
+                <div class="profile-info">
+                    <span class="profile-name" id="profileName">Rider</span>
+                    <a href="#" onclick="logout(); return false;" class="logout-btn">Logout</a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <div class="rider-content">
+            <!-- Top Header -->
+            <header class="top-header">
+                <div class="header-left">
+                    <h1 id="pageTitle">Dashboard</h1>
+                </div>
+                <div class="header-right">
+                    <div class="search-box">
+                        <input type="text" id="searchInput" placeholder="Search deliveries...">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <div class="header-icons">
+                        <div class="notification-bell">
+                            <i class="fas fa-bell"></i>
+                            <span class="notification-count" id="notificationCount">0</span>
+                        </div>
+                        <div class="online-status">
+                            <span class="status-indicator online" id="statusIndicator"></span>
+                            <span class="status-text" id="statusText">Online</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dashboard Section -->
+            <section id="dashboardSection" class="content-section active">
+                <div class="quick-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon active-deliveries">
+                            <i class="fas fa-route"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>Active Deliveries</h3>
+                            <p class="stat-number" id="activeDeliveries">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon completed-deliveries">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>Completed Today</h3>
+                            <p class="stat-number" id="completedToday">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon earnings-today">
+                            <i class="fas fa-coins"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>Earnings Today</h3>
+                            <p class="stat-number" id="earningsToday">₱0.00</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon rating">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>Average Rating</h3>
+                            <p class="stat-number" id="avgRating">0.0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="dashboard-card">
+                        <h3><i class="fas fa-clock"></i> Next Delivery</h3>
+                        <div class="next-delivery-info" id="nextDeliveryInfo">
+                            <p class="no-data">No active deliveries</p>
+                        </div>
+                    </div>
+                    <div class="dashboard-card">
+                        <h3><i class="fas fa-map"></i> Service Area</h3>
+                        <div class="service-area-info" id="serviceAreaInfo">
+                            <p class="no-data">Loading service area...</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Deliveries Section -->
+            <section id="deliveriesSection" class="content-section">
+                <div class="section-header">
+                    <h2>Active Deliveries</h2>
+                    <div class="filter-buttons">
+                        <button class="filter-btn active" onclick="filterDeliveries('all', event)" data-filter="all">All</button>
+                        <button class="filter-btn" onclick="filterDeliveries('available', event)" data-filter="available">Available</button>
+                        <button class="filter-btn" onclick="filterDeliveries('assigned', event)" data-filter="assigned">My Deliveries</button>
+                        <button class="filter-btn" onclick="filterDeliveries('in-progress', event)" data-filter="in-progress">In Progress</button>
+                        <button class="filter-btn" onclick="filterDeliveries('completed', event)" data-filter="completed">Completed</button>
+                    </div>
+                </div>
+
+                <div class="deliveries-container" id="deliveriesContainer">
+                    <p class="no-data">No deliveries available</p>
+                </div>
+            </section>
+
+            <!-- Return Pickups Section -->
+            <section id="return-pickupsSection" class="content-section">
+                <div class="section-header">
+                    <h2>Return Pickups</h2>
+                    <p>Accept and complete return pickup tasks</p>
+                </div>
+                <div class="section-controls" style="margin-bottom: 20px;">
+                    <div class="filter-buttons">
+                        <button class="filter-btn active" onclick="filterReturnPickups('all', event)" data-filter="all">All</button>
+                        <button class="filter-btn" onclick="filterReturnPickups('available', event)" data-filter="available">Available</button>
+                        <button class="filter-btn" onclick="filterReturnPickups('assigned', event)" data-filter="assigned">My Pickups</button>
+                        <button class="filter-btn" onclick="filterReturnPickups('picked-up', event)" data-filter="picked-up">Picked Up</button>
+                    </div>
+                </div>
+                <div class="deliveries-container" id="returnPickupsContainer">
+                    <p class="no-data">Loading return pickups...</p>
+                </div>
+            </section>
+
+            <!-- Tracking Section -->
+            <section id="trackingSection" class="content-section">
+                <div class="section-header">
+                    <h2>Live Tracking</h2>
+                </div>
+                <div class="tracking-container">
+                    <div class="map-container">
+                        <div id="map" style="height: 500px; border-radius: 8px;"></div>
+                    </div>
+                    <div class="delivery-details-sidebar">
+                        <h3>Current Delivery Details</h3>
+                        <div id="currentDeliveryDetails" class="delivery-details">
+                            <p class="no-data">Select a delivery to view details</p>
+                        </div>
+                        <div class="tracking-actions">
+                            <button class="btn btn-primary" id="acceptBtn" onclick="acceptDelivery()" style="display: none;">
+                                <i class="fas fa-check"></i> Accept Order
+                            </button>
+                            <button class="btn btn-success" id="startBtn" onclick="startDelivery()" style="display: none;">
+                                <i class="fas fa-truck"></i> Mark as On the Way
+                            </button>
+                            <button class="btn btn-info" id="callBtn" onclick="callCustomer()" style="display: none;">
+                                <i class="fas fa-phone"></i> Call Customer
+                            </button>
+                            <button class="btn btn-success" id="completeBtn" onclick="completeDelivery()" style="display: none;">
+                                <i class="fas fa-check-circle"></i> Mark as Delivered
+                            </button>
+                            <button class="btn btn-primary" id="markCompletedBtn" onclick="markOrderCompleted()" style="display: none;">
+                                <i class="fas fa-flag-checkered"></i> Mark as Completed
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Earnings Section -->
+            <section id="earningsSection" class="content-section">
+                <div class="section-header">
+                    <h2>Earnings Report</h2>
+                    <div class="date-range">
+                        <input type="date" id="earningsStartDate">
+                        <span>to</span>
+                        <input type="date" id="earningsEndDate">
+                        <button class="btn btn-small" onclick="updateEarningsReport()">Filter</button>
+                    </div>
+                </div>
+
+                <div class="earnings-summary">
+                    <div class="earning-card">
+                        <h4>Gross Earnings</h4>
+                        <p class="earning-amount" id="grossEarnings">₱0.00</p>
+                        <small style="color: #666; font-size: 0.8rem;">Before platform fee</small>
+                    </div>
+                    <div class="earning-card">
+                        <h4 id="platformFeeHeading">Platform Fee (5%)</h4>
+                        <p class="earning-amount" id="platformFee" style="color: #ff9800;">₱0.00</p>
+                        <small style="color: #666; font-size: 0.8rem;">Service deduction</small>
+                    </div>
+                    <div class="earning-card">
+                        <h4>Net Earnings</h4>
+                        <p class="earning-amount" id="totalEarnings" style="color: #4caf50;">₱0.00</p>
+                        <small style="color: #666; font-size: 0.8rem;">Amount you receive</small>
+                    </div>
+                    <div class="earning-card">
+                        <h4>Pending Payout</h4>
+                        <p class="earning-amount" id="pendingPayout">₱0.00</p>
+                        <small style="color: #666; font-size: 0.8rem;">Awaiting transfer</small>
+                    </div>
+                    <div class="earning-card">
+                        <h4>Completed Deliveries</h4>
+                        <p class="earning-amount" id="earningDeliveries">0</p>
+                        <small style="color: #666; font-size: 0.8rem;">This period</small>
+                    </div>
+                </div>
+
+                <div class="earnings-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Delivery ID</th>
+                                <th>Customer</th>
+                                <th>Distance</th>
+                                <th>Gross</th>
+                                <th id="feeHeader">Fee (5%)</th>
+                                <th>Net</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="earningsTableBody">
+                            <tr>
+                                <td colspan="8" class="no-data">No earnings data available</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- History Section -->
+            <section id="historySection" class="content-section">
+                <div class="section-header">
+                    <h2>Delivery History</h2>
+                    <div class="history-filters">
+                        <input type="date" id="historyDate" placeholder="Select date (optional)">
+                        <select id="historyStatus">
+                            <option value="">All Status</option>
+                            <option value="completed">Completed</option>
+                            <option value="delivered">Delivered</option>
+                            <option value="cancelled">Cancelled</option>
+                        </select>
+                        <button class="btn btn-small" onclick="loadDeliveryHistory()">Filter</button>
+                        <button class="btn btn-small" onclick="document.getElementById('historyDate').value=''; document.getElementById('historyStatus').value=''; loadDeliveryHistory();">Clear</button>
+                    </div>
+                </div>
+
+                <div class="history-timeline" id="historyTimeline">
+                    <p class="no-data">No delivery history found</p>
+                </div>
+            </section>
+
+            <!-- Statistics Section -->
+            <section id="statsSection" class="content-section">
+                <div class="section-header">
+                    <h2>Performance Statistics</h2>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stats-card">
+                        <h4>Acceptance Rate</h4>
+                        <div class="progress-container">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="acceptanceRateBar" style="width: 0%"></div>
+                            </div>
+                            <p class="percentage" id="acceptanceRateText">0%</p>
+                        </div>
+                    </div>
+                    <div class="stats-card">
+                        <h4>Completion Rate</h4>
+                        <div class="progress-container">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="completionRateBar" style="width: 0%"></div>
+                            </div>
+                            <p class="percentage" id="completionRateText">0%</p>
+                        </div>
+                    </div>
+                    <div class="stats-card">
+                        <h4>On-Time Delivery</h4>
+                        <div class="progress-container">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="onTimeRateBar" style="width: 0%"></div>
+                            </div>
+                            <p class="percentage" id="onTimeRateText">0%</p>
+                        </div>
+                    </div>
+                    <div class="stats-card">
+                        <h4>Customer Satisfaction</h4>
+                        <div class="progress-container">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="satisfactionRateBar" style="width: 0%"></div>
+                            </div>
+                            <p class="percentage" id="satisfactionRateText">0%</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="weekly-stats">
+                    <h4>Weekly Performance</h4>
+                    <div class="chart-container">
+                        <canvas id="performanceChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Profile Section -->
+            <section id="profileSection" class="content-section">
+                <div class="section-header">
+                    <h2>Rider Profile</h2>
+                </div>
+
+                <div class="profile-container">
+                    <div class="profile-header">
+                        <div class="profile-avatar-large" id="profileAvatarLarge">👤</div>
+                        <div class="profile-basic-info">
+                            <h3 id="profileFullName">Rider Name</h3>
+                            <p id="profileEmail">email@example.com</p>
+                            <div class="profile-rating">
+                                <div class="stars" id="profileStars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <span class="half-star"></span>
+                                </div>
+                                <span id="profileRatingCount">(0 ratings)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="profile-details">
+                        <div class="detail-group">
+                            <h4>Personal Information</h4>
+                            <div class="detail-row">
+                                <span class="label">Full Name:</span>
+                                <span id="detailFullName">-</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="label">Phone:</span>
+                                <span id="detailPhone">-</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="label">Email:</span>
+                                <span id="detailEmail">-</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="label">Vehicle Type:</span>
+                                <span id="detailVehicle">-</span>
+                            </div>
+                        </div>
+
+                        <div class="detail-group">
+                            <h4>Service Information</h4>
+                            <div class="detail-row">
+                                <span class="label">Member Since:</span>
+                                <span id="detailMemberSince">-</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="label">Status:</span>
+                                <span id="detailStatus" class="status-badge">-</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="label">Total Deliveries:</span>
+                                <span id="detailTotalDeliveries">0</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="label">Total Earnings:</span>
+                                <span id="detailTotalEarnings">₱0.00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="profile-actions">
+                        <button class="btn btn-primary" onclick="editProfile()">
+                            <i class="fas fa-edit"></i> Edit Profile
+                        </button>
+                        <button class="btn btn-secondary" onclick="changePassword()">
+                            <i class="fas fa-lock"></i> Change Password
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+    <script>
+        // Populate rider sidebar profile from /api/me (auth-guarded)
+        document.addEventListener('DOMContentLoaded', async function(){
+            const token = localStorage.getItem('hub_access_token');
+            if (!token || typeof authFetch !== 'function') return;
+            try{
+                const res = await authFetch('/api/me');
+                const data = await res.json();
+                if (!data.success) return;
+                const user = data.data || {};
+                const nameEl = document.getElementById('profileName');
+                const avatarEl = document.getElementById('profileAvatar');
+                if (nameEl) nameEl.textContent = ((user.first_name||'') + ' ' + (user.last_name||'')).trim() || user.email || 'Rider';
+                if (avatarEl && user.avatar_url) avatarEl.textContent = '';
+            }catch(e){ console.warn('Profile load failed', e); }
+        });
+    </script>
+
+    <!-- Modal for Delivery Details -->
+    <div id="deliveryModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeDeliveryModal()">&times;</span>
+            <h2>Delivery Details</h2>
+            <div id="modalDeliveryInfo"></div>
+            <div class="modal-actions">
+                <button class="btn btn-primary" id="modalAcceptBtn" onclick="acceptDelivery()">Accept</button>
+                <button class="btn btn-secondary" onclick="closeDeliveryModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Edit Profile -->
+    <div id="editProfileModal" class="modal">
+        <div class="checkout-modal-content">
+            <div class="checkout-modal-header">
+                <h2>Edit Profile</h2>
+                <span class="modal-close" onclick="closeEditProfileModal()" aria-label="Close">&times;</span>
+            </div>
+            
+            <div class="checkout-modal-body">
+                <form id="editProfileForm" class="checkout-form" onsubmit="saveProfile(event)">
+                    <!-- Personal Information Section -->
+                    <div class="checkout-section">
+                        <h3>Personal Information</h3>
+                        <div class="checkout-form-fields">
+                            <!-- Profile Picture Upload -->
+                            <div class="form-field">
+                                <label>Profile Picture</label>
+                                <div class="profile-picture-upload">
+                                    <div class="profile-picture-preview" id="profilePicturePreview">
+                                        <img id="profilePictureImg" src="" alt="Profile Picture" style="display: none;">
+                                        <div class="profile-picture-placeholder">
+                                            <i class="fas fa-user"></i>
+                                            <span>No picture</span>
+                                        </div>
+                                    </div>
+                                    <div class="profile-picture-controls">
+                                        <label for="editProfilePicture" class="btn-upload-picture">
+                                            <i class="fas fa-camera"></i> Choose Picture
+                                        </label>
+                                        <input type="file" id="editProfilePicture" accept="image/*" style="display: none;" onchange="handleProfilePictureChange(event)">
+                                        <button type="button" class="btn-remove-picture" id="removeProfilePictureBtn" onclick="removeProfilePicture()" style="display: none;">
+                                            <i class="fas fa-times"></i> Remove
+                                        </button>
+                                    </div>
+                                    <small class="form-text text-muted">Max size: 5MB. Supported formats: JPG, PNG, GIF, WebP</small>
+                                    <span class="error-message" id="editProfilePictureError"></span>
+                                </div>
+                            </div>
+                            <div class="form-field">
+                                <label for="editFirstName">First Name <span class="required">*</span></label>
+                                <input type="text" id="editFirstName" required placeholder="Enter your first name">
+                                <span class="error-message" id="editFirstNameError"></span>
+                            </div>
+                            <div class="form-field">
+                                <label for="editLastName">Last Name <span class="required">*</span></label>
+                                <input type="text" id="editLastName" required placeholder="Enter your last name">
+                                <span class="error-message" id="editLastNameError"></span>
+                            </div>
+                            <div class="form-field">
+                                <label for="editEmail">Email Address <span class="required">*</span></label>
+                                <input type="email" id="editEmail" required placeholder="your.email@example.com">
+                                <span class="error-message" id="editEmailError"></span>
+                            </div>
+                            <div class="form-field">
+                                <label for="editPhone">Phone Number</label>
+                                <input type="tel" id="editPhone" placeholder="+63 912 345 6789">
+                                <span class="error-message" id="editPhoneError"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Vehicle Information Section -->
+                    <div class="checkout-section">
+                        <h3>Vehicle Information</h3>
+                        <div class="checkout-form-fields">
+                            <div class="form-field">
+                                <label for="editVehicleType">Vehicle Type</label>
+                                <select id="editVehicleType" class="form-field">
+                                    <option value="">Select Vehicle Type</option>
+                                    <option value="motorcycle">🏍️ Motorcycle</option>
+                                    <option value="bicycle">🚲 Bicycle</option>
+                                    <option value="car">🚗 Car</option>
+                                    <option value="scooter">🛵 Scooter</option>
+                                </select>
+                                <span class="error-message" id="editVehicleTypeError"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="modal-actions" style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #f0f0f0;">
+                        <button type="button" class="btn btn-secondary" onclick="closeEditProfileModal()" style="margin-right: 12px;">Cancel</button>
+                        <button type="submit" class="btn btn-primary" id="saveProfileBtn">
+                            <span class="btn-text">Save Changes</span>
+                            <span class="btn-loading" style="display: none;">
+                                <i class="fas fa-spinner fa-spin"></i> Saving...
+                            </span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Change Password -->
+    <div id="changePasswordModal" class="modal">
+        <div class="checkout-modal-content">
+            <div class="checkout-modal-header">
+                <h2>Change Password</h2>
+                <span class="modal-close" onclick="closeChangePasswordModal()" aria-label="Close">&times;</span>
+            </div>
+            
+            <div class="checkout-modal-body">
+                <form id="changePasswordForm" class="checkout-form" onsubmit="savePassword(event)">
+                    <div class="checkout-section">
+                        <h3>Password Information</h3>
+                        <div class="checkout-form-fields">
+                            <div class="form-field">
+                                <label for="currentPassword">Current Password <span class="required">*</span></label>
+                                <input type="password" id="currentPassword" required placeholder="Enter your current password">
+                                <span class="error-message" id="currentPasswordError"></span>
+                            </div>
+                            <div class="form-field">
+                                <label for="newPassword">New Password <span class="required">*</span></label>
+                                <input type="password" id="newPassword" required minlength="6" placeholder="Enter new password (min. 6 characters)">
+                                <small class="form-text text-muted" style="font-size: 13px; color: #666; margin-top: 4px;">
+                                    <i class="fas fa-info-circle"></i> Password must be at least 6 characters long
+                                </small>
+                                <span class="error-message" id="newPasswordError"></span>
+                            </div>
+                            <div class="form-field">
+                                <label for="confirmPassword">Confirm New Password <span class="required">*</span></label>
+                                <input type="password" id="confirmPassword" required minlength="6" placeholder="Confirm your new password">
+                                <span class="error-message" id="confirmPasswordError"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="modal-actions" style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #f0f0f0;">
+                        <button type="button" class="btn btn-secondary" onclick="closeChangePasswordModal()" style="margin-right: 12px;">Cancel</button>
+                        <button type="submit" class="btn btn-primary" id="changePasswordBtn">
+                            <span class="btn-text">Change Password</span>
+                            <span class="btn-loading" style="display: none;">
+                                <i class="fas fa-spinner fa-spin"></i> Updating...
+                            </span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/notifications.js"></script>
+    <script src="js/role-guard.js"></script>
+    <script src="js/session-validator.js"></script>
+    <script src="js/script.js"></script>
+    <script src="js/rider_dashboard.js"></script>
+</body>
+</html>

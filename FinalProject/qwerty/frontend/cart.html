@@ -1,0 +1,2479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart - Hub</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* Force select elements to show selected value visually */
+        #checkoutProvince:not([value=""]) option:checked,
+        #checkoutCity:not([value=""]) option:checked {
+            display: block !important;
+        }
+        
+        /* Style select when it has a value (not placeholder) */
+        #checkoutProvince:not([value=""]):not([value=""]),
+        #checkoutCity:not([value=""]):not([value=""]) {
+            color: #2c3e50 !important;
+        }
+        
+        /* Alternative: Use attribute selector */
+        select[data-has-value="true"] {
+            color: #2c3e50 !important;
+        }
+        
+        /* Hide placeholder option when a value is selected */
+        select[data-has-value="true"] option[value=""] {
+            display: none !important;
+        }
+        
+        /* Force selected option to be visible */
+        select option:checked {
+            display: block !important;
+            color: #2c3e50 !important;
+        }
+        
+        /* Ensure select shows the selected value text */
+        select[data-has-value="true"] {
+            color: #2c3e50 !important;
+            font-weight: 500;
+        }
+        
+        /* Hide placeholder when value exists */
+        #checkoutProvince[data-has-value="true"] option[value=""],
+        #checkoutCity[data-has-value="true"] option[value=""] {
+            display: none !important;
+        }
+    </style>
+    <script>
+        (function() {
+            const token = localStorage.getItem('hub_access_token');
+            if (!token) {
+                window.location.href = '/loginregister.html';
+            }
+        })();
+    </script>
+</head>
+<body class="cart-page">
+    <!-- Navbar -->
+    <div class="navbar" id="navbar">
+        <div class="logo">
+            <a href="index.html">Hub</a>
+        </div>
+
+        <div class="search-bar">
+            <input type="text" placeholder="Search food, drinks, etc...">
+            <button><i class="fa fa-search"></i></button>
+        </div>
+
+        <!-- Single categories toggle: opens a dropdown panel with multiple category links -->
+        <div class="categories-dropdown">
+            <button id="categoriesToggle" class="categories-toggle" aria-expanded="false" aria-controls="categoriesPanel" aria-haspopup="true" title="Categories">
+                <i class="fa fa-th-large" aria-hidden="true"></i>
+                <i class="fa fa-caret-down caret" aria-hidden="true"></i>
+            </button>
+
+            <div id="categoriesPanel" class="categories-panel" hidden>
+                <a href="shop.html?category=Baking" class="panel-item" data-category="Baking">
+                    <i class="fa fa-bread-slice" aria-hidden="true"></i>
+                    <span>Baking</span>
+                </a>
+                <a href="shop.html?category=Coffee & Tea" class="panel-item" data-category="Coffee & Tea">
+                    <i class="fa fa-coffee" aria-hidden="true"></i>
+                    <span>Coffee & Tea</span>
+                </a>
+                <a href="shop.html?category=Snacks" class="panel-item" data-category="Snacks">
+                    <i class="fa fa-cookie-bite" aria-hidden="true"></i>
+                    <span>Snacks</span>
+                </a>
+                <a href="shop.html?category=Specialty" class="panel-item" data-category="Specialty">
+                    <i class="fa fa-globe" aria-hidden="true"></i>
+                    <span>Specialty</span>
+                </a>
+                <a href="shop.html?category=Organic" class="panel-item" data-category="Organic">
+                    <i class="fa fa-leaf" aria-hidden="true"></i>
+                    <span>Organic</span>
+                </a>
+                <a href="#mealkits" class="panel-item" data-target="mealkits">
+                    <i class="fa fa-box-open" aria-hidden="true"></i>
+                    <span>Meal Kits</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="nav-icons">
+            <a href="wishlist.html" id="wishlistBtn" title="Wishlist" class="icon-with-badge">
+                <i class="fa fa-heart"></i>
+                <span class="badge">3</span>
+            </a>
+            <a href="cart.html" id="cartBtn" title="Shopping Cart" class="icon-with-badge">
+                <i class="fa fa-shopping-cart"></i>
+                <span class="badge">2</span>
+            </a>
+            <a href="account.html" title="Account"><i class="fa fa-user"></i></a>
+            
+            <!-- Wishlist Dropdown -->
+            <div id="wishlistDropdown" class="cart-dropdown" hidden>
+                <div class="dropdown-header">Recently Added to Wishlist</div>
+                <div class="dropdown-items">
+                    <div class="dropdown-item">
+                        <img src="https://source.unsplash.com/60x60/?burger" alt="Product" loading="lazy">
+                        <div class="item-details">
+                            <p class="item-name">Cheeseburger Deluxe</p>
+                            <p class="item-price">₱199</p>
+                        </div>
+                    </div>
+                    <div class="dropdown-item">
+                        <img src="https://source.unsplash.com/60x60/?pizza" alt="Product" loading="lazy">
+                        <div class="item-details">
+                            <p class="item-name">Supreme Pizza</p>
+                            <p class="item-price">₱299</p>
+                        </div>
+                    </div>
+                    <div class="dropdown-item">
+                        <img src="https://source.unsplash.com/60x60/?coffee" alt="Product" loading="lazy">
+                        <div class="item-details">
+                            <p class="item-name">Premium Coffee Blend</p>
+                            <p class="item-price">₱150</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="dropdown-footer">
+                    <p class="items-count">3 items in wishlist</p>
+                    <button class="view-btn">View My Wishlist</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Cart Container -->
+    <main id="main" class="cart-main" role="main">
+    <div class="cart-container">
+        <nav class="breadcrumb" aria-label="Breadcrumb"><a href="index.html">Home</a> › <span>Cart</span></nav>
+        <div class="cart-header">
+            <h1>
+                <i class="fa fa-shopping-cart"></i> Shopping Cart
+            </h1>
+            <span class="cart-count"><span id="cartCount">0</span> items</span>
+        </div>
+
+        <div class="cart-content" id="cartContent">
+            <!-- Controls / table header -->
+            <div class="cart-table-head">
+                <label class="head-checkbox">
+                    <input type="checkbox" id="selectAll"> 
+                </label>
+                <div class="head-product">Product</div>
+                <div class="head-unit">Unit Price</div>
+                <div class="head-qty">Quantity</div>
+                <div class="head-total">Total Price</div>
+                <div class="head-actions">Actions</div>
+            </div>
+
+            <!-- Cart Items (populated by JS) grouped by seller -->
+            <div id="cartItems" class="cart-items"></div>
+
+            <!-- Cart Summary -->
+            <div id="cartSummary" class="cart-summary" hidden>
+                <h2>Order Summary</h2>
+                <div class="summary-row">
+                    <span>Subtotal</span>
+                    <span id="subtotal">₱0</span>
+                </div>
+                <div class="summary-row">
+                    <span>Delivery Fee</span>
+                    <span id="deliveryFee">₱50</span>
+                </div>
+                <div class="summary-row total">
+                    <span>Total</span>
+                    <span id="total">₱0</span>
+                </div>
+                <button class="btn-checkout" onclick="event.preventDefault(); checkout(); return false;">
+                    <i class="fa fa-credit-card"></i> Proceed to Checkout
+                </button>
+                <a href="index.html#products" class="btn-continue">Continue Shopping</a>
+            </div>
+
+            <!-- Fixed bottom bar similar to screenshot -->
+            <div id="cartFooterBar" class="cart-footer-bar" hidden aria-live="polite">
+                <div class="footer-left">
+                    <label class="footer-select-all">
+                        <input type="checkbox" id="footerSelectAll"> 
+                        Select All (<span id="footerAllCount">0</span>)
+                    </label>
+                    <button id="footerDelete" class="footer-action">Delete</button>
+                    <button id="footerMoveWishlist" class="footer-action" type="button">Move to Wishlist</button>
+                </div>
+                <div class="footer-right">
+                    <div class="footer-total-line">
+                        <span class="ft-label">Total (<span id="footerCount">0</span> item):</span>
+                        <span class="ft-value" id="footerTotal">₱0</span>
+                    </div>
+                    <div class="footer-saved" id="footerSaved" hidden>
+                        Saved <span id="footerSavedValue">₱0</span>
+                    </div>
+                    <button class="btn-checkout btn-orange" onclick="event.preventDefault(); checkout(); return false;">Check Out</button>
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <div id="emptyCart" class="empty-cart" hidden>
+                <i class="fa fa-cart-shopping"></i>
+                <h2>Your cart is empty</h2>
+                <p>Add some delicious items to get started</p>
+                <a href="index.html#products" class="btn-browse">Browse Products</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Chat Button -->
+    <button class="support-btn" onclick="window.location.href='chat.html'" aria-label="Open chat"><i class="fa fa-comment-dots"></i></button>
+
+    <!-- Footer (copied from index) -->
+    <footer class="site-footer" role="contentinfo">
+        <div class="footer-content">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <a href="index.html" class="footer-logo">Hub</a>
+                    <p class="footer-tagline">Food & Gourmet delivered with care.</p>
+                    <div class="footer-socials" aria-label="Social media">
+                        <a href="#" aria-label="Facebook"><i class="fa-brands fa-facebook"></i></a>
+                        <a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+                        <a href="#" aria-label="Twitter"><i class="fa-brands fa-x-twitter"></i></a>
+                    </div>
+                </div>
+
+                <div class="footer-column">
+                    <h4>Quick Links</h4>
+                    <nav class="footer-nav" aria-label="Quick Links">
+                        <a href="about_us.html">About Us</a>
+                        <a href="our_services.html">Our Services</a>
+                        <a href="contact_us.html">Contact Us</a>
+                        <a href="shop.html">Shop</a>
+                    </nav>
+                </div>
+
+                <div class="footer-column">
+                    <h4>Customer Care</h4>
+                    <nav class="footer-nav" aria-label="Customer Care">
+                        <a href="#products">Products</a>
+                        <a href="#testimonials">Testimonials</a>
+                        <a href="#newsletter">Newsletter</a>
+                        <a href="#">Support</a>
+                    </nav>
+                </div>
+
+                <div class="footer-column">
+                    <h4>My Account</h4>
+                    <nav class="footer-nav" aria-label="Account">
+                        <a href="account.html">My Account</a>
+                        <a href="cart.html">Shopping Cart</a>
+                        <a href="wishlist.html">Wishlist</a>
+                        <a href="#">Order History</a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>© <span id="year">2025</span> Hub. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Checkout Modal -->
+    <div id="checkoutModal" class="product-modal" hidden>
+        <div class="modal-overlay"></div>
+        <div class="modal-container checkout-modal-container">
+            <button class="modal-close" aria-label="Close modal"><i class="fa fa-times"></i></button>
+            
+            <div class="checkout-modal-content">
+                <div class="checkout-modal-header">
+                    <h2>Complete Your Order</h2>
+                </div>
+                
+                <div class="checkout-modal-body">
+                    <form id="checkoutForm" class="checkout-form">
+                    <!-- Delivery Information -->
+                    <div class="checkout-section">
+                            <h3>Delivery Information</h3>
+                            <div class="checkout-form-fields">
+                                <div class="form-field">
+                                    <label for="checkoutFirstName">First Name *</label>
+                                    <input type="text" id="checkoutFirstName" required>
+                            </div>
+                                <div class="form-field">
+                                    <label for="checkoutMiddleName">Middle Name <span style="color: #6b7280; font-size: 12px; font-weight: normal;">(Optional)</span></label>
+                                    <input type="text" id="checkoutMiddleName">
+                            </div>
+                                <div class="form-field">
+                                    <label for="checkoutLastName">Last Name *</label>
+                                    <input type="text" id="checkoutLastName" required>
+                            </div>
+                                <div class="form-field">
+                                    <label for="checkoutSuffix">Suffix <span style="color: #6b7280; font-size: 12px; font-weight: normal;">(Optional)</span></label>
+                                    <input type="text" id="checkoutSuffix" placeholder="e.g., Jr., Sr., III" maxlength="10">
+                            </div>
+                                <div class="form-field">
+                                    <label for="checkoutPhone">Phone Number *</label>
+                                    <input type="tel" id="checkoutPhone" required>
+                                </div>
+                                <div class="form-field">
+                                    <label for="checkoutEmail">Email Address *</label>
+                                    <input type="email" id="checkoutEmail" required>
+                                </div>
+                                <div class="form-field" style="grid-column: 1 / -1;">
+                                    <label for="checkoutAddressLine1">Address Line 1 (Street, Building) *</label>
+                                    <input type="text" id="checkoutAddressLine1" required>
+                                </div>
+                                <div class="form-field" style="grid-column: 1 / -1;">
+                                    <label for="checkoutAddressLine2">Address Line 2 (Barangay / Additional info)</label>
+                                    <input type="text" id="checkoutAddressLine2">
+                                </div>
+                                <div class="form-field">
+                                    <label for="checkoutRegion">
+                                        <i class="fas fa-map-marker-alt" style="margin-right: 6px;"></i>
+                                        Region
+                                    </label>
+                                    <input type="text" id="checkoutRegion" value="Region IV-A (CALABARZON)" readonly style="padding: 14px 18px; font-size: 15px; border: 1px solid #dce1e7; border-radius: 10px; width: 100%; box-sizing: border-box; background: #f9fafb; color: #6b7280; cursor: not-allowed;">
+                                </div>
+                                <div class="form-field">
+                                    <label for="checkoutProvince">
+                                        <i class="fas fa-map" style="margin-right: 6px;"></i>
+                                        Province <span style="color: #ef4444;">*</span>
+                                    </label>
+                                    <select id="checkoutProvince" required style="padding: 14px 18px; font-size: 15px; border: 1px solid #dce1e7; border-radius: 10px; width: 100%; box-sizing: border-box; background: white; color: #2c3e50; cursor: pointer; appearance: none; background-image: url('data:image/svg+xml;charset=UTF-8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%236b7280\'><path d=\'M7 10l5 5 5-5z\'/></svg>'); background-repeat: no-repeat; background-position: right 14px center; background-size: 20px; padding-right: 45px;">
+                                        <option value="">Select Province</option>
+                                    </select>
+                                </div>
+                                <div class="form-field">
+                                    <label for="checkoutCity">
+                                        <i class="fas fa-city" style="margin-right: 6px;"></i>
+                                        City/Municipality <span style="color: #ef4444;">*</span>
+                                    </label>
+                                    <select id="checkoutCity" required disabled style="padding: 14px 18px; font-size: 15px; border: 1px solid #dce1e7; border-radius: 10px; width: 100%; box-sizing: border-box; background: #f9fafb; color: #6b7280; cursor: not-allowed; appearance: none; background-image: url('data:image/svg+xml;charset=UTF-8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%236b7280\'><path d=\'M7 10l5 5 5-5z\'/></svg>'); background-repeat: no-repeat; background-position: right 14px center; background-size: 20px; padding-right: 45px;">
+                                        <option value="">Select Province first</option>
+                                    </select>
+                                </div>
+                                <div class="form-field">
+                                    <label for="checkoutPostalCode">Postal Code *</label>
+                                    <input type="text" id="checkoutPostalCode" readonly required style="background: #f9fafb; color: #6b7280; cursor: not-allowed;">
+                                </div>
+                                <div class="form-field" style="grid-column: 1 / -1;">
+                                    <label for="checkoutNotes">Delivery Notes (Optional)</label>
+                                    <textarea id="checkoutNotes" rows="2" placeholder="e.g., Leave at door, Call upon arrival"></textarea>
+                                </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment Method -->
+                    <div class="checkout-section">
+                            <h3>Payment Method</h3>
+                            <div class="payment-option">
+                                <label class="payment-label">
+                                    <input type="radio" name="payment" value="cod" checked>
+                                    <div class="payment-content">
+                                        <div class="payment-title">
+                                            <i class="fa fa-money-bill-wave"></i>
+                                        Cash on Delivery
+                                    </div>
+                                        <div class="payment-description">Pay with cash when your order is delivered</div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Order Summary -->
+                    <div class="checkout-section">
+                            <h3>Order Summary</h3>
+                            <div class="order-summary-box">
+                                <div class="summary-row">
+                                <span>Items (<span id="checkoutItemCount">0</span>)</span>
+                                <span id="checkoutSubtotal">₱0</span>
+                            </div>
+                                <div class="summary-row" id="discountRow" style="display:none;">
+                                <span>Discount</span>
+                                <span id="checkoutDiscount">-₱0</span>
+                            </div>
+                                <div class="summary-row">
+                                <span>Delivery Fee</span>
+                                <span id="checkoutDelivery">₱0</span>
+                            </div>
+                                <div class="summary-row summary-total">
+                                <span>Total</span>
+                                <span id="checkoutTotal">₱0</span>
+                            </div>
+                        </div>
+                        </div>
+                    </form>
+                    </div>
+
+                <!-- Action Buttons (Fixed at bottom) -->
+                <div class="checkout-modal-footer">
+                    <button type="button" class="btn-cancel modal-close-btn">Cancel</button>
+                    <button type="submit" form="checkoutForm" class="btn-submit">
+                            <i class="fa fa-check-circle"></i> Place Order
+                        </button>
+                    </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/notifications.js"></script>
+    <script src="js/session-validator.js"></script>
+    <script src="js/cart-sync.js"></script>
+    <script src="js/script.js"></script>
+    <script src="js/messenger-global.js"></script>
+    <script>
+        const API_BASE = 'http://127.0.0.1:5000/api';
+        let cartItems = [];
+
+        // Fetch cart items from backend
+        async function loadCart() {
+            const token = localStorage.getItem('hub_access_token');
+            if (!token) {
+                window.location.href = '/loginregister.html';
+                return;
+            }
+
+            try {
+                console.log('🛒 Loading cart from API...');
+                const response = await fetch(`${API_BASE}/cart`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                console.log('📡 Response status:', response.status);
+                const data = await response.json();
+                console.log('📦 Cart data received:', data);
+                
+                // Backend returns: { success: true, data: { items: [...] }, message: '...' }
+                if (data.success && data.data && data.data.items) {
+                    // Add selected property to each item
+                    cartItems = data.data.items.map(item => ({
+                        ...item,
+                        id: item.cart_id,  // Use cart_id as the item identifier
+                        name: item.title,
+                        price: item.unit_price,  // This is already the sale price if on_sale is true
+                        image_url: item.img_url,
+                        selected: false,
+                        // Include sale information if available
+                        on_sale: item.on_sale || false,
+                        original_price: item.original_price || null,
+                        sale_price: item.sale_price || null,
+                        discount_percentage: item.discount_percentage || null
+                    }));
+                    console.log('✅ Cart items:', cartItems.length, 'items');
+                    renderCart();
+                    updateNavbarCounter();
+                } else {
+                    console.log('⚠️ No items or failed:', data);
+                    showEmptyCart();
+                }
+            } catch (error) {
+                console.error('❌ Error loading cart:', error);
+                showEmptyCart();
+            }
+        }
+
+        // Render cart items
+        function renderCart() {
+            console.log('🎨 Starting renderCart...');
+            const container = document.getElementById('cartItems');
+            const emptyCart = document.getElementById('emptyCart');
+            
+            if (!cartItems || cartItems.length === 0) {
+                console.log('❌ No items to render, showing empty state');
+                showEmptyCart();
+                return;
+            }
+
+            console.log('✅ Rendering', cartItems.length, 'items...');
+            emptyCart.hidden = true;
+            container.innerHTML = '';
+
+            // Show summary and footer bar
+            document.getElementById('cartSummary').hidden = false;
+            document.getElementById('cartFooterBar').hidden = false;
+            document.getElementById('cartCount').textContent = cartItems.length;
+            container.style.display = 'flex';
+
+            cartItems.forEach((item, index) => {
+                const itemEl = createCartItem(item, index);
+                container.appendChild(itemEl);
+            });
+
+            // Setup event listeners
+            setupSelectionListeners();
+            updateCountersAndTotals();
+            
+            console.log('🎉 Render complete! Container children:', container.children.length);
+        }
+
+        // Create cart item HTML
+        function createCartItem(item, index) {
+            const div = document.createElement('div');
+            div.className = 'cart-item';
+            div.dataset.itemId = item.id;
+            div.dataset.index = index;
+            
+            const imageUrl = item.image_url ? `http://127.0.0.1:5000${item.image_url}` : 'https://via.placeholder.com/100';
+            const variation = item.variation ? `<span class="item-variation">${item.variation}</span>` : '';
+            const stock = item.stock !== undefined && item.stock !== null && item.stock < 10 ? `<span class="stock-warning" style="color: #ff6b35; font-size: 0.85rem;">Only ${item.stock} left!</span>` : '';
+            
+            div.innerHTML = `
+                <div class="item-checkbox">
+                    <input type="checkbox" class="item-select" data-index="${index}" ${item.selected ? 'checked' : ''}>
+                </div>
+                <div class="item-product">
+                    <img src="${imageUrl}" alt="${item.name || 'Product'}" loading="lazy" onerror="this.src='https://via.placeholder.com/80'">
+                    <div class="product-info">
+                        <h3 class="product-name">${item.name || 'Unknown Product'}</h3>
+                        ${variation}
+                        ${stock}
+                    </div>
+                </div>
+                <div class="item-unit-price">
+                    ${item.on_sale && item.original_price ? `
+                        <span style="text-decoration: line-through; color: #999; font-size: 0.9em; margin-right: 8px;">
+                            ₱${parseFloat(item.original_price || 0).toFixed(2)}
+                        </span>
+                        <span style="color: #e74c3c; font-weight: bold;">
+                    ₱${parseFloat(item.price || 0).toFixed(2)}
+                        </span>
+                        <span style="display: block; font-size: 0.85em; color: #e74c3c; margin-top: 4px;">
+                            <i class="fa fa-tag"></i> ${parseFloat(item.discount_percentage || 0).toFixed(0)}% OFF
+                        </span>
+                    ` : `
+                        ₱${parseFloat(item.price || 0).toFixed(2)}
+                    `}
+                </div>
+                <div class="item-quantity">
+                    <button class="qty-btn" onclick="updateQuantity(${item.product_id}, ${item.quantity - 1}, ${item.id})" ${item.quantity <= 1 ? 'disabled' : ''}>-</button>
+                    <input type="number" value="${item.quantity || 1}" min="1" max="${item.stock || 999}" 
+                           onchange="updateQuantity(${item.product_id}, this.value, ${item.id})" class="qty-input">
+                    <button class="qty-btn" onclick="updateQuantity(${item.product_id}, ${item.quantity + 1}, ${item.id})" ${item.stock && item.quantity >= item.stock ? 'disabled' : ''}>+</button>
+                </div>
+                <div class="item-total-price">
+                    ${item.on_sale && item.original_price ? `
+                        <span style="text-decoration: line-through; color: #999; font-size: 0.9em; margin-right: 8px;">
+                            ₱${parseFloat((item.original_price || 0) * (item.quantity || 1)).toFixed(2)}
+                        </span>
+                        <span style="color: #e74c3c; font-weight: bold;">
+                    ₱${parseFloat(item.total_price || 0).toFixed(2)}
+                        </span>
+                    ` : `
+                        ₱${parseFloat(item.total_price || 0).toFixed(2)}
+                    `}
+                </div>
+                <div class="item-actions">
+                    <button class="btn-remove" onclick="removeItem(${item.id})" aria-label="Remove item" title="Remove from cart">
+                        <i class="fa fa-trash"></i>
+                    </button>
+                </div>
+            `;
+            
+            return div;
+        }
+
+        // Store handler functions for cleanup
+        const itemCheckboxHandlers = new Map();
+        let selectAllHeaderHandler = null;
+        let selectAllFooterHandler = null;
+        // Flag to prevent individual handlers from running during bulk update
+        let isBulkUpdating = false;
+
+        // Individual checkbox change handler
+        function handleItemCheckboxChange() {
+            // Skip if we're in the middle of a bulk update
+            if (isBulkUpdating) {
+                console.log('⏭️ Skipping individual checkbox handler during bulk update');
+                return;
+            }
+            const index = parseInt(this.dataset.index);
+            // Only toggle if the checkbox state doesn't match the item's selected state
+            if (cartItems[index] && this.checked !== cartItems[index].selected) {
+                console.log('✓ Item checkbox changed, index:', index);
+                toggleItemSelection(index);
+            }
+        }
+
+        // Setup selection listeners (copied from working wishlist.html)
+        function setupSelectionListeners() {
+            // Remove old listeners first to prevent duplicates
+            itemCheckboxHandlers.forEach((handler, checkbox) => {
+                checkbox.removeEventListener('change', handler);
+            });
+            itemCheckboxHandlers.clear();
+
+            // Individual item checkboxes
+            const itemCheckboxes = document.querySelectorAll('.item-select');
+            console.log('📋 Found', itemCheckboxes.length, 'item checkboxes');
+            itemCheckboxes.forEach(checkbox => {
+                itemCheckboxHandlers.set(checkbox, handleItemCheckboxChange);
+                checkbox.addEventListener('change', handleItemCheckboxChange);
+            });
+
+            // Select All checkbox (header)
+            const selectAllHeader = document.getElementById('selectAll');
+            console.log('📋 Header selectAll found:', !!selectAllHeader);
+            if (selectAllHeader) {
+                if (selectAllHeaderHandler) {
+                    selectAllHeader.removeEventListener('change', selectAllHeaderHandler, true);
+                    selectAllHeader.removeEventListener('change', selectAllHeaderHandler, false);
+                }
+                selectAllHeaderHandler = function(e) {
+                    console.log('Header change event fired');
+                    e.stopImmediatePropagation();
+                    toggleSelectAll.call(this, e);
+                };
+                // Add with capture phase to run before other listeners
+                selectAllHeader.addEventListener('change', selectAllHeaderHandler, true);
+            }
+
+            // Select All checkbox (footer)
+            const selectAllFooter = document.getElementById('footerSelectAll');
+            console.log('📋 Footer selectAll found:', !!selectAllFooter);
+            if (selectAllFooter) {
+                if (selectAllFooterHandler) {
+                    selectAllFooter.removeEventListener('change', selectAllFooterHandler, true);
+                    selectAllFooter.removeEventListener('change', selectAllFooterHandler, false);
+                }
+                selectAllFooterHandler = function(e) {
+                    console.log('Footer change event fired');
+                    e.stopImmediatePropagation();
+                    toggleSelectAll.call(this, e);
+                };
+                // Add with capture phase to run before other listeners
+                selectAllFooter.addEventListener('change', selectAllFooterHandler, true);
+            }
+
+            // Delete button
+            const deleteBtn = document.getElementById('footerDelete');
+            if (deleteBtn) {
+                deleteBtn.onclick = deleteSelected;
+            }
+
+            // Move to Wishlist button
+            const moveWishlistBtn = document.getElementById('footerMoveWishlist');
+            if (moveWishlistBtn) {
+                moveWishlistBtn.onclick = moveSelectedToWishlist;
+            }
+        }
+
+        // Toggle select all (copied from working wishlist.html)
+        function toggleSelectAll(event) {
+            // Prevent event from bubbling to other handlers
+            if (event) {
+                event.stopImmediatePropagation();
+                event.preventDefault();
+            }
+            
+            // Get the actual checkbox state from the event target or this
+            const checkbox = event && event.target ? event.target : this;
+            const isChecked = checkbox.checked;
+            
+            console.log('🔄 toggleSelectAll called, isChecked:', isChecked, 'checkbox id:', checkbox.id, 'checkbox element:', checkbox);
+            
+            // Set flag BEFORE any operations to prevent handlers from running
+            isBulkUpdating = true;
+            
+            const selectAllHeader = document.getElementById('selectAll');
+            const selectAllFooter = document.getElementById('footerSelectAll');
+
+            // Update all items first
+            cartItems.forEach((item, idx) => {
+                item.selected = isChecked;
+                console.log(`  Item ${idx} selected set to:`, isChecked);
+            });
+            console.log('✅ Updated cartItems selection to:', isChecked);
+
+            // Get current checkboxes from DOM
+            const itemCheckboxes = document.querySelectorAll('.item-select');
+            console.log('📋 Updating', itemCheckboxes.length, 'item checkboxes');
+
+            // Update UI checkboxes - handlers will check the flag and skip
+            itemCheckboxes.forEach((checkboxEl, idx) => {
+                const beforeState = checkboxEl.checked;
+                checkboxEl.checked = isChecked;
+                console.log(`  Checkbox ${idx} (index ${checkboxEl.dataset.index}): ${beforeState} -> ${checkboxEl.checked}`);
+            });
+
+            // Reset flag after all synchronous operations complete
+            // Use queueMicrotask to ensure it runs after all current synchronous code
+            queueMicrotask(() => {
+                // Double-check with a small delay to catch any late events
+                setTimeout(() => {
+                    isBulkUpdating = false;
+                    console.log('✅ Bulk update complete, flag reset');
+                }, 10);
+            });
+
+            // Sync both select all checkboxes
+            if (selectAllHeader) selectAllHeader.checked = isChecked;
+            if (selectAllFooter) selectAllFooter.checked = isChecked;
+
+            // Update counters and totals
+            updateCountersAndTotals();
+        }
+
+        // Toggle individual item selection
+        function toggleItemSelection(index) {
+            cartItems[index].selected = !cartItems[index].selected;
+
+            // Check if all items are selected
+            const allSelected = cartItems.every(item => item.selected);
+            
+            // Update select all checkboxes
+            const selectAllHeader = document.getElementById('selectAll');
+            const selectAllFooter = document.getElementById('footerSelectAll');
+            if (selectAllHeader) selectAllHeader.checked = allSelected;
+            if (selectAllFooter) selectAllFooter.checked = allSelected;
+
+            // Update counters and totals
+            updateCountersAndTotals();
+        }
+
+        // Update counters and totals
+        function updateCountersAndTotals() {
+            const selectedItems = cartItems.filter(item => item.selected);
+            const selectedCount = selectedItems.length;
+            
+            // Calculate totals - use sale_price if on_sale, otherwise use regular price
+            const subtotal = selectedItems.reduce((sum, item) => {
+                const itemPrice = item.on_sale && item.sale_price ? parseFloat(item.sale_price || 0) : parseFloat(item.price || 0);
+                return sum + (itemPrice * (item.quantity || 1));
+            }, 0);
+            
+            const deliveryFee = selectedCount > 0 ? 50 : 0;
+            const total = subtotal + deliveryFee;
+
+            // Update UI elements
+            document.getElementById('footerAllCount').textContent = cartItems.length;
+            document.getElementById('footerCount').textContent = selectedCount;
+            document.getElementById('footerTotal').textContent = `₱${total.toFixed(2)}`;
+            
+            // Update summary sidebar
+            document.getElementById('subtotal').textContent = `₱${subtotal.toFixed(2)}`;
+            document.getElementById('deliveryFee').textContent = `₱${deliveryFee.toFixed(2)}`;
+            document.getElementById('total').textContent = `₱${total.toFixed(2)}`;
+        }
+
+        // Delete selected items
+        async function deleteSelected() {
+            const selectedItems = cartItems.filter(item => item.selected);
+            
+            if (selectedItems.length === 0) {
+                if (typeof notify !== 'undefined') notify.warning('Please select items to delete');
+                return;
+            }
+
+            if (!confirm(`Delete ${selectedItems.length} item(s) from cart?`)) return;
+
+            const token = localStorage.getItem('hub_access_token');
+            if (!token) return;
+
+            try {
+                // Delete each selected item
+                for (const item of selectedItems) {
+                    await fetch(`${API_BASE}/cart/${item.id}`, {
+                        method: 'DELETE',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                }
+
+                // Remove from local array
+                cartItems = cartItems.filter(item => !item.selected);
+                
+                // Re-render
+                if (cartItems.length === 0) {
+                    showEmptyCart();
+                } else {
+                    renderCart();
+                }
+                
+                updateNavbarCounter();
+                if (typeof syncCartBadge !== 'undefined') syncCartBadge();
+                if (typeof syncCartDropdown !== 'undefined') syncCartDropdown();
+                if (typeof notify !== 'undefined') notify.success('Selected items removed');
+            } catch (error) {
+                console.error('Error deleting items:', error);
+                if (typeof notify !== 'undefined') notify.error('Failed to delete items');
+            }
+        }
+
+        // Move selected items to wishlist
+        async function moveSelectedToWishlist() {
+            const selectedItems = cartItems.filter(item => item.selected);
+            
+            if (selectedItems.length === 0) {
+                if (typeof notify !== 'undefined') notify.warning('Please select items to move to wishlist');
+                return;
+            }
+
+            const token = localStorage.getItem('hub_access_token');
+            if (!token) return;
+
+            try {
+                let successCount = 0;
+                
+                // Add each selected item to wishlist
+                for (const item of selectedItems) {
+                    const response = await fetch(`${API_BASE}/wishlist/${item.product_id}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ 
+                            quantity: item.quantity || 1 
+                        })
+                    });
+
+                    const data = await response.json();
+                    if (data.success) {
+                        successCount++;
+                        // Remove from cart
+                        await fetch(`${API_BASE}/cart/${item.id}`, {
+                            method: 'DELETE',
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        });
+                    }
+                }
+
+                // Remove moved items from local array
+                cartItems = cartItems.filter(item => !item.selected);
+                
+                // Re-render
+                if (cartItems.length === 0) {
+                    showEmptyCart();
+                } else {
+                    renderCart();
+                }
+
+                updateNavbarCounter();
+                if (typeof syncCartBadge !== 'undefined') syncCartBadge();
+                if (typeof syncCartDropdown !== 'undefined') syncCartDropdown();
+                if (typeof syncWishlistBadge !== 'undefined') syncWishlistBadge();
+                if (typeof syncWishlistDropdown !== 'undefined') syncWishlistDropdown();
+                
+                if (typeof notify !== 'undefined') {
+                    notify.success(`${successCount} item(s) moved to wishlist!`);
+                }
+            } catch (error) {
+                console.error('Error moving to wishlist:', error);
+                if (typeof notify !== 'undefined') notify.error('Failed to move items to wishlist');
+            }
+        }
+
+        // Update item quantity
+        async function updateQuantity(productId, newQuantity, cartItemId) {
+            newQuantity = parseInt(newQuantity);
+            if (newQuantity < 1) return;
+
+            const token = localStorage.getItem('hub_access_token');
+            if (!token) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/cart/${cartItemId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ quantity: newQuantity })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    const item = cartItems.find(i => i.id === cartItemId);
+                    if (item) {
+                        item.quantity = newQuantity;
+                        // Recalculate total_price using sale price if on sale
+                        const itemPrice = item.on_sale && item.sale_price ? parseFloat(item.sale_price || 0) : parseFloat(item.price || 0);
+                        item.total_price = itemPrice * newQuantity;
+                        renderCart();
+                    }
+                    // Sync cart badge (and dropdown if present) globally
+                    if (typeof syncCartBadge !== 'undefined') syncCartBadge();
+                    if (typeof syncCartDropdown !== 'undefined') syncCartDropdown();
+                } else {
+                    if (typeof notify !== 'undefined') notify.error(data.message || 'Failed to update');
+                }
+            } catch (error) {
+                console.error('Error updating quantity:', error);
+            }
+        }
+
+        // Remove item from cart
+        async function removeItem(itemId) {
+            if (!confirm('Remove this item from cart?')) return;
+
+            const token = localStorage.getItem('hub_access_token');
+            if (!token) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/cart/${itemId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    cartItems = cartItems.filter(i => i.id !== itemId);
+                    
+                    if (cartItems.length === 0) {
+                        showEmptyCart();
+                    } else {
+                        renderCart();
+                    }
+                    
+                    updateNavbarCounter();
+                    // Sync cart badge (and dropdown if present) globally
+                    if (typeof syncCartBadge !== 'undefined') syncCartBadge();
+                    if (typeof syncCartDropdown !== 'undefined') syncCartDropdown();
+                    if (typeof notify !== 'undefined') notify.success('Item removed');
+                }
+            } catch (error) {
+                console.error('Error removing item:', error);
+            }
+        }
+
+        // Update navbar counter
+        function updateNavbarCounter() {
+            const totalQty = cartItems.reduce((sum, item) => sum + (item.quantity || 1), 0);
+            const badge = document.querySelector('#cartBtn .badge');
+            if (badge) badge.textContent = totalQty;
+        }
+
+        // Show empty cart
+        function showEmptyCart() {
+            const container = document.getElementById('cartItems');
+            container.innerHTML = '';
+            container.style.display = 'none';
+            document.getElementById('emptyCart').hidden = false;
+            document.getElementById('cartSummary').hidden = true;
+            document.getElementById('cartFooterBar').hidden = true;
+            document.getElementById('cartCount').textContent = '0';
+            updateNavbarCounter();
+        }
+
+        // Checkout - override any checkout function from script.js
+        window.checkout = async function checkout() {
+            // STRICT VALIDATION: Prevent checkout if no items selected
+            if (!cartItems || cartItems.length === 0) {
+                if (typeof notify !== 'undefined') {
+                    notify.warning('Your cart is empty');
+                }
+                return false; // Explicitly return false
+            }
+            
+            // First, sync checkbox state with data model to ensure consistency
+            const itemCheckboxes = document.querySelectorAll('.item-select');
+            itemCheckboxes.forEach(checkbox => {
+                const index = parseInt(checkbox.dataset.index);
+                if (cartItems[index]) {
+                    cartItems[index].selected = checkbox.checked;
+                }
+            });
+            
+            // Check both data model and DOM checkboxes to ensure we get the correct selection
+            const selectedFromData = cartItems.filter(item => item.selected === true);
+            const selectedFromDOM = Array.from(document.querySelectorAll('.item-select:checked'))
+                .map(cb => {
+                    const index = parseInt(cb.dataset.index);
+                    return cartItems[index];
+                })
+                .filter(Boolean);
+            
+            // Use DOM checkboxes as source of truth (they reflect the actual UI state)
+            const selectedItems = selectedFromDOM.length > 0 ? selectedFromDOM : selectedFromData;
+            const selectedCount = selectedItems.length;
+            
+            console.log('Checkout - Selected items:', {
+                fromData: selectedFromData.length,
+                fromDOM: selectedFromDOM.length,
+                final: selectedCount,
+                totalItems: cartItems.length
+            });
+            
+            // CRITICAL: Stop immediately if no selection
+            if (selectedCount === 0) {
+                if (typeof notify !== 'undefined') {
+                    notify.warning('Please select at least one product to checkout');
+                }
+                return false; // Do NOT proceed
+            }
+            
+            // Calculate totals - only proceed if valid amounts
+            // Use sale_price if on_sale, otherwise use regular price
+            const subtotal = selectedItems.reduce((sum, item) => {
+                const itemPrice = item.on_sale && item.sale_price ? parseFloat(item.sale_price || 0) : parseFloat(item.price || 0);
+                return sum + (itemPrice * (item.quantity || 1));
+            }, 0);
+            
+            // Double-check: Don't open modal for zero total
+            if (subtotal <= 0) {
+                if (typeof notify !== 'undefined') {
+                    notify.error('Selected items have invalid pricing');
+                }
+                return false;
+            }
+            
+            const deliveryFee = 50;
+            // Discounts are already applied via the sale system (product_sales table)
+            // Sale prices are included in the cart items, so no additional discount calculation needed
+            let discountTotal = 0;
+
+            const total = Math.max(0, subtotal - discountTotal + deliveryFee);
+            const totalQty = selectedItems.reduce((sum, item) => sum + (item.quantity || 1), 0);
+            
+            // Get modal element
+            const modal = document.getElementById('checkoutModal');
+            if (!modal) {
+                console.error('Checkout modal not found');
+                return false;
+            }
+            
+            // Populate modal with calculated values
+            document.getElementById('checkoutItemCount').textContent = totalQty;
+            document.getElementById('checkoutSubtotal').textContent = `₱${subtotal.toFixed(2)}`;
+            // Show discount row if any
+            const discRow = document.getElementById('discountRow');
+            const discEl = document.getElementById('checkoutDiscount');
+            if (discRow && discEl) {
+                if (discountTotal > 0) {
+                    discRow.style.display = 'flex';
+                    discEl.textContent = `-₱${discountTotal.toFixed(2)}`;
+                } else {
+                    discRow.style.display = 'none';
+                    discEl.textContent = '-₱0';
+                }
+            }
+            document.getElementById('checkoutDelivery').textContent = `₱${deliveryFee.toFixed(2)}`;
+            document.getElementById('checkoutTotal').textContent = `₱${total.toFixed(2)}`;
+            
+            // Reset autofill flags when modal opens
+            checkoutAutofillCompleted = false;
+            checkoutAutofillInProgress = false;
+            
+            // Ensure address dropdowns are initialized FIRST (setup only, no autofill)
+            if (typeof initializeCheckoutAddressDropdowns === 'function') {
+                initializeCheckoutAddressDropdowns();
+                console.log('✅ Checkout address dropdowns initialized');
+            }
+            
+            // Load user profile data to auto-fill form (always fetch latest)
+            // Use a delay to ensure dropdowns are fully populated and DOM is ready
+            // Note: Modal observer will also trigger this, so we use a flag to prevent duplicates
+            if (!window.checkoutProfileLoading) {
+                window.checkoutProfileLoading = true;
+                setTimeout(async () => {
+                    console.log('🔄 Loading user profile for checkout...');
+                    await loadUserProfileForCheckout();
+                    
+                    // Setup real-time sync for form changes
+                    setupCheckoutFormSync();
+                    
+                    // Reset flag after a delay
+                    setTimeout(() => {
+                        window.checkoutProfileLoading = false;
+                    }, 1000);
+                }, 300);
+            } else {
+                console.log('⏭️ Profile loading already in progress, skipping duplicate call');
+            }
+            
+            // Only NOW open the modal
+            modal.hidden = false;
+            document.body.style.overflow = 'hidden';
+            
+            return true;
+        }
+
+        // CALABARZON Address Data (same as account.html)
+        const calabarzonData = {
+            region: "Region IV-A (CALABARZON)",
+            provinces: [
+                {
+                    province: "Cavite",
+                    cities: [
+                        { city: "Cavite City", postalCode: "4100" },
+                        { city: "Bacoor", postalCode: "4102" },
+                        { city: "Imus", postalCode: "4103" },
+                        { city: "Kawit", postalCode: "4104" },
+                        { city: "Noveleta", postalCode: "4105" },
+                        { city: "Rosario", postalCode: "4106" },
+                        { city: "General Trias", postalCode: "4107" },
+                        { city: "Tanza", postalCode: "4108" },
+                        { city: "Trece Martires", postalCode: "4109" },
+                        { city: "Dasmariñas", postalCode: "4114" },
+                        { city: "General Mariano Alvarez", postalCode: "4117" },
+                        { city: "Silang", postalCode: "4118" },
+                        { city: "Amadeo", postalCode: "4119" },
+                        { city: "Tagaytay", postalCode: "4120" },
+                        { city: "Indang", postalCode: "4122" },
+                        { city: "Alfonso", postalCode: "4123" },
+                        { city: "General Emilio Aguinaldo", postalCode: "4124" },
+                        { city: "Magallanes", postalCode: "4113" },
+                        { city: "Maragondon", postalCode: "4112" },
+                        { city: "Naic", postalCode: "4110" },
+                        { city: "Ternate", postalCode: "4111" }
+                    ]
+                },
+                {
+                    province: "Laguna",
+                    cities: [
+                        { city: "Santa Rosa", postalCode: "4026" },
+                        { city: "Calamba", postalCode: "4027" },
+                        { city: "San Pedro", postalCode: "4023" },
+                        { city: "Biñan", postalCode: "4024" },
+                        { city: "Los Baños", postalCode: "4030" },
+                        { city: "San Pablo", postalCode: "4000" },
+                        { city: "Cabuyao", postalCode: "4025" },
+                        { city: "Calauan", postalCode: "4012" },
+                        { city: "Alaminos", postalCode: "4001" },
+                        { city: "Bay", postalCode: "4033" },
+                        { city: "Liliw", postalCode: "4004" },
+                        { city: "Nagcarlan", postalCode: "4002" },
+                        { city: "Pagsanjan", postalCode: "4008" },
+                        { city: "Paete", postalCode: "4016" },
+                        { city: "Pakil", postalCode: "4017" },
+                        { city: "Pangil", postalCode: "4018" },
+                        { city: "Pila", postalCode: "4010" },
+                        { city: "Rizal", postalCode: "4003" },
+                        { city: "San Antonio", postalCode: "4020" },
+                        { city: "Santa Cruz", postalCode: "4009" },
+                        { city: "Santa Maria", postalCode: "4022" },
+                        { city: "Siniloan", postalCode: "4019" },
+                        { city: "Victoria", postalCode: "4011" }
+                    ]
+                },
+                {
+                    province: "Batangas",
+                    cities: [
+                        { city: "Batangas City", postalCode: "4200" },
+                        { city: "Lipa", postalCode: "4217" },
+                        { city: "Tanauan", postalCode: "4232" },
+                        { city: "Bauan", postalCode: "4201" },
+                        { city: "Calaca", postalCode: "4212" },
+                        { city: "Calatagan", postalCode: "4215" },
+                        { city: "Cuenca", postalCode: "4222" },
+                        { city: "Ibaan", postalCode: "4230" },
+                        { city: "Laurel", postalCode: "4221" },
+                        { city: "Lemery", postalCode: "4209" },
+                        { city: "Lian", postalCode: "4216" },
+                        { city: "Lobo", postalCode: "4229" },
+                        { city: "Mabini", postalCode: "4202" },
+                        { city: "Malvar", postalCode: "4233" },
+                        { city: "Mataasnakahoy", postalCode: "4223" },
+                        { city: "Nasugbu", postalCode: "4231" },
+                        { city: "Padre Garcia", postalCode: "4224" },
+                        { city: "Rosario", postalCode: "4225" },
+                        { city: "San Jose", postalCode: "4227" },
+                        { city: "San Juan", postalCode: "4226" },
+                        { city: "San Luis", postalCode: "4210" },
+                        { city: "San Nicolas", postalCode: "4207" },
+                        { city: "San Pascual", postalCode: "4204" },
+                        { city: "Santa Teresita", postalCode: "4206" },
+                        { city: "Santo Tomas", postalCode: "4234" },
+                        { city: "Taal", postalCode: "4208" },
+                        { city: "Talisay", postalCode: "4220" },
+                        { city: "Taysan", postalCode: "4228" },
+                        { city: "Tingloy", postalCode: "4203" },
+                        { city: "Tuy", postalCode: "4214" }
+                    ]
+                },
+                {
+                    province: "Rizal",
+                    cities: [
+                        { city: "Antipolo", postalCode: "1870" },
+                        { city: "Cainta", postalCode: "1900" },
+                        { city: "Taytay", postalCode: "1920" },
+                        { city: "Binangonan", postalCode: "1940" },
+                        { city: "Angono", postalCode: "1930" },
+                        { city: "Baras", postalCode: "1970" },
+                        { city: "Cardona", postalCode: "1950" },
+                        { city: "Jalajala", postalCode: "1990" },
+                        { city: "Morong", postalCode: "1960" },
+                        { city: "Pililla", postalCode: "1910" },
+                        { city: "Rodriguez", postalCode: "1860" },
+                        { city: "San Mateo", postalCode: "1850" },
+                        { city: "Tanay", postalCode: "1980" },
+                        { city: "Teresa", postalCode: "1880" }
+                    ]
+                },
+                {
+                    province: "Quezon",
+                    cities: [
+                        { city: "Lucena", postalCode: "4301" },
+                        { city: "Tayabas", postalCode: "4327" },
+                        { city: "Sariaya", postalCode: "4322" },
+                        { city: "Candelaria", postalCode: "4323" },
+                        { city: "Dolores", postalCode: "4326" },
+                        { city: "Tiaong", postalCode: "4325" },
+                        { city: "San Antonio", postalCode: "4324" },
+                        { city: "Lopez", postalCode: "4316" },
+                        { city: "Gumaca", postalCode: "4307" },
+                        { city: "Atimonan", postalCode: "4331" },
+                        { city: "Unisan", postalCode: "4305" },
+                        { city: "Pitogo", postalCode: "4308" },
+                        { city: "Mulanay", postalCode: "4312" },
+                        { city: "San Francisco", postalCode: "4315" },
+                        { city: "San Narciso", postalCode: "4313" },
+                        { city: "Buenavista", postalCode: "4320" },
+                        { city: "Catanauan", postalCode: "4311" },
+                        { city: "General Luna", postalCode: "4310" },
+                        { city: "Macalelon", postalCode: "4309" },
+                        { city: "Padre Burgos", postalCode: "4303" },
+                        { city: "Pagbilao", postalCode: "4302" },
+                        { city: "Perez", postalCode: "4334" },
+                        { city: "Plaridel", postalCode: "4306" },
+                        { city: "Polillo", postalCode: "4339" },
+                        { city: "Quezon", postalCode: "4338" },
+                        { city: "Real", postalCode: "4335" },
+                        { city: "Sampaloc", postalCode: "4329" },
+                        { city: "San Andres", postalCode: "4314" },
+                        { city: "Tagkawayan", postalCode: "4321" }
+                    ]
+                }
+            ]
+        };
+
+        // Track if dropdowns are initialized to prevent duplicate event listeners
+        let checkoutDropdownsInitialized = false;
+        let checkoutDropdownsPopulated = false;
+        // Flag to prevent event listeners from clearing values during autofill
+        let isAutofilling = false;
+        // Flag to ensure autofill only runs once per modal open and prevent overrides
+        let checkoutAutofillCompleted = false;
+        let checkoutAutofillInProgress = false;
+        
+        // Helper function to force visual update of select element
+        function forceSelectVisualUpdate(selectElement, value) {
+            if (!selectElement || !value) return;
+            
+            const optionIndex = Array.from(selectElement.options).findIndex(opt => opt.value === value);
+            if (optionIndex < 0) {
+                console.warn('Option not found for value:', value, 'in', selectElement.id);
+                return;
+            }
+            
+            // Method 1: Hide placeholder option
+            const placeholder = selectElement.querySelector('option[value=""]');
+            if (placeholder) {
+                placeholder.style.display = 'none';
+                placeholder.selected = false;
+                placeholder.removeAttribute('selected');
+            }
+            
+            // Method 2: Clear all selected attributes first
+            Array.from(selectElement.options).forEach(opt => {
+                opt.selected = false;
+                opt.removeAttribute('selected');
+            });
+            
+            // Method 3: Set the selected option using multiple approaches
+            const targetOption = selectElement.options[optionIndex];
+            if (targetOption) {
+                targetOption.selected = true;
+                targetOption.setAttribute('selected', 'selected');
+            }
+            
+            // Method 4: Set value and selectedIndex
+            selectElement.value = value;
+            selectElement.selectedIndex = optionIndex;
+            
+            // Method 5: Force style update and trigger reflow
+            selectElement.style.color = '#2c3e50';
+            selectElement.setAttribute('data-has-value', 'true');
+            selectElement.setAttribute('data-selected-value', value);
+            
+            // Method 6: Force multiple reflows and repaints
+            void selectElement.offsetHeight;
+            void selectElement.offsetWidth;
+            selectElement.style.display = 'none';
+            void selectElement.offsetHeight;
+            selectElement.style.display = '';
+            void selectElement.offsetHeight;
+            
+            // Method 7: Focus and blur to trigger browser update
+            selectElement.focus();
+            setTimeout(() => {
+                selectElement.blur();
+            }, 10);
+            
+            console.log('✅ Visual update forced for', selectElement.id, 'value:', value, 'index:', optionIndex, 'actual value:', selectElement.value);
+        }
+        
+        // Clean function to load cities for a province (NO auto-selection, only populate options)
+        function loadCitiesForProvince(provinceValue) {
+            const citySelect = document.getElementById('checkoutCity');
+            if (!citySelect) {
+                console.warn('⚠️ City select element not found');
+                return;
+            }
+            
+            if (!provinceValue) {
+                console.warn('⚠️ No province value provided');
+                citySelect.innerHTML = '<option value="">Select Province first</option>';
+                citySelect.disabled = true;
+                citySelect.style.background = '#f9fafb';
+                citySelect.style.color = '#6b7280';
+                citySelect.style.cursor = 'not-allowed';
+                return;
+            }
+            
+            // Find the province in calabarzonData
+            const province = calabarzonData.provinces.find(p => p.province === provinceValue);
+            if (!province) {
+                console.warn('⚠️ Province not found:', provinceValue);
+                console.warn('Available provinces:', calabarzonData.provinces.map(p => p.province));
+                citySelect.innerHTML = '<option value="">Select City/Municipality</option>';
+                citySelect.disabled = true;
+                citySelect.style.background = '#f9fafb';
+                citySelect.style.color = '#6b7280';
+                citySelect.style.cursor = 'not-allowed';
+                return;
+            }
+            
+            // Clear and populate cities (DO NOT auto-select anything)
+            citySelect.innerHTML = '<option value="">Select City/Municipality</option>';
+            
+            // Sort cities alphabetically for better UX
+            const sortedCities = [...province.cities].sort((a, b) => a.city.localeCompare(b.city));
+            
+            sortedCities.forEach(city => {
+                const option = document.createElement('option');
+                option.value = city.city;
+                option.textContent = city.city;
+                option.dataset.postalCode = city.postalCode || '';
+                citySelect.appendChild(option);
+            });
+            
+            // Enable city select
+            citySelect.disabled = false;
+            citySelect.style.background = 'white';
+            citySelect.style.color = '#2c3e50';
+            citySelect.style.cursor = 'pointer';
+            
+            console.log(`✅ Cities loaded for ${provinceValue}: ${province.cities.length} cities`);
+        }
+        
+        // Initialize address dropdowns (ONLY setup, NO autofill - autofill is handled separately)
+        function initializeCheckoutAddressDropdowns() {
+            const provinceSelect = document.getElementById('checkoutProvince');
+            const citySelect = document.getElementById('checkoutCity');
+            
+            if (!provinceSelect || !citySelect) return;
+            
+            // Load provinces (only if dropdown is empty)
+            const isDropdownEmpty = provinceSelect.options.length <= 1;
+            if (isDropdownEmpty) {
+                provinceSelect.innerHTML = '<option value="">Select Province</option>';
+                calabarzonData.provinces.forEach(prov => {
+                    const option = document.createElement('option');
+                    option.value = prov.province;
+                    option.textContent = prov.province;
+                    provinceSelect.appendChild(option);
+                });
+                checkoutDropdownsPopulated = true;
+                console.log('✅ Provinces populated:', calabarzonData.provinces.length, 'provinces');
+            }
+            
+            // Apply styling to province dropdown (matching Edit Personal Info design)
+            provinceSelect.style.padding = '14px 18px';
+            provinceSelect.style.fontSize = '15px';
+            provinceSelect.style.border = '1px solid #dce1e7';
+            provinceSelect.style.borderRadius = '10px';
+            provinceSelect.style.width = '100%';
+            provinceSelect.style.boxSizing = 'border-box';
+            provinceSelect.style.background = 'white';
+            provinceSelect.style.color = '#2c3e50';
+            provinceSelect.style.cursor = 'pointer';
+            provinceSelect.style.appearance = 'none';
+            provinceSelect.style.backgroundImage = 'url(\'data:image/svg+xml;charset=UTF-8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%236b7280\'><path d=\'M7 10l5 5 5-5z\'/></svg>\')';
+            provinceSelect.style.backgroundRepeat = 'no-repeat';
+            provinceSelect.style.backgroundPosition = 'right 14px center';
+            provinceSelect.style.backgroundSize = '20px';
+            provinceSelect.style.paddingRight = '45px';
+            
+            // Apply styling to city dropdown (matching Edit Personal Info design)
+            citySelect.style.padding = '14px 18px';
+            citySelect.style.fontSize = '15px';
+            citySelect.style.border = '1px solid #dce1e7';
+            citySelect.style.borderRadius = '10px';
+            citySelect.style.width = '100%';
+            citySelect.style.boxSizing = 'border-box';
+            citySelect.style.appearance = 'none';
+            citySelect.style.backgroundImage = 'url(\'data:image/svg+xml;charset=UTF-8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%236b7280\'><path d=\'M7 10l5 5 5-5z\'/></svg>\')';
+            citySelect.style.backgroundRepeat = 'no-repeat';
+            citySelect.style.backgroundPosition = 'right 14px center';
+            citySelect.style.backgroundSize = '20px';
+            citySelect.style.paddingRight = '45px';
+            
+            // Initialize city dropdown state based on province selection
+            if (!provinceSelect.value || provinceSelect.value === '') {
+                // No province selected - disable city dropdown
+                citySelect.disabled = true;
+                citySelect.style.background = '#f9fafb';
+                citySelect.style.color = '#6b7280';
+                citySelect.style.cursor = 'not-allowed';
+                if (citySelect.options.length <= 1) {
+                    citySelect.innerHTML = '<option value="">Select Province first</option>';
+                }
+            } else {
+                // Province already selected - load cities and enable dropdown
+                loadCitiesForProvince(provinceSelect.value);
+            }
+            
+            // Only add event listeners once to prevent duplicates
+            if (!checkoutDropdownsInitialized) {
+                // Handle province change - clean approach
+                provinceSelect.addEventListener('change', function(e) {
+                    // Skip if we're currently autofilling to prevent clearing values
+                    // BUT allow user-initiated changes even if autofill was completed
+                    if ((isAutofilling || checkoutAutofillInProgress) && e.isTrusted === false) {
+                        console.log('⏭️ Skipping province change handler during autofill (programmatic)');
+                        return;
+                    }
+                    
+                    // Allow user-initiated changes (e.isTrusted === true)
+                    // or changes that happen after autofill is complete
+                    const selectedProvince = this.value;
+                    const postalCodeInput = document.getElementById('checkoutPostalCode');
+                    
+                    if (!selectedProvince) {
+                        // Clear city and postal code if no province selected
+                        citySelect.innerHTML = '<option value="">Select Province first</option>';
+                        citySelect.disabled = true;
+                        citySelect.style.background = '#f9fafb';
+                        citySelect.style.color = '#6b7280';
+                        citySelect.style.cursor = 'not-allowed';
+                        if (postalCodeInput) {
+                            postalCodeInput.value = '';
+                        }
+                        return;
+                    }
+                    
+                    console.log('🔄 Province changed to:', selectedProvince);
+                    
+                    // Load cities for the selected province
+                    loadCitiesForProvince(selectedProvince);
+                    
+                    // Clear city and postal code when province changes
+                    citySelect.value = '';
+                    
+                    // Clear postal code when province changes
+                    if (postalCodeInput) {
+                        postalCodeInput.value = '';
+                        console.log('✅ Postal code cleared');
+                    }
+                });
+                
+                // Handle city change - auto-fill postal code
+                citySelect.addEventListener('change', function() {
+                    // Skip if we're currently autofilling
+                    if (isAutofilling || checkoutAutofillInProgress) {
+                        return;
+                    }
+                    
+                    const selectedOption = this.options[this.selectedIndex];
+                    const postalCodeInput = document.getElementById('checkoutPostalCode');
+                    const selectedCity = this.value;
+                    
+                    if (!selectedCity || !selectedOption) {
+                        // Clear postal code if no city is selected
+                        if (postalCodeInput) {
+                            postalCodeInput.value = '';
+                        }
+                        return;
+                    }
+                    
+                    // Get postal code from data attribute
+                    const postalCode = selectedOption.dataset.postalCode;
+                    
+                    if (postalCode && postalCodeInput) {
+                        postalCodeInput.value = postalCode;
+                        console.log('✅ Postal code auto-filled:', postalCode, 'for', selectedCity);
+                    } else if (postalCodeInput) {
+                        // Clear postal code if no postal code data available
+                        postalCodeInput.value = '';
+                        console.warn('⚠️ No postal code found for city:', selectedCity);
+                    }
+                });
+                
+                checkoutDropdownsInitialized = true;
+            }
+        }
+
+        // SINGLE SOURCE OF TRUTH: Autofill province and city dropdowns using EXACT saved values only
+        // This function runs ONCE per modal open and prevents any overrides
+        async function autofillProvinceAndCity(provinceValue, cityValue, postalCodeValue) {
+            // Prevent duplicate calls
+            if (checkoutAutofillInProgress) {
+                console.log('⏭️ Autofill already in progress, skipping duplicate call');
+                return;
+            }
+            
+            // If autofill already completed, don't run again
+            if (checkoutAutofillCompleted) {
+                console.log('⏭️ Autofill already completed, skipping');
+                return;
+            }
+            
+            const provinceSelect = document.getElementById('checkoutProvince');
+            const citySelect = document.getElementById('checkoutCity');
+            const postalCodeInput = document.getElementById('checkoutPostalCode');
+            
+            if (!provinceSelect || !citySelect) {
+                console.warn('⚠️ Province or City select elements not found');
+                return;
+            }
+            
+            // Set flag to prevent event listeners and other functions from interfering
+            checkoutAutofillInProgress = true;
+            isAutofilling = true;
+            
+            console.log('🔧 AUTOFILL START - Using EXACT saved values only:', { 
+                provinceValue, 
+                cityValue, 
+                postalCodeValue 
+            });
+            
+            // Step 1: Set postal code first (even if province/city are missing)
+            if (postalCodeValue && postalCodeInput) {
+                postalCodeInput.value = postalCodeValue;
+                console.log('✅ Postal code set:', postalCodeValue);
+            }
+            
+            // Step 2: If no saved province, leave fields empty and exit
+            if (!provinceValue) {
+                console.log('ℹ️ No saved province, leaving province/city fields empty');
+                checkoutAutofillInProgress = false;
+                isAutofilling = false;
+                checkoutAutofillCompleted = true;
+                return;
+            }
+            
+            // Step 3: Verify province exists in dropdown
+            const provinceOptions = Array.from(provinceSelect.options);
+            const provinceIndex = provinceOptions.findIndex(opt => opt.value === provinceValue);
+            
+            if (provinceIndex < 0) {
+                console.warn('❌ Province not found in dropdown:', provinceValue);
+                console.log('Available provinces:', provinceOptions.map(opt => opt.value));
+                checkoutAutofillInProgress = false;
+                isAutofilling = false;
+                checkoutAutofillCompleted = true;
+                return;
+            }
+            
+            // Step 4: Load cities for the province (NO auto-selection, just populate options)
+            loadCitiesForProvince(provinceValue);
+            
+            // Step 5: Wait for cities to be fully populated in DOM
+            // Use multiple checks to ensure cities are loaded
+            let citiesLoaded = false;
+            let attempts = 0;
+            const maxAttempts = 10;
+            while (!citiesLoaded && attempts < maxAttempts) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+                const cityOptions = Array.from(citySelect.options);
+                // Check if cities are loaded (more than just the placeholder)
+                if (cityOptions.length > 1) {
+                    citiesLoaded = true;
+                    console.log(`✅ Cities loaded after ${attempts + 1} attempt(s), found ${cityOptions.length} options`);
+                } else {
+                    attempts++;
+                    if (attempts < maxAttempts) {
+                        console.log(`⏳ Waiting for cities to load... (attempt ${attempts + 1}/${maxAttempts})`);
+                        // Reload cities if they're not there yet
+                        loadCitiesForProvince(provinceValue);
+                    }
+                }
+            }
+            
+            if (!citiesLoaded) {
+                console.error('❌ Failed to load cities after', maxAttempts, 'attempts');
+            }
+            
+            // Step 6: Set province value (cities are now loaded)
+            // IMPORTANT: Set isAutofilling flag BEFORE setting province to prevent change event from firing
+            // The change event handler checks this flag and will skip if it's true
+            
+            // Set province value WITHOUT triggering change event
+            provinceSelect.selectedIndex = provinceIndex;
+            provinceSelect.value = provinceValue;
+            provinceOptions.forEach((opt, idx) => {
+                opt.selected = (idx === provinceIndex);
+                if (idx === provinceIndex) {
+                    opt.setAttribute('selected', 'selected');
+                } else {
+                    opt.removeAttribute('selected');
+                }
+            });
+            
+            // Hide placeholder and set data attributes
+            const placeholderProvince = provinceSelect.querySelector('option[value=""]');
+            if (placeholderProvince) {
+                placeholderProvince.style.display = 'none';
+                placeholderProvince.selected = false;
+                placeholderProvince.removeAttribute('selected');
+            }
+            provinceSelect.setAttribute('data-has-value', 'true');
+            provinceSelect.setAttribute('data-selected-value', provinceValue);
+            
+            // Force visual update
+            forceSelectVisualUpdate(provinceSelect, provinceValue);
+            
+            // Verify it was set correctly
+            if (provinceSelect.value !== provinceValue) {
+                console.error('❌ CRITICAL: Province value mismatch after setting! Expected:', provinceValue, 'Got:', provinceSelect.value);
+                // Force it again
+                provinceSelect.value = provinceValue;
+                provinceSelect.selectedIndex = provinceIndex;
+            }
+            
+            console.log('✅ Province set:', provinceValue, 'Index:', provinceIndex, 'Verified value:', provinceSelect.value);
+            
+            // Step 7: Set city value ONLY if it exists in the dropdown (NO fallback, NO guessing)
+            let matchedCityValue = null; // Store the matched city value for verification
+            if (cityValue) {
+                // Get fresh city options after loading
+                const cityOptions = Array.from(citySelect.options);
+                console.log(`🔍 Looking for city "${cityValue}" in ${cityOptions.length} options`);
+                console.log('Available cities:', cityOptions.slice(0, 10).map(opt => `"${opt.value}"`).join(', '));
+                
+                // Try exact match first
+                let cityIndex = cityOptions.findIndex(opt => opt.value === cityValue);
+                
+                // If not found, try case-insensitive match
+                if (cityIndex < 0) {
+                    cityIndex = cityOptions.findIndex(opt => opt.value.toLowerCase().trim() === cityValue.toLowerCase().trim());
+                    if (cityIndex >= 0) {
+                        console.log(`✅ Found city using case-insensitive match at index ${cityIndex}`);
+                    }
+                }
+                
+                // If still not found, try matching by text content
+                if (cityIndex < 0) {
+                    cityIndex = cityOptions.findIndex(opt => opt.textContent.trim() === cityValue.trim());
+                    if (cityIndex >= 0) {
+                        console.log(`✅ Found city using text content match at index ${cityIndex}`);
+                    }
+                }
+                
+                // If still not found, try partial match (contains)
+                if (cityIndex < 0) {
+                    const cityValueLower = cityValue.toLowerCase().trim();
+                    cityIndex = cityOptions.findIndex(opt => {
+                        const optValue = opt.value.toLowerCase().trim();
+                        const optText = opt.textContent.toLowerCase().trim();
+                        return optValue.includes(cityValueLower) || cityValueLower.includes(optValue) ||
+                               optText.includes(cityValueLower) || cityValueLower.includes(optText);
+                    });
+                    if (cityIndex >= 0) {
+                        console.log(`✅ Found city using partial match at index ${cityIndex}`);
+                    }
+                }
+                
+                if (cityIndex >= 0) {
+                    // City exists in dropdown - set it
+                    matchedCityValue = cityOptions[cityIndex].value;
+                    citySelect.selectedIndex = cityIndex;
+                    citySelect.value = matchedCityValue;
+                    cityOptions.forEach((opt, idx) => {
+                        opt.selected = (idx === cityIndex);
+                        if (idx === cityIndex) {
+                            opt.setAttribute('selected', 'selected');
+                        } else {
+                            opt.removeAttribute('selected');
+                        }
+                    });
+                    
+                    // Hide placeholder and set data attributes
+                    const placeholderCity = citySelect.querySelector('option[value=""]');
+                    if (placeholderCity) {
+                        placeholderCity.style.display = 'none';
+                        placeholderCity.selected = false;
+                    }
+                    citySelect.setAttribute('data-has-value', 'true');
+                    citySelect.setAttribute('data-selected-value', matchedCityValue);
+                    
+                    // Force visual update
+                    forceSelectVisualUpdate(citySelect, matchedCityValue);
+                    
+                    console.log('✅ City set:', matchedCityValue, 'Index:', cityIndex, 'Original value:', cityValue);
+                    
+                    // Trigger change event to auto-fill postal code (if not already set)
+                    if (!postalCodeValue) {
+                        const cityChangeEvent = new Event('change', { bubbles: true, cancelable: true });
+                        citySelect.dispatchEvent(cityChangeEvent);
+                    }
+                } else {
+                    // City NOT found in dropdown - DO NOT set anything, leave it empty
+                    console.error('❌ City "' + cityValue + '" not found in dropdown for province "' + provinceValue + '" - leaving city field empty');
+                    console.error('Available cities:', cityOptions.map(opt => `"${opt.value}"`).join(', '));
+                }
+            } else {
+                console.log('ℹ️ No saved city value, leaving city field empty');
+            }
+            
+            // Step 8: Final postal code set (override auto-filled if user has saved value)
+            if (postalCodeValue && postalCodeInput) {
+                postalCodeInput.value = postalCodeValue;
+                console.log('✅ Postal code set (final):', postalCodeValue);
+            }
+            
+            // Step 9: Final verification and visual update - use multiple techniques
+            // First, force immediate visual update
+            forceSelectVisualUpdate(provinceSelect, provinceValue);
+            if (matchedCityValue) {
+                forceSelectVisualUpdate(citySelect, matchedCityValue);
+            } else if (cityValue) {
+                forceSelectVisualUpdate(citySelect, cityValue);
+            }
+            
+            // Then use requestAnimationFrame for additional verification
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    // Re-verify province
+                    const currentProvinceSelect = document.getElementById('checkoutProvince');
+                    if (provinceValue && currentProvinceSelect && currentProvinceSelect.value !== provinceValue) {
+                        console.warn('⚠️ Province value reset, forcing update...');
+                        forceSelectVisualUpdate(currentProvinceSelect, provinceValue);
+                    }
+                    
+                    // Re-verify city (use matchedCityValue if available, otherwise try to match again)
+                    const currentCitySelect = document.getElementById('checkoutCity');
+                    const cityToVerify = matchedCityValue || cityValue;
+                    if (cityToVerify && currentCitySelect && currentCitySelect.value !== cityToVerify) {
+                        const cityOptions = Array.from(currentCitySelect.options);
+                        // Use same matching logic as before
+                        let cityIdx = cityOptions.findIndex(opt => opt.value === cityToVerify);
+                        if (cityIdx < 0) {
+                            cityIdx = cityOptions.findIndex(opt => opt.value.toLowerCase().trim() === cityToVerify.toLowerCase().trim());
+                        }
+                        if (cityIdx < 0) {
+                            cityIdx = cityOptions.findIndex(opt => opt.textContent.trim() === cityToVerify.trim());
+                        }
+                        if (cityIdx >= 0) {
+                            console.warn('⚠️ City value reset, forcing update...');
+                            currentCitySelect.value = cityOptions[cityIdx].value;
+                            currentCitySelect.selectedIndex = cityIdx;
+                            forceSelectVisualUpdate(currentCitySelect, cityOptions[cityIdx].value);
+                        }
+                    }
+                    
+                        // Final check after a delay
+                        setTimeout(() => {
+                            const finalProvinceSelect = document.getElementById('checkoutProvince');
+                            const finalCitySelect = document.getElementById('checkoutCity');
+                            
+                            // Log what the browser is actually showing
+                            console.log('🔍 FINAL VERIFICATION:');
+                            console.log('Province - Expected:', provinceValue, 'JS value:', finalProvinceSelect?.value, 'SelectedIndex:', finalProvinceSelect?.selectedIndex, 'Selected option text:', finalProvinceSelect?.options[finalProvinceSelect?.selectedIndex]?.text);
+                            console.log('City - Expected:', matchedCityValue || cityValue, 'JS value:', finalCitySelect?.value, 'SelectedIndex:', finalCitySelect?.selectedIndex, 'Selected option text:', finalCitySelect?.options[finalCitySelect?.selectedIndex]?.text);
+                            
+                            if (provinceValue && finalProvinceSelect && finalProvinceSelect.value !== provinceValue) {
+                                console.error('❌ CRITICAL: Province value still incorrect after all updates!');
+                                console.error('Expected:', provinceValue, 'Got:', finalProvinceSelect.value);
+                                // One more aggressive attempt
+                                finalProvinceSelect.value = provinceValue;
+                                finalProvinceSelect.selectedIndex = provinceOptions.findIndex(opt => opt.value === provinceValue);
+                                forceSelectVisualUpdate(finalProvinceSelect, provinceValue);
+                            }
+                            
+                            const expectedCityValue = matchedCityValue || cityValue;
+                            if (expectedCityValue && finalCitySelect && finalCitySelect.value !== expectedCityValue) {
+                                console.warn('⚠️ City value mismatch, attempting to fix...');
+                                console.warn('Expected:', expectedCityValue, 'Got:', finalCitySelect.value);
+                                const cityOptions = Array.from(finalCitySelect.options);
+                                // Use robust matching
+                                let cityIdx = cityOptions.findIndex(opt => opt.value === expectedCityValue);
+                                if (cityIdx < 0) {
+                                    cityIdx = cityOptions.findIndex(opt => opt.value.toLowerCase().trim() === expectedCityValue.toLowerCase().trim());
+                                }
+                                if (cityIdx < 0) {
+                                    cityIdx = cityOptions.findIndex(opt => opt.textContent.trim() === expectedCityValue.trim());
+                                }
+                                if (cityIdx < 0) {
+                                    const cityValueLower = expectedCityValue.toLowerCase().trim();
+                                    cityIdx = cityOptions.findIndex(opt => {
+                                        const optValue = opt.value.toLowerCase().trim();
+                                        const optText = opt.textContent.toLowerCase().trim();
+                                        return optValue.includes(cityValueLower) || cityValueLower.includes(optValue) ||
+                                               optText.includes(cityValueLower) || cityValueLower.includes(optText);
+                                    });
+                                }
+                                if (cityIdx >= 0) {
+                                    const matchedValue = cityOptions[cityIdx].value;
+                                    finalCitySelect.value = matchedValue;
+                                    finalCitySelect.selectedIndex = cityIdx;
+                                    forceSelectVisualUpdate(finalCitySelect, matchedValue);
+                                    console.log('✅ City fixed:', matchedValue);
+                                } else {
+                                    console.error('❌ City option not found in dropdown!');
+                                    console.error('Available cities:', cityOptions.map(opt => `"${opt.value}"`).join(', '));
+                                }
+                            }
+                            
+                            // Clear flags after all updates complete
+                            isAutofilling = false;
+                            checkoutAutofillInProgress = false;
+                            checkoutAutofillCompleted = true;
+                            console.log('✅ AUTOFILL COMPLETE - Values locked, no further overrides allowed');
+                            console.log('Final values - Province:', finalProvinceSelect?.value, 'City:', finalCitySelect?.value);
+                        }, 500);
+                });
+            });
+        }
+
+        // Validation functions (shared with account.html)
+        function validatePhoneNumber(phone) {
+            if (!phone) return { valid: false, message: 'Phone number is required' };
+            // Remove spaces, dashes, and parentheses
+            const cleaned = phone.replace(/[\s\-\(\)]/g, '');
+            // Philippine format: +639XXXXXXXXX, 639XXXXXXXXX, 09XXXXXXXXX, or 9XXXXXXXXX
+            const patterns = [
+                /^\+639\d{9}$/,
+                /^639\d{9}$/,
+                /^09\d{9}$/,
+                /^9\d{9}$/
+            ];
+            const isValid = patterns.some(pattern => pattern.test(cleaned));
+            return {
+                valid: isValid,
+                message: isValid ? '' : 'Invalid Philippine phone number format (e.g., 09171234567 or +639171234567)'
+            };
+        }
+
+        function validateEmail(email) {
+            if (!email) return { valid: false, message: 'Email is required' };
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            const isValid = emailRegex.test(email);
+            return {
+                valid: isValid,
+                message: isValid ? '' : 'Invalid email format'
+            };
+        }
+
+        // Load user profile data and populate checkout form (always fetches latest)
+        async function loadUserProfileForCheckout(forceRefresh = true) {
+            const token = localStorage.getItem('hub_access_token');
+            if (!token) {
+                console.log('No token found, skipping profile load');
+                return;
+            }
+
+            try {
+                // Always fetch latest data from backend with cache-busting
+                const timestamp = forceRefresh ? `?t=${Date.now()}` : '';
+                const response = await fetch(`${API_BASE}/me${timestamp}`, {
+                    method: 'GET',
+                    headers: { 
+                        'Authorization': `Bearer ${token}`,
+                        'Cache-Control': 'no-cache',
+                        'Pragma': 'no-cache'
+                    },
+                    cache: 'no-store' // Ensure we get fresh data
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.data) {
+                        const user = data.data;
+                        
+                        console.log('🔄 Loading profile data into checkout form:', {
+                            firstName: user.first_name,
+                            lastName: user.last_name,
+                            email: user.email,
+                            phone: user.phone,
+                            province: user.province,
+                            city: user.city
+                        });
+                        
+                        // Populate name fields (always set, even if empty)
+                        const firstNameInput = document.getElementById('checkoutFirstName');
+                        const middleNameInput = document.getElementById('checkoutMiddleName');
+                        const lastNameInput = document.getElementById('checkoutLastName');
+                        const suffixInput = document.getElementById('checkoutSuffix');
+                        
+                        if (firstNameInput) firstNameInput.value = user.first_name || '';
+                        if (middleNameInput) middleNameInput.value = user.middle_name || '';
+                        if (lastNameInput) lastNameInput.value = user.last_name || '';
+                        if (suffixInput) suffixInput.value = user.suffix || '';
+                        
+                        // Populate phone and email
+                        const phoneInput = document.getElementById('checkoutPhone');
+                        const emailInput = document.getElementById('checkoutEmail');
+                        
+                        if (phoneInput) phoneInput.value = user.phone || '';
+                        if (emailInput) emailInput.value = user.email || '';
+                        
+                        // Populate address fields
+                        const addressLine1Input = document.getElementById('checkoutAddressLine1');
+                        const addressLine2Input = document.getElementById('checkoutAddressLine2');
+                        
+                        if (addressLine1Input) addressLine1Input.value = user.address_line1 || '';
+                        if (addressLine2Input) addressLine2Input.value = user.address_line2 || '';
+                        
+                        // Get dropdown elements
+                        const provinceSelect = document.getElementById('checkoutProvince');
+                        const citySelect = document.getElementById('checkoutCity');
+                        const postalCodeInput = document.getElementById('checkoutPostalCode');
+                        
+                        console.log('📥 Setting up address dropdowns:', {
+                            hasProvinceSelect: !!provinceSelect,
+                            hasCitySelect: !!citySelect,
+                            userProvince: user.province,
+                            userCity: user.city,
+                            userPostalCode: user.postal_code
+                        });
+                        
+                        // Warn if province/city are missing but postal code exists
+                        if (!user.province && !user.city && user.postal_code) {
+                            console.warn('⚠️ WARNING: Postal code exists (' + user.postal_code + ') but province/city are null. Please update your address in Personal Information section to save province and city.');
+                        }
+                        
+                        // Wait for dropdowns to be fully populated in DOM
+                        await new Promise(resolve => setTimeout(resolve, 100));
+                        
+                        // SINGLE AUTOFILL CALL - This is the ONLY place that sets province/city values
+                        // The autofill function has built-in safeguards to prevent duplicate calls
+                        if (!checkoutAutofillCompleted) {
+                            await autofillProvinceAndCity(user.province, user.city, user.postal_code);
+                        } else {
+                            console.log('⏭️ Autofill already completed, skipping to prevent override');
+                        }
+                        
+                        console.log('✅ Checkout form populated with user profile data');
+                    } else {
+                        console.warn('Profile data not found in response');
+                    }
+                } else {
+                    const errorText = await response.text().catch(() => 'Unknown error');
+                    console.warn('Failed to load user profile for checkout:', response.status, errorText);
+                }
+            } catch (error) {
+                console.error('Error loading user profile for checkout:', error);
+                // User can still fill manually
+            }
+        }
+
+        // Save checkout form data to user profile (make it globally accessible)
+        // This function saves ALL fields, even if some are empty (allows partial updates)
+        window.saveCheckoutDataToProfile = async function saveCheckoutDataToProfile() {
+            const token = localStorage.getItem('hub_access_token');
+            if (!token) {
+                console.warn('No token found, cannot save checkout data to profile');
+                return false;
+            }
+
+            const firstNameInput = document.getElementById('checkoutFirstName');
+            const middleNameInput = document.getElementById('checkoutMiddleName');
+            const lastNameInput = document.getElementById('checkoutLastName');
+            const suffixInput = document.getElementById('checkoutSuffix');
+            const phoneInput = document.getElementById('checkoutPhone');
+            const emailInput = document.getElementById('checkoutEmail');
+            const addressLine1Input = document.getElementById('checkoutAddressLine1');
+            const addressLine2Input = document.getElementById('checkoutAddressLine2');
+            const provinceSelect = document.getElementById('checkoutProvince');
+            const citySelect = document.getElementById('checkoutCity');
+            const postalCodeInput = document.getElementById('checkoutPostalCode');
+
+            if (!firstNameInput || !lastNameInput || !phoneInput || !emailInput || !addressLine1Input || !provinceSelect || !citySelect) {
+                console.warn('Required form fields not found');
+                return false;
+            }
+
+            const firstName = firstNameInput.value.trim();
+            const middleName = middleNameInput ? middleNameInput.value.trim() : '';
+            const lastName = lastNameInput.value.trim();
+            const suffix = suffixInput ? suffixInput.value.trim() : '';
+            const phone = phoneInput.value.trim();
+            const email = emailInput.value.trim();
+            const addressLine1 = addressLine1Input.value.trim();
+            const addressLine2 = addressLine2Input ? addressLine2Input.value.trim() : '';
+            // Get province and city values (these are the actual names, not indices)
+            const province = provinceSelect.value.trim();
+            const city = citySelect.value.trim();
+            const postalCode = postalCodeInput ? postalCodeInput.value.trim() : '';
+            
+            console.log('💾 Saving checkout data to profile:', {
+                province: province,
+                city: city,
+                postalCode: postalCode,
+                addressLine1: addressLine1,
+                addressLine2: addressLine2
+            });
+
+            // Validate required fields
+            if (!firstName || !lastName) {
+                console.warn('First name and last name are required');
+                return false;
+            }
+
+            // Validate phone number format
+            const phoneValidation = validatePhoneNumber(phone);
+            if (!phoneValidation.valid) {
+                console.warn('Phone validation failed:', phoneValidation.message);
+                // Still save, but log warning
+            }
+
+            // Validate email format
+            const emailValidation = validateEmail(email);
+            if (!emailValidation.valid) {
+                console.warn('Email validation failed:', emailValidation.message);
+                // Still save, but log warning
+            }
+
+            try {
+                // Prepare update data - include all fields (even empty ones for clearing)
+                const updateData = {
+                    first_name: firstName,
+                    last_name: lastName,
+                    phone: phone,
+                    email: email,
+                    address_line1: addressLine1,
+                    region: 'Region IV-A (CALABARZON)',
+                    province: province || null,
+                    city: city || null
+                };
+                
+                // Include optional fields (set to null if empty to clear them)
+                updateData.middle_name = middleName || null;
+                updateData.suffix = suffix || null;
+                updateData.address_line2 = addressLine2 || null;
+                updateData.postal_code = postalCode || null;
+
+                const response = await fetch(`${API_BASE}/me`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(updateData)
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log('✅ Checkout data successfully saved to profile');
+                    console.log('Saved data response:', {
+                        province: result.data?.province,
+                        city: result.data?.city,
+                        postalCode: result.data?.postal_code
+                    });
+                    return true;
+                } else {
+                    const errorData = await response.json().catch(() => ({}));
+                    console.warn('❌ Failed to save checkout data to profile:', response.status, errorData);
+                    return false;
+                }
+            } catch (error) {
+                console.error('Error saving checkout data to profile:', error);
+                return false;
+            }
+        }
+
+        // Real-time sync: Save to profile when user edits fields (debounced)
+        let saveTimeout = null;
+        function scheduleProfileSave() {
+            // Clear existing timeout
+            if (saveTimeout) {
+                clearTimeout(saveTimeout);
+            }
+            
+            // Schedule save after 2 seconds of no changes
+            saveTimeout = setTimeout(async () => {
+                const firstName = document.getElementById('checkoutFirstName')?.value.trim();
+                const lastName = document.getElementById('checkoutLastName')?.value.trim();
+                const phone = document.getElementById('checkoutPhone')?.value.trim();
+                const email = document.getElementById('checkoutEmail')?.value.trim();
+                
+                // Only auto-save if required fields are filled
+                if (firstName && lastName && phone && email) {
+                    await saveCheckoutDataToProfile();
+                }
+            }, 2000);
+        }
+
+        // Add event listeners for real-time sync (when modal opens)
+        function setupCheckoutFormSync() {
+            const formFields = [
+                'checkoutFirstName', 'checkoutMiddleName', 'checkoutLastName', 'checkoutSuffix',
+                'checkoutPhone', 'checkoutEmail', 'checkoutAddressLine1', 'checkoutAddressLine2',
+                'checkoutProvince', 'checkoutCity'
+            ];
+            
+            formFields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field) {
+                    // Remove existing listeners to avoid duplicates
+                    const newField = field.cloneNode(true);
+                    field.parentNode.replaceChild(newField, field);
+                    
+                    // Add change/input listeners
+                    newField.addEventListener('input', scheduleProfileSave);
+                    newField.addEventListener('change', scheduleProfileSave);
+                }
+            });
+        }
+
+        // Handle checkout form submission
+        async function handleCheckoutSubmit(e) {
+            e.preventDefault();
+            
+            const token = localStorage.getItem('hub_access_token');
+            if (!token) {
+                if (typeof notify !== 'undefined') {
+                    notify.error('Please login to checkout');
+                }
+                window.location.href = '/loginregister.html';
+                return;
+            }
+
+            // Get form values
+            const firstNameInput = document.getElementById('checkoutFirstName');
+            const middleNameInput = document.getElementById('checkoutMiddleName');
+            const lastNameInput = document.getElementById('checkoutLastName');
+            const suffixInput = document.getElementById('checkoutSuffix');
+            const phoneInput = document.getElementById('checkoutPhone');
+            const emailInput = document.getElementById('checkoutEmail');
+            const addressLine1Input = document.getElementById('checkoutAddressLine1');
+            const addressLine2Input = document.getElementById('checkoutAddressLine2');
+            const provinceSelect = document.getElementById('checkoutProvince');
+            const citySelect = document.getElementById('checkoutCity');
+            const postalCodeInput = document.getElementById('checkoutPostalCode');
+            const notesInput = document.getElementById('checkoutNotes');
+            const paymentInput = document.querySelector('input[name="payment"]:checked');
+
+            if (!firstNameInput || !lastNameInput || !phoneInput || !emailInput || !addressLine1Input || !provinceSelect || !citySelect) {
+                if (typeof notify !== 'undefined') {
+                    notify.error('Please fill in all required fields');
+                }
+                return;
+            }
+
+            const firstName = firstNameInput.value.trim();
+            const middleName = middleNameInput ? middleNameInput.value.trim() : '';
+            const lastName = lastNameInput.value.trim();
+            const suffix = suffixInput ? suffixInput.value.trim() : '';
+            const phone = phoneInput.value.trim();
+            const email = emailInput.value.trim();
+            const addressLine1 = addressLine1Input.value.trim();
+            const addressLine2 = addressLine2Input ? addressLine2Input.value.trim() : '';
+            const province = provinceSelect.value.trim();
+            const city = citySelect.value.trim();
+            const postalCode = postalCodeInput ? postalCodeInput.value.trim() : '';
+            const notes = notesInput ? notesInput.value.trim() : '';
+            const payment = paymentInput ? paymentInput.value : 'cod';
+
+            // Validate required fields with specific error messages
+            if (!firstName || !lastName) {
+                if (typeof notify !== 'undefined') {
+                    notify.error('First name and last name are required');
+                }
+                return;
+            }
+            
+            if (!phone) {
+                if (typeof notify !== 'undefined') {
+                    notify.error('Phone number is required');
+                }
+                return;
+            }
+            
+            // Validate phone number format
+            const phoneValidation = validatePhoneNumber(phone);
+            if (!phoneValidation.valid) {
+                if (typeof notify !== 'undefined') {
+                    notify.error(phoneValidation.message || 'Invalid phone number format (e.g., 09171234567)');
+                }
+                return;
+            }
+            
+            if (!email) {
+                if (typeof notify !== 'undefined') {
+                    notify.error('Email address is required');
+                }
+                return;
+            }
+            
+            // Validate email format
+            const emailValidation = validateEmail(email);
+            if (!emailValidation.valid) {
+                if (typeof notify !== 'undefined') {
+                    notify.error(emailValidation.message || 'Invalid email format');
+                }
+                return;
+            }
+            
+            if (!addressLine1) {
+                if (typeof notify !== 'undefined') {
+                    notify.error('Address Line 1 is required');
+                }
+                return;
+            }
+            
+            if (!province) {
+                if (typeof notify !== 'undefined') {
+                    notify.error('Province is required');
+                }
+                return;
+            }
+            
+            if (!city) {
+                if (typeof notify !== 'undefined') {
+                    notify.error('City/Municipality is required');
+                }
+                return;
+            }
+
+            // Format full name
+            const nameParts = [firstName, middleName, lastName, suffix].filter(Boolean);
+            const fullName = nameParts.join(' ');
+
+            // Format full address
+            const addressParts = [addressLine1, addressLine2, city, province, 'Region IV-A (CALABARZON)', postalCode].filter(Boolean);
+            const fullAddress = addressParts.join(', ');
+
+            // Get selected items
+            const selectedItems = cartItems.filter(item => item.selected);
+            if (selectedItems.length === 0) {
+                if (typeof notify !== 'undefined') {
+                    notify.warning('Please select at least one item to checkout');
+                }
+                return;
+            }
+
+            // Save checkout data to profile
+            await saveCheckoutDataToProfile();
+
+            // Prepare order items - use sale_price if on_sale, otherwise use regular price
+            const orderItems = selectedItems.map(item => {
+                const itemPrice = item.on_sale && item.sale_price ? parseFloat(item.sale_price || 0) : parseFloat(item.price || 0);
+                return {
+                    product_id: item.product_id,
+                    quantity: item.quantity || 1,
+                    price: itemPrice,
+                    variation_id: item.variation_id || null,
+                    title: item.name || 'Product'
+                };
+            });
+
+            // Calculate totals - use sale_price if on_sale, otherwise use regular price
+            const subtotal = selectedItems.reduce((sum, item) => {
+                const itemPrice = item.on_sale && item.sale_price ? parseFloat(item.sale_price || 0) : parseFloat(item.price || 0);
+                return sum + (itemPrice * (item.quantity || 1));
+            }, 0);
+            const deliveryFee = 50;
+            const total = subtotal + deliveryFee;
+
+            // Prepare order data with complete customer information
+            const orderData = {
+                customer: {
+                    first_name: firstName,
+                    middle_name: middleName || null,
+                    last_name: lastName,
+                    suffix: suffix || null,
+                    name: fullName,
+                    email: email,
+                    phone: phone,
+                    address: fullAddress,
+                    address_line1: addressLine1,
+                    address_line2: addressLine2 || null,
+                    region: 'Region IV-A (CALABARZON)',
+                    province: province,
+                    city: city,
+                    postal_code: postalCode || null,
+                    notes: notes || null
+                },
+                items: orderItems,
+                payment: payment === 'cod' ? 'Cash on Delivery' : payment,
+                delivery: deliveryFee,
+                subtotal: subtotal,
+                total: total
+            };
+
+            try {
+                // Show loading state
+                const submitBtn = document.querySelector('button[type="submit"][form="checkoutForm"]');
+                const originalText = submitBtn ? submitBtn.innerHTML : '';
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Processing...';
+                }
+
+                // Create order
+                const response = await fetch(`${API_BASE}/orders`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(orderData)
+                });
+
+                let data;
+                try {
+                    data = await response.json();
+                } catch (e) {
+                    console.error('Failed to parse response:', e);
+                    throw new Error('Invalid response from server');
+                }
+
+                if (response.ok && data.success) {
+                    // Remove ordered items from cart
+                    const orderedItemIds = selectedItems.map(item => item.id);
+                    cartItems = cartItems.filter(item => !orderedItemIds.includes(item.id));
+                    
+                    // Delete from backend cart
+                    for (const itemId of orderedItemIds) {
+                        try {
+                            await fetch(`${API_BASE}/cart/${itemId}`, {
+                                method: 'DELETE',
+                                headers: { 'Authorization': `Bearer ${token}` }
+                            });
+                        } catch (err) {
+                            console.warn('Failed to remove item from cart:', err);
+                        }
+                    }
+
+                    // Update UI
+                    if (cartItems.length === 0) {
+                        showEmptyCart();
+                    } else {
+                        renderCart();
+                    }
+                    updateNavbarCounter();
+                    if (typeof syncCartBadge !== 'undefined') syncCartBadge();
+                    if (typeof syncCartDropdown !== 'undefined') syncCartDropdown();
+
+                    // Close modal
+                    const modal = document.getElementById('checkoutModal');
+                    if (modal) {
+                        modal.hidden = true;
+                        document.body.style.overflow = '';
+                    }
+
+                    // Redirect to order confirmation page
+                    window.location.href = `order-confirmation.html?order_id=${data.order_id}`;
+                } else {
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalText;
+                    }
+                    const errorMsg = data.error || data.message || `Failed to create order (${response.status}). Please try again.`;
+                    if (typeof notify !== 'undefined') {
+                        notify.error(errorMsg);
+                    } else {
+                        alert('Order failed: ' + errorMsg);
+                    }
+                    console.error('Order creation failed:', { status: response.status, data });
+                }
+            } catch (error) {
+                console.error('Error creating order:', error);
+                const submitBtn = document.querySelector('button[type="submit"][form="checkoutForm"]');
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                }
+                if (typeof notify !== 'undefined') {
+                    notify.error('Network error. Please check your connection and try again.');
+                } else {
+                    alert('Order failed (network error). Please try again.');
+                }
+            }
+        }
+
+        // Listen for profile updates from account.html (via localStorage event)
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'profile_updated' || e.key === 'hub_profile_updated') {
+                console.log('Profile updated detected (cross-tab), refreshing checkout form...');
+                // If modal is open, refresh the data
+                const modal = document.getElementById('checkoutModal');
+                if (modal && !modal.hidden) {
+                    loadUserProfileForCheckout(true);
+                }
+            }
+        });
+
+        // Also listen for custom events (for same-tab updates)
+        window.addEventListener('profileUpdated', () => {
+            console.log('Profile updated event received (same-tab), refreshing checkout form...');
+            const modal = document.getElementById('checkoutModal');
+            if (modal && !modal.hidden) {
+                loadUserProfileForCheckout(true);
+            }
+        });
+
+        // Monitor modal visibility to refresh data when it opens
+        let modalObserver = null;
+        function setupModalObserver() {
+            const modal = document.getElementById('checkoutModal');
+            if (!modal) return;
+
+            // Use MutationObserver to watch for hidden attribute changes
+            modalObserver = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'hidden') {
+                        const isVisible = !modal.hidden;
+                        if (isVisible) {
+                            // Modal just opened - reset flags
+                            console.log('🔄 Checkout modal opened');
+                            checkoutAutofillCompleted = false;
+                            checkoutAutofillInProgress = false;
+                            window.checkoutProfileLoading = false;
+                            
+                            // Note: Profile loading is handled by checkout() function
+                            // This observer just resets flags, no duplicate loading
+                        } else {
+                            // Modal closed - reset flags for next open
+                            checkoutAutofillCompleted = false;
+                            checkoutAutofillInProgress = false;
+                        }
+                    }
+                });
+            });
+
+            modalObserver.observe(modal, {
+                attributes: true,
+                attributeFilter: ['hidden']
+            });
+        }
+
+        // Setup checkout form submission handler
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize address dropdowns
+            if (typeof initializeCheckoutAddressDropdowns === 'function') {
+                initializeCheckoutAddressDropdowns();
+            }
+            
+            // Setup modal observer to refresh data when modal opens
+            setupModalObserver();
+            
+            loadCart();
+            document.getElementById('year').textContent = new Date().getFullYear();
+            
+            // Add form submission handler
+            const checkoutForm = document.getElementById('checkoutForm');
+            if (checkoutForm) {
+                checkoutForm.addEventListener('submit', handleCheckoutSubmit);
+            }
+            
+            // Also listen for modal close button clicks to ensure data refreshes on next open
+            const modalCloseButtons = document.querySelectorAll('#checkoutModal .modal-close, #checkoutModal .modal-close-btn');
+            modalCloseButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // Data will refresh automatically when modal opens next time via observer
+                    console.log('Checkout modal closed');
+                });
+            });
+        });
+    </script>
+</body>
+</html>

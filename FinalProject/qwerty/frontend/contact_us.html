@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Contact Us - Hub</title>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+	<link rel="stylesheet" href="css/style.css">
+	<meta name="description" content="Get in touch with Hub - support, sales, partnerships">
+</head>
+<body>
+	<a class="skip-link" href="#main">Skip to content</a>
+
+	<!-- Navbar -->
+	<div class="navbar" id="navbar">
+		<div class="logo">
+			<a href="index.html">Hub</a>
+		</div>
+
+		<div class="search-bar">
+			<input type="text" placeholder="Search food, drinks, etc...">
+			<button><i class="fa fa-search"></i></button>
+		</div>
+
+		<div class="categories-dropdown">
+			<button id="categoriesToggle" class="categories-toggle" aria-expanded="false" aria-controls="categoriesPanel" aria-haspopup="true" title="Categories">
+				<i class="fa fa-th-large" aria-hidden="true"></i>
+				<i class="fa fa-caret-down caret" aria-hidden="true"></i>
+			</button>
+
+			<div id="categoriesPanel" class="categories-panel" hidden>
+				<a href="shop.html?category=Baking" class="panel-item" data-category="Baking">
+					<i class="fa fa-bread-slice" aria-hidden="true"></i>
+					<span>Baking</span>
+				</a>
+				<a href="shop.html?category=Coffee & Tea" class="panel-item" data-category="Coffee & Tea">
+					<i class="fa fa-coffee" aria-hidden="true"></i>
+					<span>Coffee & Tea</span>
+				</a>
+				<a href="shop.html?category=Snacks" class="panel-item" data-category="Snacks">
+					<i class="fa fa-cookie-bite" aria-hidden="true"></i>
+					<span>Snacks</span>
+				</a>
+				<a href="shop.html?category=Organic" class="panel-item" data-category="Organic">
+					<i class="fa fa-leaf" aria-hidden="true"></i>
+					<span>Organic</span>
+				</a>
+				<a href="shop.html?category=Meal Kits" class="panel-item" data-category="Meal Kits">
+					<i class="fa fa-box-open" aria-hidden="true"></i>
+					<span>Meal Kits</span>
+				</a>
+			</div>
+		</div>
+
+		<div class="nav-icons">
+			<a href="wishlist.html" id="wishlistBtn" title="Wishlist" class="icon-with-badge">
+				<i class="fa fa-heart"></i>
+				<span class="badge">0</span>
+			</a>
+			<a href="cart.html" id="cartBtn" title="Shopping Cart" class="icon-with-badge">
+				<i class="fa fa-shopping-cart"></i>
+				<span class="badge">0</span>
+			</a>
+			<a href="account.html" title="Account"><i class="fa fa-user"></i></a>
+
+			<div id="wishlistDropdown" class="cart-dropdown" hidden>
+				<div class="dropdown-header">Recently Added to Wishlist</div>
+				<div class="dropdown-items">
+					<p class="muted">No items yet</p>
+				</div>
+				<div class="dropdown-footer">
+					<button class="view-btn">View My Wishlist</button>
+				</div>
+			</div>
+
+			<div id="cartDropdown" class="cart-dropdown" hidden>
+				<div class="dropdown-header">Recently Added Products</div>
+				<div class="dropdown-items">
+					<p class="muted">Cart is empty</p>
+				</div>
+				<div class="dropdown-footer">
+					<a class="view-btn" href="cart.html">View My Shopping Cart</a>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Hero Section -->
+	<section class="page-hero contact-hero hero" id="main" role="region" aria-label="Contact Us">
+		<div class="hero-inner">
+			<h1>Contact Us</h1>
+			<p class="lead">We're here to help. Reach out with questions, feedback, or partnership inquiries.</p>
+		</div>
+	</section>
+
+	<main class="page-main">
+		<section class="content container contact-content">
+			
+			<div class="contact-intro">
+				<p class="intro-text">Whether you need support with an order, want to discuss business opportunities, or have questions about becoming a vendor, our team is ready to assist you.</p>
+			</div>
+
+			<div class="contact-layout">
+				
+				<!-- Contact Form -->
+				<div class="contact-form-container">
+					<h2>Send Us a Message</h2>
+					<form id="contactForm" class="contact-form" novalidate>
+						
+						<div class="form-group">
+							<label for="contactName">Full Name <span class="required">*</span></label>
+							<input type="text" id="contactName" name="name" required>
+						</div>
+
+						<div class="form-group">
+							<label for="contactEmail">Email Address <span class="required">*</span></label>
+							<input type="email" id="contactEmail" name="email" required>
+						</div>
+
+						<div class="form-group">
+							<label for="contactPhone">Phone Number</label>
+							<input type="tel" id="contactPhone" name="phone">
+						</div>
+
+						<div class="form-group">
+							<label for="contactSubject">Subject <span class="required">*</span></label>
+							<select id="contactSubject" name="subject" required>
+								<option value="">Select a topic...</option>
+								<option value="support">Customer Support</option>
+								<option value="order">Order Issue</option>
+								<option value="vendor">Vendor Partnership</option>
+								<option value="business">Business Account</option>
+								<option value="feedback">Feedback</option>
+								<option value="other">Other</option>
+							</select>
+						</div>
+
+						<div class="form-group">
+							<label for="contactMessage">Message <span class="required">*</span></label>
+							<textarea id="contactMessage" name="message" rows="6" required></textarea>
+						</div>
+
+						<button type="submit" class="btn submit-btn">Send Message</button>
+						<p id="contactFormMessage" class="form-message" role="status" aria-live="polite"></p>
+					</form>
+				</div>
+
+				<!-- Contact Info Sidebar -->
+				<aside class="contact-info">
+					<h3>Get In Touch</h3>
+					
+					<div class="contact-card">
+						<div class="contact-icon">
+							<i class="fa fa-envelope"></i>
+						</div>
+						<div class="contact-details">
+							<h4>Email</h4>
+							<p><a href="mailto:support@hub.com">support@hub.com</a></p>
+							<p class="muted">We reply within 24 hours</p>
+						</div>
+					</div>
+
+					<div class="contact-card">
+						<div class="contact-icon">
+							<i class="fa fa-phone"></i>
+						</div>
+						<div class="contact-details">
+							<h4>Phone</h4>
+							<p><a href="tel:+1234567890">+1 (234) 567-890</a></p>
+							<p class="muted">Mon-Fri, 9 AM - 6 PM</p>
+						</div>
+					</div>
+
+					<div class="contact-card">
+						<div class="contact-icon">
+							<i class="fa fa-map-marker-alt"></i>
+						</div>
+						<div class="contact-details">
+							<h4>Address</h4>
+							<p>123 Food Street<br>Metro City, ST 12345</p>
+							<p class="muted">Headquarters</p>
+						</div>
+					</div>
+
+					<div class="contact-card">
+						<div class="contact-icon">
+							<i class="fa fa-clock"></i>
+						</div>
+						<div class="contact-details">
+							<h4>Business Hours</h4>
+							<p>Monday - Friday: 9 AM - 6 PM<br>
+							Saturday: 10 AM - 4 PM<br>
+							Sunday: Closed</p>
+						</div>
+					</div>
+
+					<div class="social-links">
+						<h4>Follow Us</h4>
+						<div class="social-icons">
+							<a href="#" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+							<a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+							<a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+							<a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
+						</div>
+					</div>
+				</aside>
+
+			</div>
+
+			<!-- Quick Links -->
+			<div class="contact-quick-links">
+				<h3>Quick Links</h3>
+				<div class="quick-links-grid">
+					<a href="about_us.html" class="quick-link-card">
+						<i class="fa fa-info-circle"></i>
+						<span>About Us</span>
+					</a>
+					<a href="our_services.html" class="quick-link-card">
+						<i class="fa fa-concierge-bell"></i>
+						<span>Our Services</span>
+					</a>
+					<a href="shop.html" class="quick-link-card">
+						<i class="fa fa-store"></i>
+						<span>Browse Shops</span>
+					</a>
+					<a href="account.html" class="quick-link-card">
+						<i class="fa fa-user-circle"></i>
+						<span>My Account</span>
+					</a>
+				</div>
+			</div>
+
+		</section>
+	</main>
+
+	<footer class="site-footer" role="contentinfo">
+		<div class="footer-content">
+			<div class="footer-grid">
+				<div class="footer-brand">
+					<a href="index.html" class="footer-logo">Hub</a>
+					<p class="footer-tagline">Food & Gourmet delivered with care.</p>
+					<div class="footer-socials" aria-label="Social media">
+						<a href="#" aria-label="Facebook"><i class="fa-brands fa-facebook"></i></a>
+						<a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+						<a href="#" aria-label="Twitter"><i class="fa-brands fa-x-twitter"></i></a>
+					</div>
+				</div>
+
+				<div class="footer-column">
+					<h4>Quick Links</h4>
+					<nav class="footer-nav" aria-label="Quick Links">
+						<a href="about_us.html">About Us</a>
+						<a href="our_services.html">Our Services</a>
+						<a href="contact_us.html">Contact Us</a>
+						<a href="shop.html">Shop</a>
+					</nav>
+				</div>
+
+				<div class="footer-column">
+					<h4>Customer Care</h4>
+					<nav class="footer-nav" aria-label="Customer Care">
+						<a href="#products">Products</a>
+						<a href="#testimonials">Testimonials</a>
+						<a href="#newsletter">Newsletter</a>
+						<a href="#">Support</a>
+					</nav>
+				</div>
+
+				<div class="footer-column">
+					<h4>My Account</h4>
+					<nav class="footer-nav" aria-label="Account">
+						<a href="account.html">My Account</a>
+						<a href="cart.html">Shopping Cart</a>
+						<a href="wishlist.html">Wishlist</a>
+						<a href="#">Order History</a>
+					</nav>
+				</div>
+			</div>
+		</div>
+		<div class="footer-bottom">
+			<p>© <span id="year"></span> Hub. All rights reserved.</p>
+		</div>
+	</footer>
+
+	<script src="js/role-guard.js"></script>
+	<script src="js/session-validator.js"></script>
+	<script src="js/script.js"></script>
+	<script src="js/messenger-global.js"></script>
+	<script>
+		const y = document.getElementById('year');
+		if (y) y.textContent = new Date().getFullYear();
+
+		// Contact form handling
+		const contactForm = document.getElementById('contactForm');
+		const contactMsg = document.getElementById('contactFormMessage');
+		
+		if (contactForm) {
+			contactForm.addEventListener('submit', (e) => {
+				e.preventDefault();
+				
+				const name = document.getElementById('contactName').value.trim();
+				const email = document.getElementById('contactEmail').value.trim();
+				const subject = document.getElementById('contactSubject').value;
+				const message = document.getElementById('contactMessage').value.trim();
+
+				if (!name || !email || !subject || !message) {
+					contactMsg.textContent = 'Please fill in all required fields.';
+					contactMsg.style.color = '#e74c3c';
+					return;
+				}
+
+				// Simple email validation
+				const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+				if (!emailRegex.test(email)) {
+					contactMsg.textContent = 'Please enter a valid email address.';
+					contactMsg.style.color = '#e74c3c';
+					return;
+				}
+
+				// Simulate form submission
+				contactMsg.textContent = 'Sending message...';
+				contactMsg.style.color = '#555';
+
+				setTimeout(() => {
+					contactMsg.textContent = 'Thank you! Your message has been sent. We\'ll get back to you soon.';
+					contactMsg.style.color = '#00B894';
+					contactForm.reset();
+				}, 1000);
+			});
+		}
+	</script>
+</body>
+</html>

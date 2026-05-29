@@ -1,0 +1,440 @@
+/* Sales System Styles */
+
+.sales-info-banner {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 12px;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+}
+
+.sales-info-banner .info-icon {
+    font-size: 32px;
+    opacity: 0.9;
+}
+
+.sales-info-banner .info-content h4 {
+    margin: 0 0 8px 0;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.sales-info-banner .info-content p {
+    margin: 0;
+    font-size: 14px;
+    opacity: 0.95;
+    line-height: 1.5;
+}
+
+.sale-suggestion-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border-left: 4px solid #27ae60;
+    transition: all 0.3s ease;
+}
+
+.sale-suggestion-card:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    transform: translateY(-2px);
+}
+
+.sale-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.sale-urgency {
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.sale-urgency i {
+    font-size: 14px;
+}
+
+.urgent-critical {
+    background: #fee;
+    color: #c0392b;
+    border: 1px solid #e74c3c;
+}
+
+.urgent-high {
+    background: #ffeedb;
+    color: #d35400;
+    border: 1px solid #e67e22;
+}
+
+.urgent-medium {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #f39c12;
+}
+
+.urgent-low {
+    background: #e8f5e9;
+    color: #27ae60;
+    border: 1px solid #2ecc71;
+}
+
+.sale-product-info h4 {
+    margin: 0 0 16px 0;
+    color: #2c3e50;
+    font-size: 18px;
+}
+
+.sale-pricing {
+    background: #f8f9fa;
+    padding: 16px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+}
+
+.price-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #ecf0f1;
+}
+
+.price-row:last-child {
+    border-bottom: none;
+}
+
+.price-row .label {
+    color: #7f8c8d;
+    font-size: 14px;
+}
+
+.price-row .value {
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 15px;
+}
+
+.price-row.suggested .value {
+    color: #e67e22;
+    font-size: 18px;
+}
+
+.price-row.sale .value {
+    color: #27ae60;
+    font-size: 18px;
+}
+
+.profit-analysis {
+    background: #fff9e6;
+    border: 1px solid #f39c12;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 16px;
+}
+
+.profit-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 0;
+    font-size: 13px;
+    color: #555;
+}
+
+.profit-row i {
+    color: #f39c12;
+    font-size: 16px;
+    width: 20px;
+    text-align: center;
+}
+
+.profit-row strong {
+    color: #2c3e50;
+}
+
+.sale-rationale {
+    background: #e8f5e9;
+    border-left: 3px solid #27ae60;
+    padding: 12px;
+    border-radius: 4px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    color: #27ae60;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sale-rationale i {
+    font-size: 16px;
+}
+
+.sale-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.btn-request-sale,
+.btn-custom-sale {
+    flex: 1;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-request-sale {
+    background: #27ae60;
+    color: white;
+}
+
+.btn-request-sale:hover {
+    background: #229954;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
+}
+
+.btn-custom-sale {
+    background: white;
+    color: #3498db;
+    border: 2px solid #3498db;
+}
+
+.btn-custom-sale:hover {
+    background: #3498db;
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* Custom Sale Modal Styles */
+.price-display,
+.discount-display {
+    font-size: 24px;
+    font-weight: 700;
+    color: #2c3e50;
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.discount-display {
+    color: #e67e22;
+}
+
+.sale-preview {
+    background: #e8f5e9;
+    padding: 16px;
+    border-radius: 8px;
+    margin: 16px 0;
+}
+
+.sale-preview h4 {
+    margin: 0 0 12px 0;
+    color: #27ae60;
+    font-size: 16px;
+}
+
+.preview-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    font-size: 15px;
+}
+
+.preview-row strong {
+    color: #27ae60;
+    font-size: 18px;
+}
+
+.preview-note {
+    margin-top: 12px;
+    padding: 10px;
+    background: #fff9e6;
+    border-left: 3px solid #f39c12;
+    font-size: 12px;
+    color: #856404;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.btn-cancel,
+.btn-submit {
+    flex: 1;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-cancel {
+    background: #ecf0f1;
+    color: #7f8c8d;
+}
+
+.btn-cancel:hover {
+    background: #bdc3c7;
+}
+
+.btn-submit {
+    background: #27ae60;
+    color: white;
+}
+
+.btn-submit:hover {
+    background: #229954;
+}
+
+/* Sale Badge on Product Cards */
+.product-sale-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(231, 76, 60, 0.4);
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.product-sale-badge i {
+    font-size: 11px;
+}
+
+.product-original-price {
+    text-decoration: line-through;
+    color: #95a5a6;
+    font-size: 14px;
+    margin-right: 8px;
+}
+
+.product-sale-price {
+    color: #e74c3c;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.sale-savings {
+    display: inline-block;
+    background: #e8f5e9;
+    color: #27ae60;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-left: 8px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .sale-actions {
+        flex-direction: column;
+    }
+    
+    .btn-request-sale,
+    .btn-custom-sale {
+        width: 100%;
+    }
+}
+
+/* Discount Modal - single-scroll behavior */
+#discountModal .modal-content {
+    max-height: 90vh;
+    width: 90%;
+    max-width: 720px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* ensure only body scrolls */
+}
+
+#discountModal .modal-header-modern {
+    flex-shrink: 0;
+}
+
+#discountModal .modal-body-modern {
+    flex: 1 1 auto;
+    overflow-y: auto !important;
+    overflow-x: hidden;
+    min-height: 0;
+    scrollbar-gutter: stable both-edges;
+    -ms-overflow-style: auto; /* IE/Edge legacy */
+    scrollbar-width: thin;     /* Firefox */
+}
+
+#discountModal .modal-actions-modern {
+    flex-shrink: 0;
+}
+
+/* Remove nested scrollbars inside modal body */
+#discountModal .form-section-card,
+#discountModal .form-row,
+#discountModal .form-group {
+    overflow: visible !important;
+    max-height: none !important;
+    height: auto !important;
+}
+
+/* Product selection grid should flow naturally */
+#discountModal #discProducts {
+    overflow: visible !important;
+    max-height: none !important;
+}
+
+/* Visible scrollbar styling for discount modal body */
+#discountModal .modal-body-modern::-webkit-scrollbar {
+    width: 10px;
+}
+#discountModal .modal-body-modern::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 8px;
+}
+#discountModal .modal-body-modern::-webkit-scrollbar-thumb {
+    background: #c7c7c7;
+    border-radius: 8px;
+}
+#discountModal .modal-body-modern::-webkit-scrollbar-thumb:hover {
+    background: #a9a9a9;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+    #discountModal .modal-content {
+        width: 95%;
+        max-width: 95vw;
+        max-height: 95vh;
+    }
+}

@@ -1,0 +1,1570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hub | Food & Beverages</title>
+
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Preload hero images for better LCP -->
+    <link rel="preload" as="image" href="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1600&q=80">
+    <link rel="preload" as="image" href="https://images.unsplash.com/photo-1550547660-d9450f859349?w=1600&q=80">
+    <link rel="preload" as="image" href="https://images.unsplash.com/photo-1544025162-d76694265947?w=1600&q=80">
+    <!-- Prefetch likely next product images -->
+    <!-- Prefetch links removed - Unsplash source API deprecated -->
+    <!-- SEO Meta -->
+    <meta name="description" content="Hub – curated food & beverage deals, fresh arrivals, gourmet picks, and fast delivery.">
+    <meta property="og:title" content="Hub | Food & Beverages">
+    <meta property="og:description" content="Discover curated food & beverage deals, new arrivals, and gourmet favorites.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://example.com/">
+    <meta property="og:image" content="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1200&q=80">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Hub | Food & Beverages">
+    <meta name="twitter:description" content="Curated food & beverage deals and gourmet picks.">
+    <meta name="twitter:image" content="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1200&q=80">
+</head>
+<body>
+    <!-- Global Loading Indicator -->
+    <div class="global-loader" hidden>
+        <div class="spinner"></div>
+        <span class="loader-text" id="loaderText"></span>
+    </div>
+    
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <!-- Navbar -->
+    <div class="navbar" id="navbar">
+        <div class="logo">
+            <a href="index.html">Hub</a>
+        </div>
+
+        <div class="search-bar">
+            <input type="text" placeholder="Search food, drinks, etc...">
+            <button><i class="fa fa-search"></i></button>
+        </div>
+
+        <!-- Single categories toggle: opens a dropdown panel with multiple category links -->
+        <div class="categories-dropdown">
+            <button id="categoriesToggle" class="categories-toggle" aria-expanded="false" aria-controls="categoriesPanel" aria-haspopup="true" title="Categories">
+                <i class="fa fa-th-large" aria-hidden="true"></i>
+                <i class="fa fa-caret-down caret" aria-hidden="true"></i>
+            </button>
+
+            <div id="categoriesPanel" class="categories-panel" hidden>
+                <a href="shop.html?category=Baking" class="panel-item" data-category="Baking">
+                    <i class="fa fa-bread-slice" aria-hidden="true"></i>
+                    <span>Baking</span>
+                </a>
+                <a href="shop.html?category=Coffee & Tea" class="panel-item" data-category="Coffee & Tea">
+                    <i class="fa fa-coffee" aria-hidden="true"></i>
+                    <span>Coffee & Tea</span>
+                </a>
+                <a href="shop.html?category=Snacks" class="panel-item" data-category="Snacks">
+                    <i class="fa fa-cookie-bite" aria-hidden="true"></i>
+                    <span>Snacks</span>
+                </a>
+                <a href="shop.html?category=Specialty" class="panel-item" data-category="Specialty">
+                    <i class="fa fa-globe" aria-hidden="true"></i>
+                    <span>Specialty</span>
+                </a>
+                <a href="shop.html?category=Organic" class="panel-item" data-category="Organic">
+                    <i class="fa fa-leaf" aria-hidden="true"></i>
+                    <span>Organic</span>
+                </a>
+                <a href="shop.html?category=Meal Kits" class="panel-item" data-category="Meal Kits">
+                    <i class="fa fa-box-open" aria-hidden="true"></i>
+                    <span>Meal Kits</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="nav-icons">
+            <a href="wishlist.html" id="wishlistBtn" title="Wishlist" class="icon-with-badge">
+                <i class="fa fa-heart"></i>
+                <span class="badge">3</span>
+            </a>
+            <a href="cart.html" id="cartBtn" title="Shopping Cart" class="icon-with-badge">
+                <i class="fa fa-shopping-cart"></i>
+                <span class="badge">0</span>
+            </a>
+            <!-- Dynamic Dashboard Link (shows for sellers/riders/admin when logged in) -->
+            <a href="dashboard.html" id="dashboardBtn" title="Dashboard" style="display: none;">
+                <i class="fa fa-tachometer-alt"></i>
+            </a>
+            <a href="account.html" title="Account"><i class="fa fa-user"></i></a>
+            
+            <!-- Wishlist Dropdown -->
+            <div id="wishlistDropdown" class="cart-dropdown" hidden>
+                <div class="dropdown-header">Recently Added to Wishlist</div>
+                <div class="dropdown-items">
+                    <div class="dropdown-item">
+                        <img src="https://via.placeholder.com/60x60/8B4513/FFFFFF?text=🍔" alt="Product" loading="lazy">
+                        <div class="item-details">
+                            <p class="item-name">Cheeseburger Deluxe</p>
+                            <p class="item-price">₱199</p>
+                        </div>
+                    </div>
+                    <div class="dropdown-item">
+                        <img src="https://via.placeholder.com/60x60/FF6347/FFFFFF?text=🍕" alt="Product" loading="lazy">
+                        <div class="item-details">
+                            <p class="item-name">Supreme Pizza</p>
+                            <p class="item-price">₱299</p>
+                        </div>
+                    </div>
+                    <div class="dropdown-item">
+                        <img src="https://via.placeholder.com/60x60/6F4E37/FFFFFF?text=☕" alt="Product" loading="lazy">
+                        <div class="item-details">
+                            <p class="item-name">Premium Coffee Blend</p>
+                            <p class="item-price">₱150</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="dropdown-footer">
+                    <p class="items-count">3 items in wishlist</p>
+                    <button class="view-btn">View My Wishlist</button>
+                </div>
+            </div>
+
+            <!-- Cart Dropdown -->
+            <div id="cartDropdown" class="cart-dropdown" hidden>
+                <div class="dropdown-header">Recently Added Products</div>
+                <div class="dropdown-items">
+                    <div class="dropdown-item">
+                        <img src="https://via.placeholder.com/60x60/D2B48C/FFFFFF?text=🧋" alt="Product" loading="lazy">
+                        <div class="item-details">
+                            <p class="item-name">Nescafe Ready to Drink Cappuccino...</p>
+                            <p class="item-price">₱1,128</p>
+                        </div>
+                    </div>
+                    <div class="dropdown-item">
+                        <img src="https://via.placeholder.com/60x60/8B7355/FFFFFF?text=☕" alt="Product" loading="lazy">
+                        <div class="item-details">
+                            <p class="item-name">Nescafe Ready to Drink Mocha 220m...</p>
+                            <p class="item-price">₱1,128</p>
+                        </div>
+                    </div>
+                    <div class="dropdown-item">
+                        <img src="https://via.placeholder.com/60x60/A0826D/FFFFFF?text=🧊☕" alt="Product" loading="lazy">
+                        <div class="item-details">
+                            <p class="item-name">[NEW] Nescafe Ready to Drink Ice Blac...</p>
+                            <p class="item-price">₱282</p>
+                        </div>
+                    </div>
+                    <div class="dropdown-item">
+                        <img src="https://via.placeholder.com/60x60/C19A6B/FFFFFF?text=🥤" alt="Product" loading="lazy">
+                        <div class="item-details">
+                            <p class="item-name">Starbucks Ready To Drink Frappuccino...</p>
+                            <p class="item-price">₱536</p>
+                        </div>
+                    </div>
+                    <div class="dropdown-item">
+                        <img src="https://via.placeholder.com/60x60/4A90E2/FFFFFF?text=📦" alt="Product" loading="lazy">
+                        <div class="item-details">
+                            <p class="item-name">Kingston NV3 500GB | 1TB M.2 2280...</p>
+                            <p class="item-price">₱3,855</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="dropdown-footer">
+                    <p class="items-count">227 More Products In Cart</p>
+                    <a class="view-btn" href="cart.html">View My Shopping Cart</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hero Section with Carousel -->
+    <section class="hero" id="main" role="region" aria-roledescription="carousel" aria-label="Featured promotions">
+        <!-- Slides (background layers) -->
+        <div class="hero-slides" aria-hidden="true">
+            <div class="hero-slide active" data-index="0" style="background-image: url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1600&q=80');"></div>
+            <div class="hero-slide" data-index="1" style="background-image: url('https://images.unsplash.com/photo-1550547660-d9450f859349?w=1600&q=80');"></div>
+            <div class="hero-slide" data-index="2" style="background-image: url('https://images.unsplash.com/photo-1544025162-d76694265947?w=1600&q=80');"></div>
+        </div>
+
+        <!-- Announcer for screen readers -->
+        <p id="heroSlideAnnounce" class="visually-hidden" aria-live="polite">Slide 1 of 3: Fresh gourmet dishes.</p>
+
+        <!-- Content -->
+        <h1>Welcome to Hub</h1>
+        <p>Your favorite food & beverage deals, delivered fast.</p>
+    <a href="shop.html" class="btn" data-analytics="cta-shop_now">Shop Now</a>
+
+        <!-- Controls -->
+        <div class="hero-controls">
+            <button class="hero-control prev" aria-label="Previous slide"><i class="fa fa-chevron-left" aria-hidden="true"></i></button>
+            <button class="hero-control next" aria-label="Next slide"><i class="fa fa-chevron-right" aria-hidden="true"></i></button>
+        </div>
+
+        <!-- Indicators -->
+        <div class="hero-indicators" role="tablist" aria-label="Choose slide">
+            <button class="active" data-slide="0" aria-label="Go to slide 1" aria-current="true"></button>
+            <button data-slide="1" aria-label="Go to slide 2"></button>
+            <button data-slide="2" aria-label="Go to slide 3"></button>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <a href="about_us.html" class="feature-box">
+            <div class="feature-icon">
+                <i class="fa fa-info-circle" aria-hidden="true"></i>
+            </div>
+            <h3>About Us</h3>
+            <p>Learn more about our mission, values, and how we deliver fresh food to your doorstep.</p>
+            <span class="feature-badge">Learn More</span>
+        </a>
+
+        <a href="contact_us.html" class="feature-box">
+            <div class="feature-icon">
+                <i class="fa fa-envelope" aria-hidden="true"></i>
+            </div>
+            <h3>Contact Us</h3>
+            <p>Get in touch with our support team for questions, feedback, or partnership inquiries.</p>
+            <span class="feature-badge">Get Help</span>
+        </a>
+
+        <a href="our_services.html" class="feature-box">
+            <div class="feature-icon">
+                <i class="fa fa-concierge-bell" aria-hidden="true"></i>
+            </div>
+            <h3>Our Services</h3>
+            <p>Explore the services we offer including delivery options, business accounts, and vendor partnerships.</p>
+            <span class="feature-badge">See Services</span>
+        </a>
+    </section>
+
+    <!-- Product Display -->
+    <section class="products" id="products" aria-labelledby="products-title">
+        <div class="products-header">
+            <h2 id="products-title">What food you love to order</h2>
+            <p class="products-subtitle">Here order your favorite foods from different categories</p>
+        </div>
+        <!-- Zero-Waste Deals highlight -->
+        <div class="deals-section" id="zeroWasteDeals" hidden>
+            <div class="deals-header">
+                <h3><i class="fa fa-recycle" aria-hidden="true"></i> Zero‑Waste Deals</h3>
+                <a href="shop.html" class="deals-link">View all</a>
+            </div>
+            <div class="deals-grid" id="dealsGrid"></div>
+        </div>
+        <div class="category-grid">
+            <!-- Curated categories: Baking, Coffee & Tea, Snacks, Specialty, Organic, Meal Kits -->
+            <a href="shop.html?category=baking" class="category-card">
+                <div class="category-circle">
+                    <img src="https://images.unsplash.com/photo-1509440159596-0249088772ff?w=300&h=300&fit=crop" alt="Baking" loading="lazy">
+                </div>
+                <h3 class="category-name">Baking</h3>
+            </a>
+
+            <a href="shop.html?category=coffee" class="category-card">
+                <div class="category-circle">
+                    <img src="https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=300&h=300&fit=crop" alt="Coffee & Tea" loading="lazy">
+                </div>
+                <h3 class="category-name">Coffee & Tea</h3>
+            </a>
+
+            <a href="shop.html?category=snacks" class="category-card">
+                <div class="category-circle">
+                    <img src="https://images.unsplash.com/photo-1599490659213-e2b9527bd087?w=300&h=300&fit=crop" alt="Snacks" loading="lazy">
+                </div>
+                <h3 class="category-name">Snacks</h3>
+            </a>
+
+            <a href="shop.html?category=specialty" class="category-card">
+                <div class="category-circle">
+                    <img src="https://images.unsplash.com/photo-1498654896293-37aacf113fd9?w=300&h=300&fit=crop" alt="Specialty" loading="lazy">
+                </div>
+                <h3 class="category-name">Specialty</h3>
+            </a>
+
+            <a href="shop.html?category=organic" class="category-card">
+                <div class="category-circle">
+                    <img src="https://images.unsplash.com/photo-1540420773420-3366772f4999?w=300&h=300&fit=crop" alt="Organic" loading="lazy">
+                </div>
+                <h3 class="category-name">Organic</h3>
+            </a>
+
+            <a href="shop.html?category=mealkits" class="category-card">
+                <div class="category-circle">
+                    <img src="https://images.unsplash.com/photo-1606787366850-de6330128bfc?w=300&h=300&fit=crop" alt="Meal Kits" loading="lazy">
+                </div>
+                <h3 class="category-name">Meal Kits</h3>
+            </a>
+        </div>
+
+        <!-- About / Key Information -->
+        <section class="info-section" id="about" aria-labelledby="about-title">
+            <div class="info-header">
+                <h2 id="about-title">About MealHub</h2>
+                <p class="info-subtitle">Affordable, sustainable meals with smart features for consumers and local vendors.</p>
+            </div>
+            <div class="info-grid">
+                <div class="info-card">
+                    <div class="info-icon"><i class="fa fa-utensils" aria-hidden="true"></i></div>
+                    <h3 class="info-title">Project Focus</h3>
+                    <p>MealHub offers meals, food products, and beverages at budget-friendly prices with options for individuals and families.</p>
+                    <ul class="info-list">
+                        <li>Budget meals, combo meals, and meal plans</li>
+                        <li>Product listings for meals, beverages, bundles</li>
+                        <li>Simple cart and secure checkout</li>
+                        <li>Search and filters by diet and price</li>
+                        <li>Seller dashboard for local vendors</li>
+                    </ul>
+                </div>
+                <div class="info-card">
+                    <div class="info-icon"><i class="fa fa-earth-asia" aria-hidden="true"></i></div>
+                    <h3 class="info-title">SDG Alignment</h3>
+                    <ul class="info-list">
+                        <li><strong>SDG 2 – End Hunger:</strong> connects consumers to affordable, nutritious meals and supports small local providers.</li>
+                        <li><strong>SDG 12 – Responsible Consumption:</strong> promotes eco‑friendly packaging, portion control, and awareness to reduce waste.</li>
+                    </ul>
+                </div>
+                <div class="info-card">
+                    <div class="info-icon"><i class="fa fa-lightbulb" aria-hidden="true"></i></div>
+                    <h3 class="info-title">Creativity & Innovation</h3>
+                    <ul class="info-list">
+                        <li><strong>Smart recommendations</strong> for combos and sustainable picks</li>
+                        <li><strong>Zero‑Waste deals</strong> for near‑expiry surplus</li>
+                        <li><strong>Community</strong> tips on sustainable eating</li>
+                        <li><strong>Vendor verification</strong> for responsible production</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="info-cta">
+                <a class="cta-btn primary" href="shop.html">Explore Meals</a>
+                <a class="cta-btn" href="about_us.html">Learn More</a>
+            </div>
+        </section>
+    <script>
+    // Load zero-waste deals for homepage highlight
+    (function(){
+        const container = document.getElementById('zeroWasteDeals');
+        const grid = document.getElementById('dealsGrid');
+        if(!container || !grid) return;
+        fetch('/api/deals/zero-waste?limit=6')
+            .then(r => r.ok ? r.json() : null)
+            .then(data => {
+                if(!data || !data.success || !data.data || !data.data.items || data.data.items.length === 0) return;
+                const items = data.data.items;
+                container.hidden = false;
+                grid.innerHTML = items.map(it => {
+                    const img = it.img_url || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&h=600&fit=crop';
+                    const title = (it.title || 'Deal').slice(0, 48);
+                    const op = parseFloat(it.original_price || 0).toFixed(2);
+                    const sp = parseFloat(it.sale_price || 0).toFixed(2);
+                    const disc = Math.round(parseFloat(it.discount_percentage || 0));
+                    return `
+                    <a class="deal-card" href="shop.html" title="${title}">
+                        <div class="deal-thumb"><img src="${img}" alt="${title}"></div>
+                        <div class="deal-info">
+                            <div class="deal-title">${title}</div>
+                            <div class="deal-pricing">
+                                <span class="deal-price">₱${sp}</span>
+                                <span class="deal-original">₱${op}</span>
+                                <span class="deal-badge">-${disc}%</span>
+                            </div>
+                        </div>
+                    </a>`;
+                }).join('');
+            })
+            .catch(()=>{});
+    })();
+    </script>
+    </section>
+
+    
+
+    <!-- Best Seller Grocery Section -->
+    <section class="best-seller" aria-labelledby="bestseller-title" style="display: none;">
+        <!-- Hidden until there are actual best sellers -->
+        <h2 id="bestseller-title">Best Selling Products</h2>
+        <p class="bestseller-subtitle">Top products from verified sellers based on customer orders</p>
+        
+        <!-- Filter Controls -->
+        <div class="bestseller-controls" style="margin: 20px 0; display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; align-items: center;">
+            <!-- Category Filters -->
+            <div class="category-filters" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button class="category-filter-btn active" data-category="all">
+                    <i class="fa fa-th-large"></i> All Categories
+                </button>
+                <button class="category-filter-btn" data-category="Baking">
+                    <i class="fa fa-birthday-cake"></i> Baking
+                </button>
+                <button class="category-filter-btn" data-category="Coffee & Tea">
+                    <i class="fa fa-coffee"></i> Coffee & Tea
+                </button>
+                <button class="category-filter-btn" data-category="Snacks">
+                    <i class="fa fa-cookie-bite"></i> Snacks
+                </button>
+                <button class="category-filter-btn" data-category="Specialty">
+                    <i class="fa fa-star"></i> Specialty
+                </button>
+                <button class="category-filter-btn" data-category="Organic">
+                    <i class="fa fa-leaf"></i> Organic
+                </button>
+                <button class="category-filter-btn" data-category="Meal Kits">
+                    <i class="fa fa-utensils"></i> Meal Kits
+                </button>
+            </div>
+            
+            <!-- Timeframe Filter -->
+            <select id="bestseller-timeframe" style="padding: 8px 15px; border-radius: 20px; border: 2px solid #28a745; background: white; cursor: pointer; font-size: 14px;">
+                <option value="all">All Time</option>
+                <option value="monthly">Last 30 Days</option>
+                <option value="weekly">Last 7 Days</option>
+                <option value="daily">Today</option>
+            </select>
+        </div>
+        
+        <!-- Loading State -->
+        <div id="bestsellerLoadingState" class="loading-state" style="display: none; text-align: center; padding: 40px;">
+            <i class="fa fa-spinner fa-spin" style="font-size: 48px; color: #28a745;"></i>
+            <p style="margin-top: 15px; color: #666;">Loading best selling products...</p>
+        </div>
+        
+        <!-- Empty State -->
+        <div id="bestsellerEmptyState" class="empty-state" style="display: none; text-align: center; padding: 40px;">
+            <i class="fa fa-shopping-bag" style="font-size: 64px; color: #ccc;"></i>
+            <p style="margin-top: 15px; color: #666; font-size: 18px;">No best sellers found</p>
+            <p style="color: #999; font-size: 14px;">Check back later for popular products</p>
+        </div>
+        
+        <!-- Products Grid -->
+        <div id="bestsellerProductsGrid" class="product-grid-shop">
+            <!-- Products will be dynamically loaded here -->
+        </div>
+    </section>
+
+    <!-- Product Detail Modal -->
+    <div id="productModal" class="product-modal" hidden>
+        <div class="modal-overlay"></div>
+        <div class="modal-container">
+            <button class="modal-close" aria-label="Close modal"><i class="fa fa-times"></i></button>
+            
+            <div class="modal-content">
+                <!-- Left side: Image Gallery -->
+                <div class="modal-gallery">
+                    <div class="gallery-main">
+                        <img id="modalMainImage" src="" alt="" loading="lazy">
+                        <button class="gallery-nav gallery-prev" aria-label="Previous image"><i class="fa fa-chevron-left"></i></button>
+                        <button class="gallery-nav gallery-next" aria-label="Next image"><i class="fa fa-chevron-right"></i></button>
+                    </div>
+                    <div class="gallery-thumbs">
+                        <button class="thumb active" data-index="0">
+                            <img src="" alt="Thumbnail 1">
+                        </button>
+                        <button class="thumb" data-index="1">
+                            <img src="" alt="Thumbnail 2">
+                        </button>
+                        <button class="thumb" data-index="2">
+                            <img src="" alt="Thumbnail 3">
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Right side: Product Info -->
+                <div class="modal-info">
+                    <h2 id="modalTitle" class="modal-product-title"></h2>
+                    <div id="modalPrice" class="modal-product-price"></div>
+                    
+                    <div class="modal-options">
+                        <label class="modal-label">Available In:</label>
+                        <div id="modalSizes" class="size-options">
+                            <button class="size-btn" data-size="12oz">12oz</button>
+                            <button class="size-btn" data-size="24oz">24oz</button>
+                            <button class="size-btn" data-size="36oz">36oz</button>
+                        </div>
+                    </div>
+
+                    <div class="modal-quantity">
+                        <button class="modal-qty-btn" data-action="decrease" aria-label="Decrease quantity">-</button>
+                        <span class="modal-qty-value">1</span>
+                        <button class="modal-qty-btn" data-action="increase" aria-label="Increase quantity">+</button>
+                    </div>
+
+                    <button class="modal-add-cart">
+                        <i class="fa fa-shopping-bag"></i> Add to Cart
+                    </button>
+
+                    <div class="modal-actions">
+                        <button class="modal-action-btn">
+                            <i class="fa fa-heart"></i> Wishlist
+                        </button>
+                        <button class="modal-action-btn">
+                            <i class="fa fa-share-nodes"></i> Share
+                        </button>
+                    </div>
+
+                    <div class="modal-tags">
+                        <i class="fa fa-tag"></i>
+                        <span class="modal-label">Tags:</span>
+                        <span id="modalTags" class="tag-list"></span>
+                    </div>
+
+                    <div class="modal-details">
+                        <h3>Product Details:</h3>
+                        <p id="modalDescription"></p>
+                        <button class="read-more">Read More</button>
+                    </div>
+
+                    <div class="modal-related">
+                        <h3>Related products</h3>
+                        <div id="modalRelated" class="related-products-mini"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Support Button -->
+    <button class="support-btn" onclick="window.location.href='chat.html'" aria-label="Open chat"><i class="fa fa-comment-dots"></i></button>
+
+    <!-- Testimonials -->
+    <section class="testimonials" id="testimonials" aria-labelledby="testimonials-title">
+        <h2 id="testimonials-title">What our customers say</h2>
+        <div class="testimonials-grid">
+            <figure class="testimonial-card">
+                <blockquote>
+                    “Amazing variety and fast delivery. My go-to for late-night cravings.”
+                </blockquote>
+                <figcaption>
+                    <div class="stars" aria-label="5 out of 5 stars">
+                        <i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i>
+                    </div>
+                    <span class="author">Janelle, Quezon City</span>
+                </figcaption>
+            </figure>
+            <figure class="testimonial-card">
+                <blockquote>
+                    “Great deals on premium coffee and desserts. Highly recommended!”
+                </blockquote>
+                <figcaption>
+                    <div class="stars" aria-label="4.5 out of 5 stars">
+                        <i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa-regular fa-star-half-stroke"></i>
+                    </div>
+                    <span class="author">Miguel, Makati</span>
+                </figcaption>
+            </figure>
+            <figure class="testimonial-card">
+                <blockquote>
+                    “Fresh, tasty, and on time. The pizza picks are top-notch.”
+                </blockquote>
+                <figcaption>
+                    <div class="stars" aria-label="5 out of 5 stars">
+                        <i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i>
+                    </div>
+                    <span class="author">Aria, Pasig</span>
+                </figcaption>
+            </figure>
+        </div>
+    </section>
+
+    <!-- Newsletter Signup -->
+    <section class="newsletter" id="newsletter" aria-labelledby="newsletter-title">
+        <h2 id="newsletter-title">Get fresh deals in your inbox</h2>
+        <p>Subscribe for weekly promos, new arrivals, and curated picks.</p>
+        <form id="newsletterForm" novalidate>
+            <label for="newsletterEmail" class="visually-hidden">Email address</label>
+            <input id="newsletterEmail" name="email" type="email" placeholder="Enter your email" required>
+            <button type="submit">Subscribe</button>
+            <p id="newsletterMessage" class="form-message" role="status" aria-live="polite"></p>
+        </form>
+    </section>
+
+    <!-- Messages Button -->
+    <button class="messages-btn" aria-haspopup="true" aria-expanded="false" aria-controls="messagesPanel" onclick="toggleMessagesPanel()">
+        <i class="fa fa-message"></i>
+        <span class="messages-badge" id="messagesBadge" style="display:none;">0</span>
+    </button>
+    
+    <div id="messagesPanel" class="messages-panel" hidden>
+        <div class="messages-header">
+            <button class="back-to-list" onclick="backToConversationsList()" style="display:none;">
+                <i class="fa fa-arrow-left"></i>
+            </button>
+            <h3 id="messagesPanelTitle">Messages</h3>
+            <button class="close-messages" aria-label="Close messages panel" onclick="closeMessagesPanel()">
+                <i class="fa fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="messages-search" id="messagesSearchBar">
+            <input type="text" id="messagesSearch" placeholder="Search name" onkeyup="filterMessageConversations()">
+        </div>
+        
+        <div class="messages-list" id="messagesList">
+            <!-- Messages will be dynamically loaded here -->
+            <div class="no-messages">
+                <i class="fa fa-inbox" style="font-size: 48px; color: #ccc; margin-bottom: 12px;"></i>
+                <p style="color: #999; font-size: 14px;">No messages yet</p>
+                <p style="color: #bbb; font-size: 12px;">Start chatting with sellers!</p>
+            </div>
+        </div>
+
+        <!-- Chat View (hidden by default) -->
+        <div id="chatView" style="display:none; flex-direction: column; height: 100%;">
+            <div id="chatMessages" style="flex: 1; overflow-y: auto; padding: 16px;"></div>
+            <div style="padding: 12px; border-top: 1px solid #ecf0f1; background: white;">
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <input type="text" id="chatInput" placeholder="Type a message..." 
+                           style="flex: 1; padding: 10px 14px; border: 1px solid #ddd; border-radius: 20px; outline: none;"
+                           onkeypress="if(event.key==='Enter') sendMessageInPanel()">
+                    <button onclick="sendMessageInPanel()" 
+                            style="width: 40px; height: 40px; border-radius: 50%; background: #3498db; color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                        <i class="fa fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="site-footer" role="contentinfo">
+        <div class="footer-content">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <a href="index.html" class="footer-logo">Hub</a>
+                    <p class="footer-tagline">Food & Gourmet delivered with care.</p>
+                    <div class="footer-socials" aria-label="Social media">
+                        <a href="#" aria-label="Facebook"><i class="fa-brands fa-facebook"></i></a>
+                        <a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+                        <a href="#" aria-label="Twitter"><i class="fa-brands fa-x-twitter"></i></a>
+                    </div>
+                </div>
+
+                <div class="footer-column">
+                    <h4>Quick Links</h4>
+                    <nav class="footer-nav" aria-label="Quick Links">
+                        <a href="about_us.html">About Us</a>
+                        <a href="our_services.html">Our Services</a>
+                        <a href="contact_us.html">Contact Us</a>
+                        <a href="shop.html">Shop</a>
+                    </nav>
+                </div>
+
+                <div class="footer-column">
+                    <h4>Customer Care</h4>
+                    <nav class="footer-nav" aria-label="Customer Care">
+                        <a href="#products">Products</a>
+                        <a href="#testimonials">Testimonials</a>
+                        <a href="#newsletter">Newsletter</a>
+                        <a href="#">Support</a>
+                    </nav>
+                </div>
+
+                <div class="footer-column">
+                    <h4>My Account</h4>
+                    <nav class="footer-nav" aria-label="Account">
+                        <a href="account.html">My Account</a>
+                        <a href="cart.html">Shopping Cart</a>
+                        <a href="wishlist.html">Wishlist</a>
+                        <a href="#">Order History</a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>© <span id="year"></span> Hub. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="js/notifications.js"></script>
+    <script src="js/role-guard.js"></script>
+    <script src="js/auth-guard.js"></script>
+    <script src="js/session-validator.js"></script>
+    <script src="js/script.js"></script>
+    <script src="js/messenger-global.js"></script>
+    <script>
+        // ============== Global Loader Utility Functions ==============
+        window.showLoader = function(text = '') {
+            const loader = document.querySelector('.global-loader');
+            const loaderText = document.getElementById('loaderText');
+            if (loaderText) loaderText.textContent = text;
+            if (loader) loader.removeAttribute('hidden');
+        };
+        
+        window.hideLoader = function() {
+            const loader = document.querySelector('.global-loader');
+            if (loader) loader.setAttribute('hidden', '');
+        };
+        
+        // Navbar sticky & categories handled centrally in js/script.js now.
+        // (Removed duplicate scroll logic to avoid race conditions.)
+
+        // Categories dropdown logic removed (centralized in js/script.js:initNavbarFeatures())
+
+        // Modal/Popup functionality
+        (function() {
+            const wishlistBtn = document.getElementById('wishlistBtn');
+            const cartBtn = document.getElementById('cartBtn');
+            const wishlistDropdown = document.getElementById('wishlistDropdown');
+            const cartDropdown = document.getElementById('cartDropdown');
+
+            function openDropdown(dropdown) {
+                // Close other dropdown first
+                document.querySelectorAll('.cart-dropdown.open').forEach(d => {
+                    if (d !== dropdown) closeDropdown(d);
+                });
+                
+                dropdown.hidden = false;
+                setTimeout(() => dropdown.classList.add('open'), 10);
+            }
+
+            function closeDropdown(dropdown) {
+                dropdown.classList.remove('open');
+                setTimeout(() => dropdown.hidden = true, 250);
+            }
+
+            // Toggle dropdowns
+            if (wishlistBtn && wishlistDropdown) {
+                wishlistBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (wishlistDropdown.classList.contains('open')) {
+                        closeDropdown(wishlistDropdown);
+                    } else {
+                        openDropdown(wishlistDropdown);
+                    }
+                });
+            }
+
+            if (cartBtn && cartDropdown) {
+                cartBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (cartDropdown.classList.contains('open')) {
+                        closeDropdown(cartDropdown);
+                    } else {
+                        openDropdown(cartDropdown);
+                    }
+                });
+            }
+
+            // Close on outside click
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.cart-dropdown') && 
+                    !e.target.closest('#wishlistBtn') && 
+                    !e.target.closest('#cartBtn')) {
+                    document.querySelectorAll('.cart-dropdown.open').forEach(dropdown => {
+                        closeDropdown(dropdown);
+                    });
+                }
+            });
+
+            // Close on Escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    document.querySelectorAll('.cart-dropdown.open').forEach(dropdown => {
+                        closeDropdown(dropdown);
+                    });
+                }
+            });
+        })();
+
+        // Hero Carousel
+        (function() {
+            const hero = document.querySelector('.hero');
+            const slides = Array.from(document.querySelectorAll('.hero-slide'));
+            const prevBtn = document.querySelector('.hero-control.prev');
+            const nextBtn = document.querySelector('.hero-control.next');
+            const indicators = Array.from(document.querySelectorAll('.hero-indicators button'));
+            const announcer = document.getElementById('heroSlideAnnounce');
+
+            if (!hero || slides.length === 0) return;
+
+            let current = 0;
+            let timer = null;
+            const interval = 6000;
+            const captions = [
+                'Fresh gourmet dishes.',
+                'Artisanal coffee and desserts.',
+                'Wood-fired pizza and more.'
+            ];
+
+            function showSlide(index) {
+                const total = slides.length;
+                current = (index + total) % total;
+                slides.forEach((s, i) => s.classList.toggle('active', i === current));
+                indicators.forEach((b, i) => {
+                    const active = i === current;
+                    b.classList.toggle('active', active);
+                    b.setAttribute('aria-current', active ? 'true' : 'false');
+                });
+                if (announcer) announcer.textContent = `Slide ${current + 1} of ${total}: ${captions[current] || ''}`;
+            }
+
+            function next() { showSlide(current + 1); }
+            function prev() { showSlide(current - 1); }
+
+            function start() {
+                stop();
+                timer = setInterval(next, interval);
+            }
+            function stop() {
+                if (timer) { clearInterval(timer); timer = null; }
+            }
+
+            // Controls
+            if (prevBtn) prevBtn.addEventListener('click', () => { prev(); start(); });
+            if (nextBtn) nextBtn.addEventListener('click', () => { next(); start(); });
+            indicators.forEach((btn, i) => btn.addEventListener('click', () => { showSlide(i); start(); }));
+
+            // Pause on hover/focus
+            hero.addEventListener('mouseenter', stop);
+            hero.addEventListener('mouseleave', start);
+            hero.addEventListener('focusin', stop);
+            hero.addEventListener('focusout', start);
+
+            // Pause when not visible
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) stop(); else start();
+            });
+
+            // Keyboard navigation
+            hero.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight') { next(); start(); }
+                if (e.key === 'ArrowLeft') { prev(); start(); }
+            });
+
+            // Init
+            const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            showSlide(0);
+            if (!prefersReduced) start();
+        })();
+
+        // Newsletter form handling
+        (function(){
+            const form = document.getElementById('newsletterForm');
+            const input = document.getElementById('newsletterEmail');
+            const msg = document.getElementById('newsletterMessage');
+            if (!form) return;
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                msg.textContent = '';
+                const email = (input.value || '').trim();
+                const valid = /.+@.+\..+/.test(email);
+                if (!valid) {
+                    msg.textContent = 'Please enter a valid email address.';
+                    msg.style.color = 'crimson';
+                    input.focus();
+                    return;
+                }
+                msg.textContent = 'Thanks! You are subscribed.';
+                msg.style.color = 'green';
+                form.reset();
+            });
+        })();
+
+        // Footer year
+        (function(){
+            const y = document.getElementById('year');
+            if (y) y.textContent = new Date().getFullYear();
+        })();
+
+        // Check for login success notification
+        (function() {
+            // Check if user just logged in
+            const justLoggedIn = sessionStorage.getItem('just_logged_in');
+            if (justLoggedIn === 'true') {
+                sessionStorage.removeItem('just_logged_in');
+                // Show welcome notification if user is authenticated
+                const token = localStorage.getItem('hub_access_token');
+                if (token && window.notify) {
+                    setTimeout(() => {
+                        window.notify.success('Welcome back! You are now logged in.');
+                    }, 500);
+                }
+            }
+            
+            // Check for logout notification
+            const justLoggedOut = sessionStorage.getItem('just_logged_out');
+            if (justLoggedOut === 'true') {
+                sessionStorage.removeItem('just_logged_out');
+                if (window.notify) {
+                    setTimeout(() => {
+                        window.notify.info('You have been logged out successfully.');
+                    }, 300);
+                }
+            }
+        })();
+
+        
+
+        // Product Modal Functionality
+        (function(){
+            const modal = document.getElementById('productModal');
+            if (!modal) return;
+
+            const overlay = modal.querySelector('.modal-overlay');
+            const closeBtn = modal.querySelector('.modal-close');
+            const mainImage = document.getElementById('modalMainImage');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalPrice = document.getElementById('modalPrice');
+            const modalSizes = document.getElementById('modalSizes');
+            const modalTags = document.getElementById('modalTags');
+            const modalDescription = document.getElementById('modalDescription');
+            const modalRelated = document.getElementById('modalRelated');
+            const qtyValue = modal.querySelector('.modal-qty-value');
+            const thumbs = modal.querySelectorAll('.thumb');
+            
+            // Sample product data
+            const productData = {
+                'Fresh Green Leaf Lettuce': {
+                    title: 'Fresh Green Leaf Lettuce',
+                    price: '$2.64',
+                    oldPrice: '$2.74',
+                    images: [
+                        'https://images.unsplash.com/photo-1622206151226-18ca2c9ab4a1?w=600&h=600&fit=crop',
+                        'https://images.unsplash.com/photo-1622206151226-18ca2c9ab4a1?w=600&h=600&fit=crop',
+                        'https://images.unsplash.com/photo-1622206151226-18ca2c9ab4a1?w=600&h=600&fit=crop'
+                    ],
+                    sizes: ['12oz', '24oz', '36oz'],
+                    tags: ['Fresh food', 'Organic', 'Vegetables'],
+                    description: 'Vegetables are parts of plants that are consumed by humans or other animals as food, the first meaning is still commonly used and is applied to plants collectively to ask all edible plant matter, including the flowers, fruits, stems, leaves, roots,... Read More',
+                    unit: '1 each',
+                    onSale: true
+                },
+                'Leafy Romaine Mixed Lettuce': {
+                    title: 'Leafy Romaine Mixed Lettuce',
+                    price: '$2.50',
+                    oldPrice: '$2.74',
+                    images: [
+                        'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=600&h=600&fit=crop',
+                        'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=600&h=600&fit=crop',
+                        'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=600&h=600&fit=crop'
+                    ],
+                    sizes: ['12oz', '24oz', '36oz'],
+                    tags: ['Fresh food', 'Organic', 'Vegetables'],
+                    description: 'Crisp romaine lettuce mixed with fresh greens, perfect for salads and sandwiches.',
+                    unit: '1 each',
+                    onSale: true
+                },
+                'Fresh Express Iceberg Garden Salad Blend': {
+                    title: 'Fresh Express Iceberg Garden Salad Blend',
+                    price: '$25.00 - $40.00',
+                    oldPrice: null,
+                    images: [
+                        'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=600&h=600&fit=crop',
+                        'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=600&h=600&fit=crop',
+                        'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=600&h=600&fit=crop'
+                    ],
+                    sizes: ['12oz', '24oz', '36oz'],
+                    tags: ['Fresh food', 'Organic', 'Cilantro', 'Dry Food'],
+                    description: 'Premium iceberg garden salad blend with fresh vegetables and crisp greens.',
+                    unit: '1 Bag',
+                    onSale: false
+                }
+            };
+
+            // All products for related section
+            const allProducts = [
+                { title: 'Fresh Green Leaf Lettuce', price: '$2.64', oldPrice: '$2.74', img: 'https://images.unsplash.com/photo-1622206151226-18ca2c9ab4a1?w=300&h=300&fit=crop', unit: '1 each', onSale: true },
+                { title: 'Leafy Romaine Mixed Lettuce', price: '$2.50', oldPrice: '$2.74', img: 'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=300&h=300&fit=crop', unit: '1 each', onSale: true },
+                { title: 'Fresh Express Iceberg Garden Salad Blend', price: '$25.00 - $40.00', img: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=300&h=300&fit=crop', unit: '1 Bag', onSale: false },
+                { title: 'Organic Girl Lettuce', price: '$1.50', img: 'https://images.unsplash.com/photo-1588868776867-e3c5b0d9e8be?w=300&h=300&fit=crop', unit: '1 Bag', onSale: false },
+                { title: 'Organic Spring Mix', price: '$2.60', oldPrice: '$3.00', img: 'https://images.unsplash.com/photo-1576045057995-568f588f82fb?w=300&h=300&fit=crop', unit: '1 each', onSale: true },
+                { title: 'Organic Firm Fresh White Lettuce', price: '$3.00 - $5.00', img: 'https://images.unsplash.com/photo-1588868776867-e3c5b0d9e8be?w=300&h=300&fit=crop', unit: '1 each', onSale: false }
+            ];
+
+            function openModal(productName) {
+                const data = productData[productName] || productData['Fresh Express Iceberg Garden Salad Blend'];
+                
+                // Populate modal
+                modalTitle.textContent = data.title;
+                modalPrice.innerHTML = `<span class="price-current">${data.price}</span>` + 
+                    (data.oldPrice ? `<span class="price-old">${data.oldPrice}</span>` : '');
+                
+                // Set images
+                mainImage.src = data.images[0];
+                mainImage.alt = data.title;
+                thumbs.forEach((thumb, idx) => {
+                    const img = thumb.querySelector('img');
+                    img.src = data.images[idx] || data.images[0];
+                    img.alt = `${data.title} ${idx + 1}`;
+                    thumb.classList.toggle('active', idx === 0);
+                });
+
+                // Set sizes
+                modalSizes.innerHTML = data.sizes.map(size => 
+                    `<button class="size-btn ${size === '12oz' ? 'active' : ''}" data-size="${size}">${size}</button>`
+                ).join('');
+
+                // Set tags
+                modalTags.innerHTML = data.tags.map(tag => `<span>${tag}</span>`).join('');
+
+                // Set description
+                modalDescription.textContent = data.description;
+
+                // Set related products (random 6)
+                const shuffled = [...allProducts].sort(() => 0.5 - Math.random()).slice(0, 6);
+                modalRelated.innerHTML = shuffled.map(prod => `
+                    <div class="related-mini-card" data-product="${prod.title}">
+                        <div class="related-mini-img">
+                            ${prod.onSale ? '<span class="related-mini-badge">ON SALE</span>' : ''}
+                            <img src="${prod.img}" alt="${prod.title}" loading="lazy">
+                        </div>
+                        <div class="related-mini-price">
+                            <span class="price-current">${prod.price}</span>
+                            ${prod.oldPrice ? `<span class="price-old">${prod.oldPrice}</span>` : ''}
+                        </div>
+                        <h4 class="related-mini-title">${prod.title}</h4>
+                        <p class="related-mini-unit">${prod.unit}</p>
+                    </div>
+                `).join('');
+
+                // Reset quantity
+                qtyValue.textContent = '1';
+
+                // Show modal
+                modal.hidden = false;
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeModal() {
+                modal.hidden = true;
+                document.body.style.overflow = '';
+            }
+
+            // Store current product data
+            let currentProduct = null;
+
+            // Event listeners
+            document.addEventListener('click', (e) => {
+                // Open modal when clicking product card
+                const card = e.target.closest('.product-shop-card');
+                if (card) {
+                    const titleEl = card.querySelector('.product-shop-title');
+                    if (titleEl) {
+                        const productName = titleEl.textContent.trim();
+                        currentProduct = productData[productName] || productData['Fresh Express Iceberg Garden Salad Blend'];
+                        openModal(productName);
+                    }
+                }
+
+                // Close modal
+                if (e.target === overlay || e.target === closeBtn || e.target.closest('.modal-close')) {
+                    closeModal();
+                }
+
+                // Add to Cart from modal
+                const addCartBtn = e.target.closest('.modal-add-cart');
+                if (addCartBtn && modal.contains(addCartBtn) && currentProduct) {
+                    const qty = parseInt(qtyValue.textContent) || 1;
+                    const selectedSize = modal.querySelector('.size-btn.active')?.dataset.size || '12oz';
+                    
+                    if (window.hubCart && typeof window.hubCart.addToCartFromButton === 'function') {
+                        // Create a temporary button element with product data
+                        const tempBtn = document.createElement('button');
+                        tempBtn.setAttribute('data-product', currentProduct.title);
+                        tempBtn.setAttribute('data-price', parseFloat(currentProduct.price.replace(/[^0-9.]/g, '')));
+                        tempBtn.setAttribute('data-variant', selectedSize);
+                        
+                        // Add to cart multiple times for quantity
+                        for (let i = 0; i < qty; i++) {
+                            window.hubCart.addToCartFromButton(tempBtn);
+                        }
+                        
+                        // Show success feedback
+                        addCartBtn.innerHTML = '<i class="fa fa-check"></i> Added!';
+                        addCartBtn.style.background = '#28a745';
+                        setTimeout(() => {
+                            addCartBtn.innerHTML = '<i class="fa fa-shopping-bag"></i> Add to Cart';
+                            addCartBtn.style.background = '';
+                        }, 2000);
+                    } else {
+                        alert(`Added ${qty}x ${currentProduct.title} (${selectedSize}) to cart!`);
+                    }
+                }
+
+                // Add to Wishlist from modal
+                const wishlistBtn = e.target.closest('.modal-action-btn');
+                if (wishlistBtn && modal.contains(wishlistBtn) && currentProduct) {
+                    const icon = wishlistBtn.querySelector('i');
+                    if (icon && icon.classList.contains('fa-heart')) {
+                        const selectedSize = modal.querySelector('.size-btn.active')?.dataset.size || '12oz';
+                        
+                        if (window.hubWishlist && typeof window.hubWishlist.addToWishlistFromButton === 'function') {
+                            // Create a temporary button element with product data
+                            const tempBtn = document.createElement('button');
+                            tempBtn.setAttribute('data-product', currentProduct.title);
+                            tempBtn.setAttribute('data-price', parseFloat(currentProduct.price.replace(/[^0-9.]/g, '')));
+                            tempBtn.setAttribute('data-variant', selectedSize);
+                            
+                            window.hubWishlist.addToWishlistFromButton(tempBtn);
+                            
+                            // Show success feedback
+                            icon.classList.remove('fa-heart');
+                            icon.classList.add('fa-heart', 'fa-solid');
+                            wishlistBtn.style.color = '#e74c3c';
+                            setTimeout(() => {
+                                icon.classList.remove('fa-solid');
+                                icon.classList.add('fa-heart');
+                                wishlistBtn.style.color = '';
+                            }, 2000);
+                        } else {
+                            alert(`Added ${currentProduct.title} (${selectedSize}) to wishlist!`);
+                        }
+                    }
+                }
+
+                // Thumbnail click
+                const thumb = e.target.closest('.thumb');
+                if (thumb && modal.contains(thumb)) {
+                    const idx = parseInt(thumb.dataset.index);
+                    const allThumbs = modal.querySelectorAll('.thumb');
+                    allThumbs.forEach(t => t.classList.remove('active'));
+                    thumb.classList.add('active');
+                    const imgSrc = thumb.querySelector('img').src;
+                    mainImage.src = imgSrc;
+                }
+
+                // Size selection
+                const sizeBtn = e.target.closest('.size-btn');
+                if (sizeBtn && modal.contains(sizeBtn)) {
+                    modal.querySelectorAll('.size-btn').forEach(btn => btn.classList.remove('active'));
+                    sizeBtn.classList.add('active');
+                }
+
+                // Quantity buttons
+                const qtyBtn = e.target.closest('.modal-qty-btn');
+                if (qtyBtn && modal.contains(qtyBtn)) {
+                    let qty = parseInt(qtyValue.textContent);
+                    if (qtyBtn.dataset.action === 'increase') {
+                        qty++;
+                    } else if (qtyBtn.dataset.action === 'decrease' && qty > 1) {
+                        qty--;
+                    }
+                    qtyValue.textContent = qty;
+                }
+
+                // Related product click
+                const relatedCard = e.target.closest('.related-mini-card');
+                if (relatedCard && modal.contains(relatedCard)) {
+                    const productName = relatedCard.dataset.product;
+                    openModal(productName);
+                }
+            });
+
+            // Close on Escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && !modal.hidden) {
+                    closeModal();
+                }
+            });
+
+            // Gallery navigation
+            const prevBtn = modal.querySelector('.gallery-prev');
+            const nextBtn = modal.querySelector('.gallery-next');
+            let currentImageIndex = 0;
+
+            if (prevBtn) prevBtn.addEventListener('click', () => {
+                currentImageIndex = (currentImageIndex - 1 + 3) % 3;
+                updateGalleryImage();
+            });
+
+            if (nextBtn) nextBtn.addEventListener('click', () => {
+                currentImageIndex = (currentImageIndex + 1) % 3;
+                updateGalleryImage();
+            });
+
+            function updateGalleryImage() {
+                const thumbs = modal.querySelectorAll('.thumb');
+                thumbs.forEach((thumb, idx) => {
+                    thumb.classList.toggle('active', idx === currentImageIndex);
+                });
+                const activeThumb = thumbs[currentImageIndex];
+                if (activeThumb) {
+                    mainImage.src = activeThumb.querySelector('img').src;
+                }
+            }
+        })();
+
+        // Product skeletons: remove after load
+        (function(){
+            const fronts = document.querySelectorAll('.card-front');
+            fronts.forEach(f => f.classList.add('skeleton'));
+            const done = () => fronts.forEach(f => f.classList.remove('skeleton'));
+            window.addEventListener('load', ()=> setTimeout(done, 600));
+        })();
+
+        // Handle role-based navigation and UI visibility
+        (function() {
+            function getUserRole() {
+                const token = localStorage.getItem('hub_access_token');
+                if (!token) return null;
+                try {
+                    const parts = token.split('.');
+                    const decoded = JSON.parse(atob(parts[1]));
+                    return decoded.role;
+                } catch (e) {
+                    return null;
+                }
+            }
+
+            const role = getUserRole();
+            
+            // Redirect admin users away from customer homepage
+            if (role === 'admin') {
+                console.log('🔒 Admin detected on customer homepage - redirecting to admin dashboard');
+                window.location.href = 'admin_dashboard.html';
+                return;
+            }
+            
+            // Show dashboard button only for sellers/riders (NOT admin)
+            const dashboardBtn = document.getElementById('dashboardBtn');
+            if (dashboardBtn && role && ['seller', 'rider'].includes(role)) {
+                dashboardBtn.style.display = 'inline-block';
+            }
+            
+            // Hide cart and wishlist for sellers/riders (they should use dashboard)
+            if (role === 'seller' || role === 'rider') {
+                const cartBtn = document.getElementById('cartBtn');
+                const wishlistBtn = document.getElementById('wishlistBtn');
+                if (cartBtn) cartBtn.style.display = 'none';
+                if (wishlistBtn) wishlistBtn.style.display = 'none';
+            }
+        })();
+
+        // Analytics hooks (console stub)
+        (function(){
+            document.body.addEventListener('click', (e)=>{
+                const el = e.target.closest('[data-analytics]');
+                if (!el) return;
+                const payload = {
+                    action: el.getAttribute('data-analytics'),
+                    product: el.getAttribute('data-product') || null,
+                    ts: Date.now()
+                };
+                console.log('[analytics]', payload);
+            });
+        })();
+
+        // ============== Best Selling Products Dynamic System ==============
+        (function() {
+            let allBestSellers = [];
+            let currentCategory = 'all';
+            let currentTimeframe = 'all';
+            
+            const bestsellerGrid = document.getElementById('bestsellerProductsGrid');
+            const loadingState = document.getElementById('bestsellerLoadingState');
+            const emptyState = document.getElementById('bestsellerEmptyState');
+            const timeframeSelect = document.getElementById('bestseller-timeframe');
+            const categoryButtons = document.querySelectorAll('.category-filter-btn');
+            
+            // Load best sellers from API
+            async function loadBestSellers() {
+                try {
+                    showLoading();
+                    window.showLoader('Loading best sellers...');
+                    
+                    const params = new URLSearchParams({
+                        limit: 12,
+                        timeframe: currentTimeframe
+                    });
+                    
+                    if (currentCategory !== 'all') {
+                        params.append('category', currentCategory);
+                    }
+                    
+                    const response = await fetch(`/api/products/best-sellers?${params}`);
+                    
+                    if (!response.ok) {
+                        console.warn('Best sellers API returned:', response.status);
+                        showEmpty();
+                        return;
+                    }
+                    
+                    const data = await response.json();
+                    
+                    if (data.success && data.data) {
+                        // Handle both 'products' and 'items' for backward compatibility
+                        allBestSellers = data.data.products || data.data.items || [];
+                        renderBestSellers();
+                    } else {
+                        showEmpty();
+                    }
+                } catch (error) {
+                    console.error('Error loading best sellers:', error);
+                    showEmpty();
+                } finally {
+                    window.hideLoader();
+                }
+            }
+            
+            // Render best seller products
+            function renderBestSellers() {
+                if (allBestSellers.length === 0) {
+                    showEmpty();
+                    return;
+                }
+                
+                hideAllStates();
+                bestsellerGrid.style.display = 'grid';
+                bestsellerGrid.innerHTML = '';
+                
+                allBestSellers.forEach(product => {
+                    const card = createBestSellerCard(product);
+                    bestsellerGrid.appendChild(card);
+                });
+            }
+            
+            // Create product card HTML
+            function createBestSellerCard(product) {
+                const card = document.createElement('div');
+                card.className = 'product-shop-card';
+                
+                // Add bestseller badge
+                const isBestSeller = product.total_sold >= 10; // Threshold for badge
+                const badgeHtml = isBestSeller ? '<span class="sale-badge" style="background: #ffc107;">BEST SELLER</span>' : '';
+                
+                // Category badge
+                const categoryColor = getCategoryColor(product.category_normalized);
+                const categoryBadge = `<span class="category-badge" style="position: absolute; top: 50px; left: 10px; background: ${categoryColor}; color: white; padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; z-index: 2;">${product.category_normalized}</span>`;
+                
+                // Expiry date badge for food products
+                let expiryBadge = '';
+                if (product.expiry_date) {
+                    const expiryDate = new Date(product.expiry_date);
+                    const today = new Date();
+                    const daysUntilExpiry = Math.floor((expiryDate - today) / (1000 * 60 * 60 * 24));
+                    
+                    if (daysUntilExpiry >= 0 && daysUntilExpiry <= 7) {
+                        expiryBadge = `<span class="expiry-badge" style="position: absolute; top: 10px; right: 10px; background: #e74c3c; color: white; padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; z-index: 2;">Expires ${daysUntilExpiry === 0 ? 'Today' : 'in ' + daysUntilExpiry + 'd'}</span>`;
+                    }
+                }
+                
+                // Date info for food products
+                let dateInfo = '';
+                if (product.manufacture_date || product.expiry_date) {
+                    dateInfo = '<div style="font-size: 10px; color: #888; margin-top: 6px; line-height: 1.4;">';
+                    if (product.manufacture_date) {
+                        const mfgDate = new Date(product.manufacture_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                        dateInfo += `<div><i class="fa fa-calendar" style="font-size: 9px;"></i> Mfg: ${mfgDate}</div>`;
+                    }
+                    if (product.expiry_date) {
+                        const expDate = new Date(product.expiry_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                        dateInfo += `<div><i class="fa fa-clock" style="font-size: 9px;"></i> Exp: ${expDate}</div>`;
+                    }
+                    dateInfo += '</div>';
+                }
+                
+                card.innerHTML = `
+                    ${badgeHtml}
+                    ${expiryBadge}
+                    ${categoryBadge}
+                    <div class="product-shop-image">
+                        <img src="${product.img_url}" alt="${product.title}" loading="lazy" onerror="this.src='/static/images/default-product.jpg'">
+                        <button class="btn-view-circle" aria-label="View product" onclick="viewProduct(${product.id})">
+                            <i class="fa fa-eye"></i>
+                        </button>
+                    </div>
+                    <div class="product-shop-info">
+                        <div class="product-shop-price">
+                            <span class="price-current">₱${parseFloat(product.price).toFixed(2)}</span>
+                        </div>
+                        <h3 class="product-shop-title">${product.title}</h3>
+                        <p class="product-shop-unit" style="color: #666; font-size: 13px;">
+                            <i class="fa fa-store" style="color: #28a745;"></i> ${product.seller_name}
+                        </p>
+                        ${dateInfo}
+                        <div class="product-stats" style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; padding-top: 8px; border-top: 1px solid #eee; font-size: 12px; color: #666;">
+                            <span title="Total sold">
+                                <i class="fa fa-shopping-cart" style="color: #28a745;"></i> ${product.total_sold} sold
+                            </span>
+                            <span title="Stock available" style="${product.stock < 10 ? 'color: #ff6b6b;' : ''}">
+                                <i class="fa fa-box"></i> ${product.stock} left
+                            </span>
+                        </div>
+                        <button class="btn-add-cart" onclick="addToCartFromBestSeller(${product.id}, '${product.title.replace(/'/g, "\\'")}', ${product.price})" style="margin-top: 10px; width: 100%; padding: 10px; background: #28a745; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: background 0.3s;" onmouseover="this.style.background='#218838'" onmouseout="this.style.background='#28a745'">
+                            <i class="fa fa-cart-plus"></i> Add to Cart
+                        </button>
+                    </div>
+                `;
+                
+                return card;
+            }
+            
+            // Get category color
+            function getCategoryColor(category) {
+                const colors = {
+                    'Baking': '#e91e63',
+                    'Coffee & Tea': '#795548',
+                    'Snacks': '#ff9800',
+                    'Specialty': '#9c27b0',
+                    'Organic': '#4caf50',
+                    'Meal Kits': '#ff5722'
+                };
+                return colors[category] || '#607d8b';
+            }
+            
+            // Show/hide states
+            function showLoading() {
+                bestsellerGrid.style.display = 'none';
+                emptyState.style.display = 'none';
+                loadingState.style.display = 'block';
+            }
+            
+            function showEmpty() {
+                bestsellerGrid.style.display = 'none';
+                loadingState.style.display = 'none';
+                emptyState.style.display = 'block';
+            }
+            
+            function hideAllStates() {
+                bestsellerGrid.style.display = 'none';
+                loadingState.style.display = 'none';
+                emptyState.style.display = 'none';
+            }
+            
+            // Category filter handler
+            categoryButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // Update active state
+                    categoryButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    
+                    // Update current category
+                    currentCategory = button.dataset.category;
+                    
+                    // Reload products
+                    loadBestSellers();
+                });
+            });
+            
+            // Timeframe filter handler
+            if (timeframeSelect) {
+                timeframeSelect.addEventListener('change', (e) => {
+                    currentTimeframe = e.target.value;
+                    loadBestSellers();
+                });
+            }
+            
+            // Initial load
+            loadBestSellers();
+            
+            // Auto-refresh every 5 minutes
+            setInterval(loadBestSellers, 300000);
+            
+        })();
+        
+        // Global function for adding to cart from best sellers
+        window.addToCartFromBestSeller = function(productId, productTitle, price) {
+            // Check if user is logged in
+            const token = localStorage.getItem('hub_access_token');
+            
+            if (!token) {
+                alert('Please login to add items to cart');
+                window.location.href = 'loginregister.html';
+                return;
+            }
+            
+            // Check if product has variations first
+            window.showLoader('Checking product options...');
+            fetch(`/api/products/${productId}/variations`)
+            .then(response => response.json())
+            .then(varData => {
+                if (varData.success && varData.data && varData.data.length > 0) {
+                    // Product has variations - redirect to shop page to select
+                    window.hideLoader();
+                    alert('This product has multiple options. Please select your preferred option.');
+                    window.location.href = `shop.html?product=${productId}`;
+                    return;
+                }
+                
+                // No variations, proceed with add to cart
+                window.showLoader('Adding to cart...');
+                return fetch('/api/cart', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        product_id: productId,
+                        quantity: 1,
+                        variation_id: null
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(`${productTitle} added to cart!`);
+                        // Update cart badge if it exists
+                        updateCartBadge();
+                    } else {
+                        alert(data.message || 'Failed to add to cart');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error adding to cart:', error);
+                    alert('Error adding to cart. Please try again.');
+                })
+                .finally(() => {
+                    window.hideLoader();
+                });
+            })
+            .catch(error => {
+                console.error('Error checking variations:', error);
+                // If variation check fails, try to add anyway
+                window.showLoader('Adding to cart...');
+                fetch('/api/cart', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        product_id: productId,
+                        quantity: 1
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(`${productTitle} added to cart!`);
+                        updateCartBadge();
+                    } else {
+                        alert(data.message || 'Failed to add to cart');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error adding to cart:', error);
+                    alert('Error adding to cart. Please try again.');
+                })
+                .finally(() => {
+                    window.hideLoader();
+                });
+            });
+        };
+        
+        // Global function for viewing product (placeholder)
+        window.viewProduct = function(productId) {
+            // Redirect to shop page with product ID
+            window.location.href = `shop.html?product=${productId}`;
+        };
+        
+        // Update cart badge (if cart badge element exists)
+        window.updateCartBadge = function() {
+            const token = localStorage.getItem('hub_access_token');
+            if (!token) return;
+            
+            fetch('/api/cart', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.data && data.data.items) {
+                    const badge = document.querySelector('#cartBtn .badge');
+                    if (badge) {
+                        const count = data.data.items.reduce((sum, item) => sum + (item.quantity || 0), 0);
+                        badge.textContent = count;
+                    }
+                }
+            })
+            .catch(error => console.error('Error updating cart badge:', error));
+        };
+    </script>
+</body>
+</html>

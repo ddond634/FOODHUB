@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Redirect</title>
+</head>
+<body>
+    <div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; font-family: Arial, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+        <div style="text-align: center; background: white; padding: 40px; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+            <h1 style="margin: 0 0 20px 0; color: #333;">🔄 Redirecting...</h1>
+            <p style="color: #666; margin: 0;">Taking you to your dashboard</p>
+        </div>
+    </div>
+
+    <script>
+        // Get user info from token
+        function getUserRole() {
+            const token = localStorage.getItem('hub_access_token');
+            if (!token) return null;
+            
+            try {
+                const parts = token.split('.');
+                const decoded = JSON.parse(atob(parts[1]));
+                return decoded.role;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        // Redirect based on role
+        const role = getUserRole();
+        
+        if (!role) {
+            // Not logged in
+            window.location.href = '/loginregister.html';
+        } else if (role === 'seller') {
+            window.location.href = '/seller_dashboard.html';
+        } else if (role === 'rider') {
+            window.location.href = '/rider_dashboard.html';
+        } else if (role === 'admin') {
+            window.location.href = '/admin_dashboard.html';
+        } else {
+            // Customer - go to account page
+            window.location.href = '/account.html';
+        }
+    </script>
+</body>
+</html>

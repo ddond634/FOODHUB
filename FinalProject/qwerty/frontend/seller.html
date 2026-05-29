@@ -1,0 +1,1843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grocery Shop - Hub</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛒</text></svg>">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <meta name="description" content="The grocery shop is the best shop around the city. Get groceries delivered.">
+</head>
+<body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <!-- Navbar -->
+    <div class="navbar" id="navbar">
+        <div class="logo">
+            <a href="index.html">Hub</a>
+        </div>
+
+        <div class="search-bar">
+            <input type="text" id="navbarSearch" placeholder="Search in this shop...">
+            <button id="navbarSearchBtn"><i class="fa fa-search"></i></button>
+        </div>
+
+        <div class="categories-dropdown">
+            <button id="categoriesToggle" class="categories-toggle" aria-expanded="false" aria-controls="categoriesPanel" aria-haspopup="true" title="Categories">
+                <i class="fa fa-th-large" aria-hidden="true"></i>
+                <i class="fa fa-caret-down caret" aria-hidden="true"></i>
+            </button>
+
+            <div id="categoriesPanel" class="categories-panel" hidden>
+                <a href="shop.html?category=Baking" class="panel-item" data-category="Baking">
+                    <i class="fa fa-bread-slice" aria-hidden="true"></i>
+                    <span>Baking</span>
+                </a>
+                <a href="shop.html?category=Coffee & Tea" class="panel-item" data-category="Coffee & Tea">
+                    <i class="fa fa-coffee" aria-hidden="true"></i>
+                    <span>Coffee & Tea</span>
+                </a>
+                <a href="shop.html?category=Snacks" class="panel-item" data-category="Snacks">
+                    <i class="fa fa-cookie-bite" aria-hidden="true"></i>
+                    <span>Snacks</span>
+                </a>
+                <a href="shop.html?category=Specialty" class="panel-item" data-category="Specialty">
+                    <i class="fa fa-globe" aria-hidden="true"></i>
+                    <span>Specialty</span>
+                </a>
+                <a href="shop.html?category=Organic" class="panel-item" data-category="Organic">
+                    <i class="fa fa-leaf" aria-hidden="true"></i>
+                    <span>Organic</span>
+                </a>
+                <a href="#mealkits" class="panel-item" data-target="mealkits">
+                    <i class="fa fa-box-open" aria-hidden="true"></i>
+                    <span>Meal Kits</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="nav-icons">
+            <a href="wishlist.html" id="wishlistBtn" title="Wishlist" class="icon-with-badge">
+                <i class="fa fa-heart"></i>
+                <span class="badge">3</span>
+            </a>
+            <a href="cart.html" id="cartBtn" title="Shopping Cart" class="icon-with-badge">
+                <i class="fa fa-shopping-cart"></i>
+                <span class="badge">2</span>
+            </a>
+            <a href="account.html" title="Account"><i class="fa fa-user"></i></a>
+            
+            <div id="wishlistDropdown" class="cart-dropdown" hidden>
+                <div class="dropdown-header">Recently Added to Wishlist</div>
+                <div class="dropdown-items">
+                    <div class="dropdown-item">
+                        <img src="https://source.unsplash.com/60x60/?burger" alt="Product" loading="lazy">
+                        <div class="item-details">
+                            <p class="item-name">Cheeseburger Deluxe</p>
+                            <p class="item-price">₱199</p>
+                        </div>
+                    </div>
+                    <div class="dropdown-item">
+                        <img src="https://source.unsplash.com/60x60/?pizza" alt="Product" loading="lazy">
+                        <div class="item-details">
+                            <p class="item-name">Supreme Pizza</p>
+                            <p class="item-price">₱299</p>
+                        </div>
+                    </div>
+                    <div class="dropdown-item">
+                        <img src="https://source.unsplash.com/60x60/?coffee" alt="Product" loading="lazy">
+                        <div class="item-details">
+                            <p class="item-name">Premium Coffee Blend</p>
+                            <p class="item-price">₱150</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="dropdown-footer">
+                    <p class="items-count">3 items in wishlist</p>
+                    <button class="view-btn">View My Wishlist</button>
+                </div>
+            </div>
+
+            <div id="cartDropdown" class="cart-dropdown" hidden>
+                <div class="dropdown-header">Recently Added Products</div>
+                <div class="dropdown-items">
+                    <div class="dropdown-item">
+                        <img src="https://source.unsplash.com/60x60/?milktea" alt="Product" loading="lazy">
+                        <div class="item-details">
+                            <p class="item-name">Nescafe Ready to Drink Cappuccino...</p>
+                            <p class="item-price">₱1,128</p>
+                        </div>
+                    </div>
+                    <div class="dropdown-item">
+                        <img src="https://source.unsplash.com/60x60/?mocha" alt="Product" loading="lazy">
+                        <div class="item-details">
+                            <p class="item-name">Nescafe Ready to Drink Mocha 220m...</p>
+                            <p class="item-price">₱1,128</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="dropdown-footer">
+                    <p class="items-count">227 More Products In Cart</p>
+                    <a class="view-btn" href="cart.html">View My Shopping Cart</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Seller Hero Banner -->
+    <header class="seller-hero" id="main" role="banner" style="background-image: url('https://source.unsplash.com/1200x300/?grocery,store');">
+        <div class="seller-hero-inner">
+            <h1 id="heroSellerName">Grocery Shop</h1>
+            <nav class="breadcrumb" aria-label="Breadcrumb">
+                <ol>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="shop.html">Shops</a></li>
+                    <li aria-current="page" id="breadcrumbSellerName">Grocery Shop</li>
+                </ol>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Seller Page Content -->
+    <section class="seller-page-section">
+        <div class="seller-page-container">
+            <!-- Left Sidebar: Seller Info -->
+            <aside class="seller-sidebar">
+                <div class="seller-card">
+                    <div class="seller-logo" id="sellerLogoContainer">
+                        <i class="fa fa-store"></i>
+                    </div>
+                    <h2 class="seller-title" id="sellerTitle">Grocery Shop</h2>
+                    <p class="seller-description" id="sellerDescription">The grocery shop is the best shop around the city. Get groceries delivered..</p>
+                    
+                    <!-- Message Seller primary action -->
+                    <button class="seller-contact-btn" onclick="openMessenger()" aria-label="Message this seller" 
+                            style="margin-top:10px; width:100%; padding:10px 14px; border:none; border-radius:8px; background:#3498db; color:#fff; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">
+                        <i class="fa fa-message"></i>
+                        Message Seller
+                    </button>
+                    
+                    <div class="seller-social">
+                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+                        <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
+                    </div>
+
+                    <!-- Category Tag -->
+                    <div id="categoryTag" style="display: none; margin: 15px 0; padding: 8px 12px; background: #e3f2fd; border-radius: 20px; text-align: center;">
+                        <i class="fa fa-tag" style="color: #1976d2; margin-right: 5px;"></i>
+                        <span style="color: #1565c0; font-weight: 600; font-size: 13px;">Category</span>
+                    </div>
+
+                    <div class="seller-info-section">
+                        <div class="seller-info-item" id="addressSection">
+                            <i class="fa fa-map-marker-alt"></i>
+                            <div>
+                                <strong>Address:</strong>
+                                <p id="sellerAddress">Not provided</p>
+                            </div>
+                        </div>
+                        <div class="seller-info-item" id="phoneSection" style="display: none;">
+                            <i class="fa fa-phone"></i>
+                            <div>
+                                <strong>Phone:</strong>
+                                <p id="sellerPhone"></p>
+                            </div>
+                        </div>
+                        <div class="seller-info-item" id="websiteSection" style="display: none;">
+                            <i class="fa fa-globe"></i>
+                            <div>
+                                <strong>Website:</strong>
+                                <p id="sellerWebsite"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Right Side: All Products -->
+            <div class="seller-products-main">
+                <div class="seller-products-header">
+                    <h2>All Products</h2>
+                    <div style="display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap; justify-content: flex-end;">
+                        <select id="productSort" 
+                                style="padding: 10px 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; background: white; cursor: pointer;">
+                            <option value="newest">Newest First</option>
+                            <option value="price-low">Price: Low to High</option>
+                            <option value="price-high">Price: High to Low</option>
+                            <option value="name">Name: A-Z</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="seller-products-grid" id="sellerProductsGrid">
+                    <!-- Products will be loaded dynamically -->
+                    <p style="text-align: center; padding: 40px; color: #999;">Loading products...</p>
+                </div>
+                
+                <!-- Pagination -->
+                <div id="productsPagination" style="display: none; margin-top: 30px; text-align: center;">
+                    <div style="display: inline-flex; gap: 8px; align-items: center;">
+                        <button id="prevPage" style="padding: 8px 16px; border: 1px solid #ddd; border-radius: 6px; background: white; cursor: pointer; font-weight: 600;">
+                            <i class="fa fa-chevron-left"></i>
+                        </button>
+                        <span id="pageInfo" style="padding: 0 16px; font-weight: 600; color: #555;">Page 1 of 1</span>
+                        <button id="nextPage" style="padding: 8px 16px; border: 1px solid #ddd; border-radius: 6px; background: white; cursor: pointer; font-weight: 600;">
+                            <i class="fa fa-chevron-right"></i>
+                        </button>
+                    </div>
+                    <p style="margin-top: 12px; color: #999; font-size: 14px;" id="resultsCount">Showing 0 products</p>
+                </div>
+            </div>
+        </div>
+    </section>
+                    <!-- Product Detail Modal -->
+    <div id="productModal" class="product-modal" hidden>
+        <div class="modal-overlay"></div>
+        <div class="modal-container">
+            <button class="modal-close" aria-label="Close modal"><i class="fa fa-times"></i></button>
+            
+            <div class="modal-content">
+                <!-- Left side: Image with thumbnails -->
+                <div class="modal-gallery">
+                    <div class="gallery-thumbnails" id="modalThumbnails">
+                        <!-- Thumbnails will be dynamically generated -->
+                    </div>
+                    <div class="gallery-main" style="position: relative;">
+                        <button class="gallery-arrow gallery-prev" aria-label="Previous image" id="modalPrevBtn" style="display:none;">
+                            <i class="fa fa-chevron-left"></i>
+                        </button>
+                        <img id="modalMainImage" src="" alt="Product image" loading="lazy">
+                        <span class="sale-badge sale-badge-modal" data-modal-sale-badge="" style="display:none;"></span>
+                        <button class="gallery-arrow gallery-next" aria-label="Next image" id="modalNextBtn" style="display:none;">
+                            <i class="fa fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Right side: Product Info -->
+                <div class="modal-info">
+                    <div class="modal-info-scroll">
+                        <h2 id="modalTitle" class="modal-product-title"></h2>
+                        <div id="modalPrice" class="modal-product-price"></div>
+                        
+                        <div id="modalVariationsSection" class="modal-options" style="display: none;">
+                            <label class="modal-label">Select Option:</label>
+                            <div id="modalVariations" class="variation-options"></div>
+                        </div>
+
+                        <div class="modal-quantity">
+                            <button class="modal-qty-btn" data-action="decrease" aria-label="Decrease quantity">-</button>
+                            <span class="modal-qty-value">1</span>
+                            <button class="modal-qty-btn" data-action="increase" aria-label="Increase quantity">+</button>
+                        </div>
+
+                        <button class="modal-add-cart">
+                            <i class="fa fa-shopping-bag"></i> Add to Cart
+                        </button>
+
+                        <div class="modal-actions">
+                            <button class="modal-action-btn" id="messageSellerButton" onclick="handleMessageSeller()" style="display:none;">
+                                <i class="fa fa-comment"></i> Message Seller
+                            </button>
+                            <button class="modal-action-btn">
+                                <i class="fa fa-heart"></i> Wishlist
+                            </button>
+                        </div>
+
+                        <div class="modal-details">
+                            <h3>Product Details:</h3>
+                            <p id="modalDescription"></p>
+                            <div id="modalStock" class="modal-stock-info"></div>
+                            <div id="modalSeller" class="modal-seller-info"></div>
+                        </div>
+
+                        <div class="modal-related">
+                            <h3>Related products</h3>
+                            <div id="modalRelated" class="related-products-mini"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Customer Chat Modal (triggered from product page) -->
+    <div id="customerChatModal" class="modal">
+        <div class="modal-content" style="max-width: 500px; height: 600px; padding: 0; display: flex; flex-direction: column;">
+            <!-- Chat Header -->
+            <div style="padding: 20px 24px; border-bottom: 1px solid #e0e0e0; background: white;">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, #27ae60, #2ecc71); display: flex; align-items: center; justify-content: center; color: white; font-size: 24px;">
+                            <i class="fa fa-store"></i>
+                        </div>
+                        <div>
+                            <h3 style="margin: 0 0 4px 0; font-size: 18px; color: #2c3e50;">Grocery Shop</h3>
+                            <p style="margin: 0; font-size: 13px; color: #666; display: flex; align-items: center; gap: 6px;">
+                                <span style="width: 8px; height: 8px; border-radius: 50%; background: #27ae60;"></span>
+                                Usually responds within hours
+                            </p>
+                        </div>
+                    </div>
+                    <span class="modal-close" onclick="closeModal('customerChatModal')">&times;</span>
+                </div>
+            </div>
+
+            <!-- Chat Messages -->
+            <div id="customerChatMessages" style="flex: 1; overflow-y: auto; overflow-x: hidden; padding: 24px; background: #f8f9fa; display: flex; flex-direction: column; gap: 16px; scroll-behavior: smooth;">
+                <!-- Welcome Message -->
+                <div style="align-self: center; max-width: 100%;">
+                    <div style="background: #e3f2fd; color: #1976d2; padding: 12px 20px; border-radius: 8px; font-size: 13px; text-align: center;">
+                        <i class="fa fa-circle-info"></i> Start a conversation with Grocery Shop
+                    </div>
+                </div>
+                
+                <!-- Seller welcome message -->
+                <div style="display: flex; gap: 12px; max-width: 70%; align-self: flex-start;">
+                    <div style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #27ae60, #2ecc71); display: flex; align-items: center; justify-content: center; color: white; font-size: 16px; flex-shrink: 0;">
+                        <i class="fa fa-store"></i>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                        <div style="background: white; padding: 12px 16px; border-radius: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.08);">
+                            <p style="margin: 0; font-size: 14px; line-height: 1.5; color: #2c3e50;">
+                                Hello! 👋 Welcome to Grocery Shop. How can I help you today?
+                            </p>
+                        </div>
+                        <span style="font-size: 11px; color: #999; padding: 0 4px;">Just now</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Action Buttons -->
+            <div style="padding: 12px 24px; border-top: 1px solid #e0e0e0; background: white;">
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <button onclick="insertQuickMessage('Hi! I\'m interested in your products.')" style="padding: 8px 14px; background: #f0f0f0; border: 1px solid #ddd; border-radius: 20px; cursor: pointer; font-size: 13px; color: #2c3e50; transition: all 0.2s;">
+                        👋 Say Hello
+                    </button>
+                    <button onclick="insertQuickMessage('Do you have this product in stock?')" style="padding: 8px 14px; background: #f0f0f0; border: 1px solid #ddd; border-radius: 20px; cursor: pointer; font-size: 13px; color: #2c3e50; transition: all 0.2s;">
+                        📦 Check Stock
+                    </button>
+                    <button onclick="insertQuickMessage('What are your delivery options?')" style="padding: 8px 14px; background: #f0f0f0; border: 1px solid #ddd; border-radius: 20px; cursor: pointer; font-size: 13px; color: #2c3e50; transition: all 0.2s;">
+                        🚚 Delivery Info
+                    </button>
+                </div>
+            </div>
+
+            <!-- Chat Input -->
+            <div style="border-top: 1px solid #e0e0e0; background: white; padding: 16px 24px;">
+                <div style="display: flex; gap: 12px; align-items: center;">
+                    <button onclick="attachFile()" style="width: 40px; height: 40px; border-radius: 50%; border: 1px solid #ddd; background: white; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #666; transition: all 0.2s;" title="Attach file">
+                        <i class="fa fa-paperclip"></i>
+                    </button>
+                    <input type="text" id="customerMessageInput" placeholder="Type your message..." style="flex: 1; padding: 12px 16px; border: 1px solid #ddd; border-radius: 24px; font-size: 14px; outline: none; transition: border-color 0.2s;" onkeypress="handleCustomerMessageKeyPress(event)">
+                    <button onclick="sendCustomerMessage()" style="padding: 12px 24px; background: #3498db; color: white; border: none; border-radius: 24px; cursor: pointer; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: all 0.2s;">
+                        <i class="fa fa-paper-plane"></i> Send
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Messages Button -->
+    <button class="messages-btn" aria-haspopup="true" aria-expanded="false" aria-controls="messagesPanel" onclick="toggleMessagesPanel()">
+        <i class="fa fa-message"></i>
+        <span class="messages-badge" id="messagesBadge" style="display:none;">0</span>
+    </button>
+    
+    <div id="messagesPanel" class="messages-panel" hidden>
+        <div class="messages-header">
+            <button class="back-to-list" onclick="backToConversationsList()" style="display:none;">
+                <i class="fa fa-arrow-left"></i>
+            </button>
+            <h3 id="messagesPanelTitle">Messages</h3>
+            <button class="close-messages" aria-label="Close messages panel" onclick="closeMessagesPanel()">
+                <i class="fa fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="messages-search" id="messagesSearchBar">
+            <input type="text" id="messagesSearch" placeholder="Search name" onkeyup="filterMessageConversations()">
+        </div>
+        
+        <div class="messages-list" id="messagesList">
+            <!-- Messages will be dynamically loaded here -->
+            <div class="no-messages">
+                <i class="fa fa-inbox" style="font-size: 48px; color: #ccc; margin-bottom: 12px;"></i>
+                <p style="color: #999; font-size: 14px;">No messages yet</p>
+                <p style="color: #bbb; font-size: 12px;">Start chatting with sellers!</p>
+            </div>
+        </div>
+
+        <!-- Chat View (hidden by default) -->
+        <div id="chatView" style="display:none; flex-direction: column; height: 100%;">
+            <div id="chatMessages" style="flex: 1; overflow-y: auto; padding: 16px;"></div>
+            <div style="padding: 12px; border-top: 1px solid #ecf0f1; background: white;">
+                <div id="filePreview" style="display: none; margin-bottom: 8px;"></div>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <label for="chatFileInput" style="cursor: pointer; width: 40px; height: 40px; border-radius: 50%; background: #95a5a6; color: white; border: none; display: flex; align-items: center; justify-content: center; flex-shrink: 0;" title="Attach file">
+                        <i class="fa fa-paperclip"></i>
+                        <input type="file" id="chatFileInput" accept="image/*,video/*" style="display: none;" onchange="handleFileInput(event)">
+                    </label>
+                    <input type="text" id="chatInput" placeholder="Type a message..." 
+                           style="flex: 1; padding: 10px 14px; border: 1px solid #ddd; border-radius: 20px; outline: none;"
+                           onkeypress="if(event.key==='Enter' && !event.shiftKey) { event.preventDefault(); sendMessageInPanel(); }">
+                    <button onclick="sendMessageInPanel()" 
+                            style="width: 40px; height: 40px; border-radius: 50%; background: #3498db; color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <i class="fa fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="site-footer" role="contentinfo">
+        <div class="footer-content">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <a href="index.html" class="footer-logo">Hub</a>
+                    <p class="footer-tagline">Food & Gourmet delivered with care.</p>
+                    <div class="footer-socials" aria-label="Social media">
+                        <a href="#" aria-label="Facebook"><i class="fa-brands fa-facebook"></i></a>
+                        <a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+                        <a href="#" aria-label="Twitter"><i class="fa-brands fa-x-twitter"></i></a>
+                    </div>
+                </div>
+
+                <div class="footer-column">
+                    <h4>Quick Links</h4>
+                    <nav class="footer-nav" aria-label="Quick Links">
+                        <a href="about_us.html">About Us</a>
+                        <a href="our_services.html">Our Services</a>
+                        <a href="contact_us.html">Contact Us</a>
+                        <a href="shop.html">Shop</a>
+                    </nav>
+                </div>
+
+                <div class="footer-column">
+                    <h4>Customer Care</h4>
+                    <nav class="footer-nav" aria-label="Customer Care">
+                        <a href="#products">Products</a>
+                        <a href="#testimonials">Testimonials</a>
+                        <a href="#newsletter">Newsletter</a>
+                        <a href="#">Support</a>
+                    </nav>
+                </div>
+
+                <div class="footer-column">
+                    <h4>My Account</h4>
+                    <nav class="footer-nav" aria-label="Account">
+                        <a href="account.html">My Account</a>
+                        <a href="cart.html">Shopping Cart</a>
+                        <a href="wishlist.html">Wishlist</a>
+                        <a href="#">Order History</a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>© <span id="year">2025</span> Hub. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="js/notifications.js"></script>
+    <script src="js/session-validator.js"></script>
+    <script src="js/script.js"></script>
+    <script src="js/customer-messaging.js"></script>
+    <script src="js/messaging-panel.js"></script>
+    <script src="js/messenger-global.js"></script>
+    <script>
+        // API_BASE is declared in customer-messaging.js
+        
+        // Global variables for seller info - check if already declared to avoid redeclaration errors
+        if (typeof currentSellerId === 'undefined') {
+            var currentSellerId = null;
+        }
+        if (typeof currentSellerName === 'undefined') {
+            var currentSellerName = null;
+        }
+        
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        // Product Modal Functionality
+        // Old modal code removed - using openProductModal function instead
+
+        // Load Seller Profile Data
+        (function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const sellerId = urlParams.get('id');
+            const storeId = urlParams.get('store');
+            
+            if (!sellerId || sellerId === 'seller_id') {
+                console.warn('No valid seller ID provided in URL');
+                return;
+            }
+            
+            // Fetch store data if storeId is provided, then fetch seller data
+            const loadStoreAndSeller = async () => {
+                let storeData = null;
+                
+                // Fetch store data first if storeId is provided
+                if (storeId) {
+                    try {
+                        const storeResponse = await fetch(`${API_BASE}/api/stores/${storeId}`);
+                        const storeResult = await storeResponse.json();
+                        if (storeResult.success && storeResult.data) {
+                            storeData = storeResult.data;
+                        }
+                    } catch (error) {
+                        console.error('Error loading store data:', error);
+                    }
+                }
+                
+                // Fetch seller data
+                try {
+                    const response = await authFetch(`${API_BASE}/api/sellers/${sellerId}`);
+                    const data = await response.json();
+                    
+                    if (data.success && data.data) {
+                        const seller = data.data;
+                        // Use store data if available, otherwise use seller data
+                        const storeName = storeData ? storeData.name : (seller.store_name || seller.business_name || 'Grocery Shop');
+                        const storeDescription = storeData ? storeData.description : (seller.store_description || 'The grocery shop is the best shop around the city. Get groceries delivered.');
+                        const storeLogo = storeData ? storeData.logo : seller.store_logo;
+                        const storeBanner = storeData ? storeData.banner : seller.store_banner;
+                    
+                    // Store seller info globally for messaging
+                    currentSellerId = parseInt(sellerId);
+                    currentSellerName = storeName;
+                    
+                    // Update page title
+                    document.title = `${storeName} - Hub`;
+                    
+                    // Update hero section
+                    const heroName = document.getElementById('heroSellerName');
+                    const breadcrumbName = document.getElementById('breadcrumbSellerName');
+                    if (heroName) heroName.textContent = storeName;
+                    if (breadcrumbName) breadcrumbName.textContent = storeName;
+                    
+                    // Update banner image
+                    const heroSection = document.querySelector('.seller-hero');
+                    if (storeBanner && heroSection) {
+                        heroSection.style.backgroundImage = `url('${storeBanner}')`;
+                    }
+                    
+                    // Update sidebar
+                    const sellerTitle = document.getElementById('sellerTitle');
+                    const sellerDesc = document.getElementById('sellerDescription');
+                    if (sellerTitle) sellerTitle.textContent = storeName;
+                    if (sellerDesc) sellerDesc.textContent = storeDescription;
+                    
+                    // Update logo
+                    const logoContainer = document.getElementById('sellerLogoContainer');
+                    if (logoContainer && storeLogo) {
+                        logoContainer.innerHTML = `<img src="${storeLogo}" alt="${storeName} Logo" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
+                    }
+                    
+                    // Update category tag
+                    const categoryTag = document.getElementById('categoryTag');
+                    if (categoryTag && seller.category) {
+                        const categoryNames = {
+                            // Food-specific categories (from seller dashboard)
+                            'general_food': 'General Food Stores',
+                            'prepared_food': 'Prepared Food / Ready-to-Eat Specialty Cuisine',
+                            'fresh_ingredients': 'Fresh Ingredients / Specialty Food Sources',
+                            'meal_subscription': 'Meal Subscription / Pre-made Services',
+                            // Generic categories (from registration)
+                            'food': 'Food & Beverages',
+                            'apparel': 'Apparel & Fashion',
+                            'tools': 'Tools & Hardware',
+                            'equipment': 'Equipment',
+                            'electronics': 'Electronics',
+                            'home': 'Home & Garden',
+                            'beauty': 'Beauty & Personal Care',
+                            'sports': 'Sports & Outdoors',
+                            'other': 'Others'
+                        };
+                        const categoryName = categoryNames[seller.category] || seller.category;
+                        categoryTag.querySelector('span').textContent = categoryName;
+                        categoryTag.style.display = 'block';
+                    }
+                    
+                    // Update address
+                    const addressEl = document.getElementById('sellerAddress');
+                    if (addressEl) {
+                        const addressParts = [];
+                        if (seller.city) addressParts.push(seller.city);
+                        if (seller.province) addressParts.push(seller.province);
+                        if (seller.region) addressParts.push(seller.region);
+                        
+                        if (addressParts.length > 0) {
+                            addressEl.textContent = addressParts.join(', ');
+                        } else {
+                            addressEl.textContent = 'Location not provided';
+                        }
+                    }
+                    
+                    // Update phone (if available in user data)
+                    const phoneSection = document.getElementById('phoneSection');
+                    const phoneEl = document.getElementById('sellerPhone');
+                    if (seller.phone || seller.contact_phone) {
+                        const phone = seller.phone || seller.contact_phone;
+                        if (phoneEl) phoneEl.textContent = phone;
+                        if (phoneSection) phoneSection.style.display = 'flex';
+                    }
+                    
+                    // Update website (if available)
+                    const websiteSection = document.getElementById('websiteSection');
+                    const websiteEl = document.getElementById('sellerWebsite');
+                    if (seller.website) {
+                        if (websiteEl) {
+                            websiteEl.innerHTML = `<a href="${seller.website}" target="_blank" rel="noopener noreferrer">${seller.website.replace(/^https?:\/\//, '')}</a>`;
+                        }
+                        if (websiteSection) websiteSection.style.display = 'flex';
+                    }
+                    
+                    // Update messenger references
+                    document.querySelectorAll('.seller-messenger-name').forEach(el => {
+                        el.textContent = storeName;
+                    });
+                    
+                        // Load seller products (with store filter if storeId is provided)
+                        loadSellerProducts(sellerId, storeId);
+                    }
+                } catch (error) {
+                    console.error('Error loading seller data:', error);
+                }
+            };
+            
+            // Execute the async function
+            loadStoreAndSeller();
+        })();
+        
+        // Helper function to update page with store data
+        function updatePageWithStoreData(storeData) {
+            const storeName = storeData.name || 'Store';
+            const storeDescription = storeData.description || '';
+            const storeLogo = storeData.logo;
+            const storeBanner = storeData.banner;
+            
+            // Update page title
+            document.title = `${storeName} - Hub`;
+            
+            // Update hero section
+            const heroName = document.getElementById('heroSellerName');
+            const breadcrumbName = document.getElementById('breadcrumbSellerName');
+            if (heroName) heroName.textContent = storeName;
+            if (breadcrumbName) breadcrumbName.textContent = storeName;
+            
+            // Update banner image
+            const heroSection = document.querySelector('.seller-hero');
+            if (storeBanner && heroSection) {
+                heroSection.style.backgroundImage = `url('${storeBanner}')`;
+            }
+            
+            // Update sidebar
+            const sellerTitle = document.getElementById('sellerTitle');
+            const sellerDesc = document.getElementById('sellerDescription');
+            if (sellerTitle) sellerTitle.textContent = storeName;
+            if (sellerDesc) sellerDesc.textContent = storeDescription;
+            
+            // Update logo
+            const logoContainer = document.getElementById('sellerLogoContainer');
+            if (logoContainer && storeLogo) {
+                logoContainer.innerHTML = `<img src="${storeLogo}" alt="${storeName} Logo" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
+            }
+        }
+        
+        // Load Seller Products with Pagination
+        let allProducts = [];
+        let filteredProducts = [];
+        let currentPage = 1;
+        const productsPerPage = 24;
+        
+        async function loadSellerProducts(sellerId, storeId = null) {
+            const productsGrid = document.getElementById('sellerProductsGrid');
+            
+            try {
+                // Add store parameter if provided
+                const url = storeId 
+                    ? `${API_BASE}/api/sellers/${sellerId}/products?store=${storeId}`
+                    : `${API_BASE}/api/sellers/${sellerId}/products`;
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.success && data.data && data.data.length > 0) {
+                    allProducts = data.data;
+                    filteredProducts = [...allProducts];
+                    displayProducts();
+                    setupProductControls();
+                } else {
+                    productsGrid.innerHTML = '<p style="text-align: center; padding: 40px; color: #999;">No products available yet.</p>';
+                }
+            } catch (error) {
+                console.error('Error loading products:', error);
+                productsGrid.innerHTML = '<p style="text-align: center; padding: 40px; color: #e74c3c;">Error loading products. Please try again later.</p>';
+            }
+        }
+        
+        function displayProducts() {
+            const productsGrid = document.getElementById('sellerProductsGrid');
+            const pagination = document.getElementById('productsPagination');
+            const pageInfo = document.getElementById('pageInfo');
+            const resultsCount = document.getElementById('resultsCount');
+            
+            const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+            const startIdx = (currentPage - 1) * productsPerPage;
+            const endIdx = startIdx + productsPerPage;
+            const pageProducts = filteredProducts.slice(startIdx, endIdx);
+            
+            productsGrid.innerHTML = '';
+            
+            // Check if no products after filtering
+            if (filteredProducts.length === 0) {
+                productsGrid.innerHTML = '<p style="text-align: center; padding: 40px; color: #999; grid-column: 1 / -1;">No products found in this store.</p>';
+                pagination.style.display = 'none';
+                return;
+            }
+            
+            pageProducts.forEach(product => {
+                const productCard = document.createElement('div');
+                productCard.className = 'product-shop-card product-card-packshot';
+                
+                const imgUrl = product.img_url || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=400&fit=crop';
+                const price = parseFloat(product.price);
+                const isOnSale = product.stock > 0 && price < 100;
+                
+                // Get rating and review count - match shop.html exactly
+                const avgRating = parseFloat(product.average_rating || 0) || 0;
+                const reviewCount = parseInt(product.review_count || 0) || 0;
+                
+                // Generate rating HTML - exactly matching shop.html
+                const ratingHTML = (product.average_rating && product.average_rating > 0 && product.review_count > 0) ? `
+				<div class="product-rating-display" style="display: flex; align-items: center; gap: 4px; margin-top: 2px; margin-bottom: 4px; flex-wrap: wrap;">
+					<div class="product-stars" style="display: flex; gap: 1px; align-items: center;">
+						${Array.from({length: 5}, (_, i) => {
+							const rating = parseFloat(product.average_rating) || 0;
+							const fullStars = Math.floor(rating);
+							const hasHalfStar = rating % 1 >= 0.5;
+							if (i < fullStars) {
+								return '<i class="fas fa-star" style="color: #fbbf24; font-size: 12px; line-height: 1;"></i>';
+							} else if (i === fullStars && hasHalfStar) {
+								return '<i class="fas fa-star-half-alt" style="color: #fbbf24; font-size: 12px; line-height: 1;"></i>';
+							} else {
+								return '<i class="far fa-star" style="color: #d1d5db; font-size: 12px; line-height: 1;"></i>';
+							}
+						}).join('')}
+					</div>
+					<span style="font-size: 11px; color: #666; font-weight: 600; margin-left: 2px;">${parseFloat(product.average_rating).toFixed(1)}</span>
+					${product.review_count > 0 ? `<span style="font-size: 10px; color: #999; margin-left: 2px;">(${product.review_count} ${product.review_count === 1 ? 'review' : 'reviews'})</span>` : ''}
+				</div>
+			` : `
+				<div style="font-size: 11px; color: #999; margin-top: 2px; margin-bottom: 4px;">
+					No reviews
+				</div>
+			`;
+                
+                productCard.innerHTML = `
+                    ${isOnSale ? '<span class="sale-badge">ON SALE</span>' : ''}
+                    <div class="product-shop-image">
+                        <img src="${imgUrl}" alt="${escapeHtml(product.title)}" loading="lazy">
+                        <button class="btn-view-circle" onclick="openProductModal(${product.id})" aria-label="View product"><i class="fa fa-eye"></i></button>
+                    </div>
+                    <div class="product-shop-info">
+                        <div class="product-shop-price">
+                            <span class="price-current">₱${price.toFixed(2)}</span>
+                        </div>
+                        <h3 class="product-shop-title">${escapeHtml(product.title)}</h3>
+                        ${ratingHTML}
+                        <p class="product-shop-unit">${product.stock > 0 ? 'In Stock' : 'Out of Stock'}</p>
+                    </div>
+                `;
+                
+                productsGrid.appendChild(productCard);
+            });
+            
+            // Update pagination
+            if (filteredProducts.length > productsPerPage) {
+                pagination.style.display = 'block';
+                pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+                resultsCount.textContent = `Showing ${startIdx + 1}-${Math.min(endIdx, filteredProducts.length)} of ${filteredProducts.length} products`;
+                
+                document.getElementById('prevPage').disabled = currentPage === 1;
+                document.getElementById('nextPage').disabled = currentPage === totalPages;
+            } else {
+                pagination.style.display = 'none';
+            }
+        }
+        
+        function setupProductControls() {
+            const sortSelect = document.getElementById('productSort');
+            const prevBtn = document.getElementById('prevPage');
+            const nextBtn = document.getElementById('nextPage');
+            const navbarSearch = document.getElementById('navbarSearch');
+            const navbarSearchBtn = document.getElementById('navbarSearchBtn');
+            
+            // Function to highlight and scroll to product
+            const highlightAndScrollToProduct = (productCard) => {
+                if (!productCard) return;
+                
+                // Remove previous highlights
+                document.querySelectorAll('.search-highlight').forEach(el => {
+                    el.classList.remove('search-highlight');
+                });
+                
+                // Add highlight class
+                productCard.classList.add('search-highlight');
+                
+                // Scroll to product with offset for navbar
+                const navbarHeight = document.querySelector('.navbar')?.offsetHeight || 80;
+                const cardPosition = productCard.getBoundingClientRect().top + window.pageYOffset;
+                const offsetPosition = cardPosition - navbarHeight - 20;
+                
+                window.scrollTo({
+                    top: offsetPosition,
+                    behavior: 'smooth'
+                });
+                
+                // Remove highlight after animation completes (3 seconds)
+                setTimeout(() => {
+                    productCard.classList.remove('search-highlight');
+                }, 3000);
+            };
+            
+            // Function to show "No products found" message
+            const showNoProductsMessage = (searchTerm) => {
+                // Remove any existing messages
+                const existingMsg = document.getElementById('searchNoResultsMessage');
+                if (existingMsg) {
+                    existingMsg.remove();
+                }
+                
+                // Create message element
+                const message = document.createElement('div');
+                message.id = 'searchNoResultsMessage';
+                message.style.cssText = `
+                    position: fixed;
+                    top: 100px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    background: #e74c3c;
+                    color: white;
+                    padding: 16px 24px;
+                    border-radius: 8px;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                    z-index: 10000;
+                    font-size: 14px;
+                    font-weight: 500;
+                    animation: fadeInOut 4s ease-out forwards;
+                `;
+                message.textContent = `No products found for "${searchTerm}"`;
+                
+                // Add fade animation if not already added
+                if (!document.getElementById('searchMessageStyles')) {
+                    const style = document.createElement('style');
+                    style.id = 'searchMessageStyles';
+                    style.textContent = `
+                        @keyframes fadeInOut {
+                            0% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+                            15% { opacity: 1; transform: translateX(-50%) translateY(0); }
+                            85% { opacity: 1; transform: translateX(-50%) translateY(0); }
+                            100% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+                
+                document.body.appendChild(message);
+                
+                // Remove message after animation
+                setTimeout(() => {
+                    if (message.parentNode) {
+                        message.remove();
+                    }
+                }, 4000);
+            };
+            
+            // Navbar Search - Local filtering for real-time results
+            const performLocalSearch = () => {
+                const query = navbarSearch.value.toLowerCase();
+                filteredProducts = allProducts.filter(p => 
+                    p.title.toLowerCase().includes(query) || 
+                    (p.description && p.description.toLowerCase().includes(query))
+                );
+                currentPage = 1;
+                sortProducts(sortSelect.value);
+                displayProducts();
+                
+                // After displaying, highlight first match if query exists
+                if (query && query.length >= 2) {
+                    setTimeout(() => {
+                        const productsGrid = document.getElementById('sellerProductsGrid');
+                        if (productsGrid) {
+                            const cards = productsGrid.querySelectorAll('.product-shop-card, .product-card-packshot');
+                            const firstCard = Array.from(cards).find(card => {
+                                const titleEl = card.querySelector('.product-shop-title, h3, h4');
+                                const title = titleEl ? titleEl.textContent.toLowerCase() : '';
+                                return title.includes(query);
+                            });
+                            if (firstCard) {
+                                highlightAndScrollToProduct(firstCard);
+                            } else if (filteredProducts.length === 0) {
+                                showNoProductsMessage(navbarSearch.value.trim());
+                            }
+                        }
+                    }, 100);
+                }
+            };
+            
+            // Global search - redirects to shop.html for site-wide search
+            const performGlobalSearch = () => {
+                const query = (navbarSearch.value || '').trim();
+                if (query && query.length >= 2) {
+                    // First check if there are matches on current page
+                    const productsGrid = document.getElementById('sellerProductsGrid');
+                    if (productsGrid) {
+                        const cards = productsGrid.querySelectorAll('.product-shop-card, .product-card-packshot');
+                        const matches = Array.from(cards).filter(card => {
+                            const titleEl = card.querySelector('.product-shop-title, h3, h4');
+                            const title = titleEl ? titleEl.textContent.toLowerCase() : '';
+                            return title.includes(query.toLowerCase());
+                        });
+                        
+                        if (matches.length > 0) {
+                            // Found matches - highlight and scroll
+                            highlightAndScrollToProduct(matches[0]);
+                            return;
+                        }
+                    }
+                    
+                    // No matches on current page - redirect to shop.html
+                    try { localStorage.setItem('last_search_term', query); } catch(e){}
+                    window.location.href = `shop.html?search=${encodeURIComponent(query)}`;
+                }
+            };
+            
+            // Local search on input (real-time filtering)
+            navbarSearch.addEventListener('input', performLocalSearch);
+            
+            // Enter key: Search on page first, then global if no match
+            navbarSearch.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    performGlobalSearch();
+                }
+            });
+            
+            // Button click: Search on page first, then global if no match
+            navbarSearchBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                performGlobalSearch();
+            });
+            
+            // Sort
+            sortSelect.addEventListener('change', (e) => {
+                sortProducts(e.target.value);
+                displayProducts();
+            });
+            
+            // Pagination
+            prevBtn.addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    displayProducts();
+                }
+            });
+            
+            nextBtn.addEventListener('click', () => {
+                const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    displayProducts();
+                }
+            });
+        }
+        
+        function sortProducts(sortBy) {
+            switch(sortBy) {
+                case 'price-low':
+                    filteredProducts.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
+                    break;
+                case 'price-high':
+                    filteredProducts.sort((a, b) => parseFloat(b.price) - parseFloat(a.price));
+                    break;
+                case 'name':
+                    filteredProducts.sort((a, b) => a.title.localeCompare(b.title));
+                    break;
+                case 'newest':
+                default:
+                    filteredProducts.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+                    break;
+            }
+        }
+	// Product Modal Functionality
+	async function openProductModal(productId) {
+		const modal = document.getElementById('productModal');
+		if (!modal) return;
+
+		// Find product data
+		const product = allProducts.find(p => p.id === productId);
+		if (!product) {
+			console.error('Product not found:', productId);
+			return;
+		}
+
+		// Fetch product variations if they exist
+		let variations = [];
+		try {
+			const response = await fetch(`${API_BASE}/api/products/${productId}/variations`);
+			const data = await response.json();
+			if (data.success && data.data) {
+				variations = data.data;
+			}
+		} catch (error) {
+			console.log('No variations found for this product');
+		}
+
+	// Populate modal
+	// Get all images (from image_urls array or fallback to img_url)
+	const productImages = product.image_urls && Array.isArray(product.image_urls) && product.image_urls.length > 0 
+		? product.image_urls 
+		: (product.img_url ? [product.img_url] : []);
+	
+	// Debug logging
+	console.log(`Loading images for product ${productId}:`, {
+		image_urls: product.image_urls,
+		img_url: product.img_url,
+		productImages: productImages
+	});
+	
+	const defaultImage = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&h=600&fit=crop';
+	const images = productImages.length > 0 ? productImages : [defaultImage];
+	
+	// Store images array on modal for persistence
+	modal.dataset.productImages = JSON.stringify(images);
+	
+	// Store current image index
+	let currentImageIndex = 0;
+	modal.dataset.currentImageIndex = '0';
+	modal.dataset.totalImages = images.length.toString();
+	
+	console.log(`Modal images setup: ${images.length} images`, images);
+	
+	document.getElementById('modalTitle').textContent = product.title;
+	
+	// Set main image
+	const mainImage = document.getElementById('modalMainImage');
+	const thumbnailsContainer = document.getElementById('modalThumbnails');
+	
+	// Helper function to update gallery (defined before use)
+	function updateModalGallery(images, index) {
+		if (!images || !images[index]) {
+			console.error('Invalid image index or images array:', { images, index });
+			return;
+		}
+		
+		const imageUrl = images[index].startsWith('http') 
+			? images[index] 
+			: (images[index].startsWith('/') 
+				? `http://127.0.0.1:5000${images[index]}` 
+				: `http://127.0.0.1:5000/${images[index]}`);
+		
+		if (mainImage) {
+			mainImage.src = imageUrl;
+		}
+		
+		// Update active thumbnail
+		thumbnailsContainer.querySelectorAll('.thumb-item').forEach((thumb, idx) => {
+			if (idx === index) {
+				thumb.classList.add('active');
+			} else {
+				thumb.classList.remove('active');
+			}
+		});
+	}
+	
+	// Handle both absolute and relative URLs
+	let imageUrl = images[0];
+	if (images[0] && !images[0].startsWith('http')) {
+		imageUrl = images[0].startsWith('/') 
+			? `http://127.0.0.1:5000${images[0]}` 
+			: `http://127.0.0.1:5000/${images[0]}`;
+	}
+	mainImage.src = imageUrl;
+	
+	// Populate thumbnails dynamically
+	thumbnailsContainer.innerHTML = '';
+	
+	images.forEach((imgUrl, index) => {
+		const thumbDiv = document.createElement('div');
+		thumbDiv.className = `thumb-item ${index === 0 ? 'active' : ''}`;
+		thumbDiv.dataset.index = index;
+		
+		const thumbImg = document.createElement('img');
+		// Handle both absolute and relative URLs
+		let thumbUrl = imgUrl;
+		if (imgUrl && !imgUrl.startsWith('http')) {
+			thumbUrl = imgUrl.startsWith('/') 
+				? `http://127.0.0.1:5000${imgUrl}` 
+				: `http://127.0.0.1:5000/${imgUrl}`;
+		}
+		thumbImg.src = thumbUrl;
+		thumbImg.alt = `Thumbnail ${index + 1}`;
+		thumbImg.loading = 'lazy';
+		
+		thumbDiv.appendChild(thumbImg);
+		thumbnailsContainer.appendChild(thumbDiv);
+		
+		// Click handler for thumbnail
+		thumbDiv.addEventListener('click', function() {
+			const newIndex = parseInt(this.dataset.index);
+			// Get images from modal dataset to ensure we have the latest
+			const modalImages = JSON.parse(modal.dataset.productImages || '[]');
+			if (modalImages.length === 0) {
+				console.error('No images found in modal dataset');
+				return;
+			}
+			currentImageIndex = newIndex;
+			modal.dataset.currentImageIndex = newIndex.toString();
+			updateModalGallery(modalImages, newIndex);
+		});
+	});
+	
+	// Show/hide navigation arrows
+	const prevBtn = document.getElementById('modalPrevBtn');
+	const nextBtn = document.getElementById('modalNextBtn');
+	if (images.length > 1) {
+		prevBtn.style.display = 'block';
+		nextBtn.style.display = 'block';
+		
+		// Navigation handlers - read current index from dataset or active thumbnail
+		prevBtn.onclick = () => {
+			// Get images from modal dataset to ensure we have the latest
+			const modalImages = JSON.parse(modal.dataset.productImages || '[]');
+			if (modalImages.length === 0) {
+				console.error('No images found in modal dataset');
+				return;
+			}
+			// Get current index from dataset or find active thumbnail
+			let currentIdx = parseInt(modal.dataset.currentImageIndex || '0');
+			const activeThumb = thumbnailsContainer.querySelector('.thumb-item.active');
+			if (activeThumb) {
+				currentIdx = parseInt(activeThumb.dataset.index || '0');
+			}
+			currentImageIndex = (currentIdx - 1 + modalImages.length) % modalImages.length;
+			modal.dataset.currentImageIndex = currentImageIndex.toString();
+			updateModalGallery(modalImages, currentImageIndex);
+		};
+		
+		nextBtn.onclick = () => {
+			// Get images from modal dataset to ensure we have the latest
+			const modalImages = JSON.parse(modal.dataset.productImages || '[]');
+			if (modalImages.length === 0) {
+				console.error('No images found in modal dataset');
+				return;
+			}
+			// Get current index from dataset or find active thumbnail
+			let currentIdx = parseInt(modal.dataset.currentImageIndex || '0');
+			const activeThumb = thumbnailsContainer.querySelector('.thumb-item.active');
+			if (activeThumb) {
+				currentIdx = parseInt(activeThumb.dataset.index || '0');
+			}
+			currentImageIndex = (currentIdx + 1) % modalImages.length;
+			modal.dataset.currentImageIndex = currentImageIndex.toString();
+			updateModalGallery(modalImages, currentImageIndex);
+		};
+	} else {
+		prevBtn.style.display = 'none';
+		nextBtn.style.display = 'none';
+	}
+	
+	// Set initial price (will be updated by loadProductSale if on sale)
+	const basePrice = parseFloat(product.price || 0);
+	const priceFormatted = `₱${basePrice.toFixed(2)}`;
+	const modalPriceEl = document.getElementById('modalPrice');
+	modalPriceEl.innerHTML = `<span class="price-current">${priceFormatted}</span>`;
+	
+	// Set product ID on modal sale badge
+	const modalSaleBadge = document.querySelector('[data-modal-sale-badge]');
+	if (modalSaleBadge) {
+		modalSaleBadge.setAttribute('data-modal-sale-badge', productId);
+	}
+	
+		// Display manufacture and expiry dates if available
+		const datesSection = document.getElementById('modalDatesSection') || createDatesSection();
+		if (product.manufacture_date || product.expiry_date) {
+			let datesHTML = '<div style="background: #f8f9fa; padding: 12px; border-radius: 8px; margin: 12px 0; border-left: 3px solid #27ae60;">';
+			datesHTML += '<div style="font-weight: 600; color: #2c3e50; margin-bottom: 8px; font-size: 13px;"><i class="fa fa-info-circle"></i> Product Information</div>';
+			
+			if (product.manufacture_date) {
+				const mfgDate = new Date(product.manufacture_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+				datesHTML += `<div style="font-size: 13px; color: #555; margin-bottom: 4px;"><i class="fa fa-calendar" style="color: #3498db; width: 18px;"></i> <strong>Manufactured:</strong> ${mfgDate}</div>`;
+			}
+			
+			if (product.expiry_date) {
+				const expDate = new Date(product.expiry_date);
+				const today = new Date();
+				const daysUntilExpiry = Math.floor((expDate - today) / (1000 * 60 * 60 * 24));
+				const expDateFormatted = expDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+				
+				let expiryColor = '#27ae60';
+				let expiryWarning = '';
+				if (daysUntilExpiry <= 0) {
+					expiryColor = '#e74c3c';
+					expiryWarning = ' <span style="color: #e74c3c; font-weight: bold;">(EXPIRED)</span>';
+				} else if (daysUntilExpiry <= 7) {
+					expiryColor = '#f39c12';
+					expiryWarning = ` <span style="color: #f39c12; font-weight: bold;">(Expires in ${daysUntilExpiry} day${daysUntilExpiry > 1 ? 's' : ''})</span>`;
+				}
+				
+				datesHTML += `<div style="font-size: 13px; color: #555;"><i class="fa fa-clock" style="color: ${expiryColor}; width: 18px;"></i> <strong>Expires:</strong> ${expDateFormatted}${expiryWarning}</div>`;
+			}
+			
+			datesHTML += '</div>';
+			datesSection.innerHTML = datesHTML;
+			datesSection.style.display = 'block';
+		} else {
+			datesSection.style.display = 'none';
+		}
+		
+		// Render variations using the new renderVariations function
+		await renderVariations(productId, basePrice);
+
+		// Description and details
+		document.getElementById('modalDescription').textContent = product.description || 'No description available.';
+		document.getElementById('modalStock').innerHTML = `
+			<p style="margin: 8px 0; color: ${product.stock > 10 ? '#27ae60' : '#e74c3c'};">
+				<i class="fa fa-box"></i> <strong>${product.stock}</strong> items in stock
+			</p>
+		`;
+	document.getElementById('modalSeller').innerHTML = `
+		<p style="margin: 8px 0; color: #666;">
+			<i class="fa fa-store"></i> Sold by: <strong>${product.seller_store_name || product.seller_business_name || 'Unknown Seller'}</strong>
+		</p>
+	`;
+
+	// Populate related products (same category, exclude current product)
+	const relatedContainer = document.getElementById('modalRelated');
+	const relatedProducts = allProducts
+		.filter(p => p.id !== productId && (p.category_normalized || p.category) === (product.category_normalized || product.category))
+		.slice(0, 6);
+	
+	if (relatedProducts.length > 0) {
+		relatedContainer.innerHTML = relatedProducts.map(p => {
+			const relatedPrice = parseFloat(p.price || 0).toFixed(2);
+			// Get first image from image_urls array or fallback to img_url
+			const productImages = p.image_urls && Array.isArray(p.image_urls) && p.image_urls.length > 0 
+				? p.image_urls 
+				: (p.img_url ? [p.img_url] : []);
+			const relatedImg = productImages.length > 0 ? productImages[0] : 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=300&h=300&fit=crop';
+			// Handle both absolute and relative URLs
+			let imgUrl = relatedImg;
+			if (relatedImg && !relatedImg.startsWith('http')) {
+				imgUrl = relatedImg.startsWith('/') 
+					? `http://127.0.0.1:5000${relatedImg}` 
+					: `http://127.0.0.1:5000/${relatedImg}`;
+			}
+			const isOnSale = p.stock > 0 && p.stock < 10;
+			const avgRating = parseFloat(p.average_rating || 0) || 0;
+			const reviewCount = parseInt(p.review_count || 0) || 0;
+			
+			// Generate star rating HTML
+			let starsHtml = '';
+			if (avgRating > 0) {
+				const fullStars = Math.floor(avgRating);
+				const hasHalfStar = avgRating % 1 >= 0.5;
+				for (let i = 0; i < 5; i++) {
+					if (i < fullStars) {
+						starsHtml += '<i class="fas fa-star" style="color: #fbbf24; font-size: 11px;"></i>';
+					} else if (i === fullStars && hasHalfStar) {
+						starsHtml += '<i class="fas fa-star-half-alt" style="color: #fbbf24; font-size: 11px;"></i>';
+					} else {
+						starsHtml += '<i class="far fa-star" style="color: #d1d5db; font-size: 11px;"></i>';
+					}
+				}
+			}
+			
+			return `
+				<div class="related-product-card" onclick="openProductModal(${p.id})" style="cursor: pointer;">
+					${isOnSale ? '<span class="on-sale-badge">ON SALE</span>' : ''}
+					<div class="related-product-image">
+						<img src="${escapeHtml(imgUrl)}" alt="${escapeHtml(p.title)}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=300&h=300&fit=crop'">
+						<button class="related-add-btn" onclick="event.stopPropagation(); addToCart(${p.id})" aria-label="Add to cart">
+							<i class="fa fa-plus"></i>
+						</button>
+					</div>
+					<div class="related-product-info">
+						<div class="related-product-price">
+							₱${relatedPrice}
+						</div>
+						<h4 class="related-product-title">${escapeHtml(p.title)}</h4>
+						${avgRating > 0 ? `
+							<div class="related-product-rating" style="display: flex; align-items: center; gap: 4px; margin: 4px 0;">
+								<div style="display: flex; gap: 1px; align-items: center;">
+									${starsHtml}
+								</div>
+								<span style="font-size: 11px; color: #666; font-weight: 600;">${avgRating.toFixed(1)}</span>
+								${reviewCount > 0 ? `<span style="font-size: 10px; color: #999;">(${reviewCount})</span>` : ''}
+							</div>
+						` : ''}
+						<p class="related-product-unit">${p.stock > 0 ? `<i class="fa fa-check-circle" style="color: #27ae60; font-size: 10px;"></i> In Stock` : '<i class="fa fa-times-circle" style="color: #e74c3c; font-size: 10px;"></i> Out of Stock'}</p>
+					</div>
+				</div>
+			`;
+		}).join('');
+	} else {
+		relatedContainer.innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">No related products found.</p>';
+	}
+
+	// Reset quantity
+	modal.querySelector('.modal-qty-value').textContent = '1';
+
+	// Try to load active sale for modal and update pricing UI
+	try {
+		await loadProductSale(productId, basePrice, null, {
+			context: 'modal',
+			updateModal: true
+		});
+	} catch (e) { /* ignore in modal */ }
+	
+	// Thumbnail click handlers are now set up dynamically in openProductModal above
+	
+	// Store product ID and seller info in modal for operations
+	modal.dataset.currentProductId = productId;
+	modal.dataset.sellerId = product.seller_id;
+	modal.dataset.sellerName = product.seller_store_name || product.seller_business_name || 'Unknown Seller';
+	
+	// Show/hide message seller button based on login status
+	const messageSellerBtn = document.getElementById('messageSellerButton');
+	const token = localStorage.getItem('hub_access_token');
+	if (messageSellerBtn && token) {
+		messageSellerBtn.style.display = 'inline-flex';
+	}
+	
+	// Show modal
+	modal.hidden = false;
+	document.body.style.overflow = 'hidden';
+}
+        
+// Handle message seller button click
+function handleMessageSeller() {
+	const modal = document.getElementById('productModal');
+	const sellerId = modal?.dataset?.sellerId;
+	const sellerName = modal?.dataset?.sellerName;
+	
+	if (!sellerId) {
+		alert('Seller information not available');
+		return;
+	}
+	
+	// Check if messageSellerFromProduct function exists (from customer-messaging.js)
+	if (typeof messageSellerFromProduct === 'function') {
+		messageSellerFromProduct(parseInt(sellerId), sellerName);
+	} else {
+		// Fallback: redirect to account page
+		alert('Please go to your Messages section to contact the seller');
+		window.location.href = '/account.html';
+	}
+}
+
+	// Create dates section if it doesn't exist in the modal
+	function createDatesSection() {
+		const modal = document.getElementById('productModal');
+		if (!modal) return null;
+		
+		let datesSection = document.getElementById('modalDatesSection');
+		if (!datesSection) {
+			datesSection = document.createElement('div');
+			datesSection.id = 'modalDatesSection';
+			// Insert after price, before description
+			const priceEl = document.getElementById('modalPrice');
+			if (priceEl && priceEl.parentNode) {
+				priceEl.parentNode.insertBefore(datesSection, priceEl.nextSibling);
+			}
+		}
+		return datesSection;
+	}
+
+	// Modal close handlers
+	(function() {
+		const modal = document.getElementById('productModal');
+		if (!modal) return;
+
+		const closeBtn = modal.querySelector('.modal-close');
+		const overlay = modal.querySelector('.modal-overlay');
+		const qtyBtns = modal.querySelectorAll('.modal-qty-btn');
+		const addCartBtn = modal.querySelector('.modal-add-cart');
+		const wishlistBtns = modal.querySelectorAll('.modal-action-btn');
+
+		function closeModal() {
+			modal.hidden = true;
+			document.body.style.overflow = '';
+		}
+
+		if (closeBtn) closeBtn.addEventListener('click', closeModal);
+		if (overlay) overlay.addEventListener('click', closeModal);
+
+		// Quantity controls
+		qtyBtns.forEach(btn => {
+			btn.addEventListener('click', function() {
+				const qtyValue = modal.querySelector('.modal-qty-value');
+				let qty = parseInt(qtyValue.textContent);
+				
+				if (this.dataset.action === 'increase') {
+					qty++;
+				} else if (this.dataset.action === 'decrease' && qty > 1) {
+					qty--;
+				}
+				
+				qtyValue.textContent = qty;
+			});
+		});
+
+		// Add to cart from modal
+		if (addCartBtn) {
+			addCartBtn.addEventListener('click', async function() {
+				const productId = modal.dataset.currentProductId;
+				const qty = parseInt(modal.querySelector('.modal-qty-value').textContent);
+				
+				// Check if product has variations visible in modal
+				const variationsSection = document.getElementById('modalVariationsSection');
+				const hasVariations = variationsSection && variationsSection.style.display !== 'none';
+				
+				// Get selected variation - check both the dataset and the DOM element
+				let variationId = null;
+				if (hasVariations) {
+					// First try to get from dataset (set when variation is clicked)
+					variationId = modal.dataset.selectedVariationId || null;
+					
+					// Fallback: check for selected variation button
+					if (!variationId) {
+						const selectedVariation = modal.querySelector('.variation-option.selected');
+						variationId = selectedVariation ? selectedVariation.dataset.variationId : null;
+					}
+				
+				// If product has variations but none selected, show error
+					if (!variationId) {
+					notify.error('Please select a product option (size, flavor, etc.) before adding to cart');
+					// Highlight the variations section
+					const variationsContainer = document.getElementById('modalVariations');
+					if (variationsContainer) {
+						variationsContainer.style.border = '2px solid #e74c3c';
+						variationsContainer.style.borderRadius = '8px';
+						variationsContainer.style.padding = '8px';
+						setTimeout(() => {
+							variationsContainer.style.border = '';
+							variationsContainer.style.padding = '';
+						}, 3000);
+					}
+					return;
+					}
+				}
+				
+				try {
+					const token = localStorage.getItem('hub_access_token');
+					if (!token) {
+						notify.warning('Please sign in to add items to cart');
+						setTimeout(() => window.location.href = 'loginregister.html', 1500);
+						return;
+					}				const response = await authFetch(`${API_BASE}/api/cart`, {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify({
+						product_id: parseInt(productId),
+						quantity: qty,
+						variation_id: variationId ? parseInt(variationId) : null
+					})
+				});					const data = await response.json();
+					
+					if (data.success) {
+						notify.success(`Added ${qty} item(s) to cart!`);
+						// Sync cart badge and dropdown
+						if (window.syncCartBadge) window.syncCartBadge();
+						if (window.syncCartDropdown) window.syncCartDropdown();
+						closeModal();
+					} else {
+						notify.error(data.message || 'Failed to add to cart');
+					}
+				} catch (error) {
+					console.error('Error adding to cart:', error);
+					notify.error('Failed to add to cart. Please try again.');
+				}
+			});
+		}
+
+		// Wishlist button handler
+		wishlistBtns.forEach(btn => {
+			if (btn.innerHTML.includes('Wishlist')) {
+				btn.addEventListener('click', async function() {
+					const productId = modal.dataset.currentProductId;
+					
+					try {
+						const token = localStorage.getItem('hub_access_token');
+						if (!token) {
+							notify.warning('Please sign in to add items to wishlist');
+							setTimeout(() => window.location.href = 'loginregister.html', 1500);
+							return;
+						}
+
+						const qty = parseInt(modal.querySelector('.modal-qty-value')?.textContent || '1');
+						const response = await authFetch(`${API_BASE}/api/wishlist/${productId}`, {
+							method: 'POST',
+							headers: {
+								'Content-Type': 'application/json'
+							},
+							body: JSON.stringify({ quantity: isNaN(qty) ? 1 : qty })
+						});
+
+						const data = await response.json();
+						
+						if (data.success) {
+							notify.success('Added to wishlist!');
+							// Sync wishlist badge and dropdown
+							if (window.syncWishlistBadge) window.syncWishlistBadge();
+							if (window.syncWishlistDropdown) window.syncWishlistDropdown();
+							btn.innerHTML = '<i class="fa fa-heart" style="color: #e74c3c;"></i> In Wishlist';
+						} else {
+							notify.error(data.message || 'Failed to add to wishlist');
+						}
+					} catch (error) {
+						console.error('Error adding to wishlist:', error);
+						notify.error('Failed to add to wishlist. Please try again.');
+					}
+				});
+			}
+		});
+
+		// Close on Escape key
+		document.addEventListener('keydown', function(e) {
+			if (e.key === 'Escape' && !modal.hidden) {
+				closeModal();
+			}
+		});
+	})();
+
+        // Quick add to cart for related products
+        async function addToCartQuick(productId) {
+            try {
+                const token = localStorage.getItem('hub_access_token');
+                if (!token) {
+                    if (window.notify) window.notify.warning('Please sign in to add items to cart');
+                    setTimeout(() => window.location.href = 'loginregister.html', 1500);
+                    return;
+                }
+
+                const response = await authFetch(`${API_BASE}/api/cart`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        product_id: parseInt(productId),
+                        quantity: 1,
+                        variation_id: null
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    if (window.notify) window.notify.success('Added to cart!');
+                    if (window.syncCartBadge) window.syncCartBadge();
+                    if (window.syncCartDropdown) window.syncCartDropdown();
+                } else {
+                    if (window.notify) window.notify.error(data.message || 'Failed to add to cart');
+                }
+            } catch (error) {
+                console.error('Error adding to cart:', error);
+                if (window.notify) window.notify.error('Failed to add to cart. Please try again.');
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text || '';
+            return div.innerHTML;
+        }
+        
+	// Variation rendering for product modal (shows name + price adj)
+	window.renderVariations = async function(productId, basePrice){
+		try{
+			const section = document.getElementById('modalVariationsSection');
+			const container = document.getElementById('modalVariations');
+			if(!section || !container || !productId) return;
+			const res = await fetch(`http://127.0.0.1:5000/api/products/${productId}/variations`);
+			const data = await res.json();
+			
+			// Handle different response structures
+			let variationsList = [];
+			if(data.success && data.data){
+				// Check if it's the new structure with variations array
+				if(Array.isArray(data.data.variations)){
+					variationsList = data.data.variations;
+				} else if(Array.isArray(data.data)){
+					variationsList = data.data;
+				} else {
+					variationsList = data.variations || [];
+				}
+			} else if(Array.isArray(data.variations)){
+				variationsList = data.variations;
+			}
+			
+			if(variationsList.length === 0){
+				section.style.display = 'none';
+				container.innerHTML = '';
+				return;
+			}
+			
+			section.style.display = '';
+			// Group by type for clear labeling
+			const byType = {};
+			for(const v of variationsList){
+				// Handle both 'type'/'name' and 'variation_type'/'variation_value'
+				const type = v.variation_type || v.type || 'Option';
+				const normalizedVar = {
+					id: v.id,
+					variation_type: type,
+					variation_value: v.variation_value || v.name || v.value,
+					price_adjustment: v.price_adjustment,
+					stock: v.stock,
+					sku: v.sku
+				};
+				(byType[type] = byType[type] || []).push(normalizedVar);
+			}
+			const peso = '₱';
+			container.innerHTML = '';
+			Object.keys(byType).forEach(type => {
+				const group = document.createElement('div');
+				group.className = 'variation-group';
+				const label = document.createElement('div');
+				label.className = 'variation-group-label';
+				label.textContent = type;
+				group.appendChild(label);
+				const opts = document.createElement('div');
+				opts.className = 'variation-group-options';
+				byType[type].forEach(opt => {
+					const btn = document.createElement('button');
+					btn.type = 'button';
+					btn.className = 'variation-option';
+					const adj = parseFloat(opt.price_adjustment||0) || 0;
+					const adjStr = adj>0 ? ` (+${peso}${adj.toFixed(2)})` : (adj<0 ? ` (${peso}${adj.toFixed(2)})` : '');
+					const stock = parseInt(opt.stock || 0);
+					const stockStr = stock > 0 ? `<span class="var-stock">${stock} left</span>` : '<span class="var-stock out">Out of stock</span>';
+					btn.innerHTML = `<span class="var-type">${type}:</span> <span class="var-value">${opt.variation_value}</span>${adjStr ? '<span class="var-price">' + adjStr + '</span>' : ''} ${stockStr}`;
+					btn.dataset.variationId = opt.id;
+					btn.dataset.variationType = type;
+					btn.dataset.variationValue = opt.variation_value;
+					btn.dataset.stock = stock;
+					btn.disabled = (opt.stock !== undefined && Number(opt.stock) <= 0);
+					btn.addEventListener('click', () => {
+						// Remove 'selected' class from ALL variation options in ALL groups first
+						const allVariationOptions = container.querySelectorAll('.variation-option');
+						allVariationOptions.forEach(b => b.classList.remove('selected'));
+						
+						// Then add 'selected' only to the clicked button
+						btn.classList.add('selected');
+						
+						// update displayed price if basePrice provided
+						if(typeof basePrice === 'number'){
+							const total = basePrice + adj;
+							const priceEl = document.getElementById('modalPrice');
+							if(priceEl) priceEl.textContent = `${peso}${total.toFixed(2)}`;
+						}
+						// update stock display
+						const stockEl = document.getElementById('modalStock');
+						if(stockEl){
+							stockEl.innerHTML = `<p style="margin: 8px 0; color: ${stock > 10 ? '#27ae60' : '#e74c3c'};"><i class="fa fa-box"></i> <strong>${stock}</strong> items in stock</p>`;
+						}
+						// store selection for add-to-cart
+						document.getElementById('productModal').dataset.selectedVariationId = opt.id;
+						document.getElementById('productModal').dataset.selectedVariationLabel = `${type}: ${opt.variation_value}`;
+					});
+					opts.appendChild(btn);
+				});
+				group.appendChild(opts);
+				container.appendChild(group);
+			});
+		}catch(e){ console.error('renderVariations error', e); }
+	};
+        
+        // Load active sale for a product and update the UI (card or modal)
+        async function loadProductSale(productId, basePrice, cardEl = null, options = {}) {
+            try {
+                // Prefer API_BASE if available; fallback to localhost
+                const base = (typeof API_BASE !== 'undefined' && API_BASE) ? API_BASE : 'http://127.0.0.1:5000';
+                const res = await fetch(`${base}/api/products/${productId}/sale`);
+                const data = await res.json();
+
+                // Expecting shape: { success: true, data: { active: true, sale_price, original_price, discount_percentage, valid_until } }
+                if (!data || !data.success || !data.data || data.data.active !== true) {
+                    // Hide sale badge if sale is not active
+                    const badge = document.querySelector(`[data-sale-badge="${productId}"]`);
+                    if (badge) badge.style.display = 'none';
+                    const modalBadge = document.querySelector(`[data-modal-sale-badge="${productId}"]`);
+                    if (modalBadge) modalBadge.style.display = 'none';
+                    return;
+                }
+
+                const sale = data.data;
+                const salePrice = parseFloat(sale.sale_price);
+                const original = parseFloat(sale.original_price || basePrice || 0);
+                const discountPct = sale.discount_percentage != null ? parseFloat(sale.discount_percentage) : (original > 0 ? Math.round((1 - (salePrice / original)) * 100) : 0);
+                const validUntil = sale.valid_until ? new Date(sale.valid_until) : null;
+
+                // Update product card UI if present
+                const priceBlock = document.querySelector(`[data-price-block="${productId}"]`);
+                if (priceBlock) {
+                    priceBlock.innerHTML = `
+                        <span class="price-old" style="text-decoration: line-through; color: #999; font-size: 0.9em; margin-right: 8px;">₱${(original || basePrice || 0).toFixed(2)}</span>
+                        <span class="price-current price-sale" style="color: #e74c3c; font-weight: bold; font-size: 1.1em;">₱${salePrice.toFixed(2)}</span>
+                    `;
+                }
+                
+                // Update modal price if in modal context
+                if (options.updateModal || options.context === 'modal') {
+                    const modalPriceEl = document.getElementById('modalPrice');
+                    if (modalPriceEl) {
+                        modalPriceEl.innerHTML = `
+                            <span class="price-old" style="text-decoration: line-through; color: #999; font-size: 0.95em; margin-right: 10px;">₱${(original || basePrice || 0).toFixed(2)}</span>
+                            <span class="price-current price-sale" style="color: #e74c3c; font-weight: bold; font-size: 1.3em;">₱${salePrice.toFixed(2)}</span>
+                            ${discountPct > 0 ? `<span style="display: inline-block; margin-left: 10px; background: #e74c3c; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.85em; font-weight: 600;">Save ${Math.round(discountPct)}%</span>` : ''}
+                        `;
+                    }
+                    
+                    // Update modal sale badge
+                    const modalBadge = document.querySelector(`[data-modal-sale-badge="${productId}"]`);
+                    if (modalBadge) {
+                        modalBadge.textContent = discountPct > 0 ? `-${Math.round(discountPct)}%` : 'SALE';
+                        modalBadge.className = 'sale-badge sale-badge-modal sale-badge-active';
+                        modalBadge.style.display = 'block';
+                        modalBadge.style.position = 'absolute';
+                        modalBadge.style.top = '15px';
+                        modalBadge.style.left = '15px';
+                        modalBadge.style.background = 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)';
+                        modalBadge.style.color = 'white';
+                        modalBadge.style.padding = '8px 14px';
+                        modalBadge.style.borderRadius = '6px';
+                        modalBadge.style.fontSize = '14px';
+                        modalBadge.style.fontWeight = '700';
+                        modalBadge.style.zIndex = '10';
+                        modalBadge.style.boxShadow = '0 2px 8px rgba(231, 76, 60, 0.4)';
+                        modalBadge.style.textTransform = 'uppercase';
+                        modalBadge.style.letterSpacing = '0.5px';
+                        modalBadge.style.animation = 'pulse 2s infinite';
+                    }
+                }
+
+                // Update sale badge with enhanced styling
+                const badge = document.querySelector(`[data-sale-badge="${productId}"]`);
+                if (badge) {
+                    badge.textContent = discountPct > 0 ? `-${Math.round(discountPct)}%` : 'SALE';
+                    badge.className = 'sale-badge sale-badge-active';
+                    badge.style.display = 'block';
+                    badge.style.position = 'absolute';
+                    badge.style.top = '12px';
+                    badge.style.left = '12px';
+                    badge.style.background = 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)';
+                    badge.style.color = 'white';
+                    badge.style.padding = '6px 12px';
+                    badge.style.borderRadius = '6px';
+                    badge.style.fontSize = '12px';
+                    badge.style.fontWeight = '700';
+                    badge.style.zIndex = '10';
+                    badge.style.boxShadow = '0 2px 8px rgba(231, 76, 60, 0.4)';
+                    badge.style.textTransform = 'uppercase';
+                    badge.style.letterSpacing = '0.5px';
+                    badge.style.animation = 'pulse 2s infinite';
+                }
+            } catch (e) {
+                // Fail silently; sale UI is optional
+                console.warn('Error loading product sale:', e);
+            }
+        }
+
+        /**
+         * Open messenger to contact the seller
+         * Uses the customer messaging system to start a conversation
+         */
+        function openMessenger() {
+            // Check if user is logged in
+            const token = localStorage.getItem('hub_access_token');
+            if (!token) {
+                if (window.notify) {
+                    window.notify.warning('Please sign in to message sellers');
+                } else {
+                    alert('Please sign in to message sellers');
+                }
+                // Save current page as return URL
+                localStorage.setItem('returnUrl', window.location.href);
+                setTimeout(() => {
+                    window.location.href = 'loginregister.html';
+                }, 1500);
+                return;
+            }
+
+            // Check if seller info is available
+            if (!currentSellerId || !currentSellerName) {
+                if (window.notify) {
+                    window.notify.error('Seller information not available');
+                } else {
+                    alert('Seller information not available');
+                }
+                return;
+            }
+
+            // Use the new messaging panel function
+            if (typeof openMessengerPanelWithSeller === 'function') {
+                openMessengerPanelWithSeller(currentSellerId, currentSellerName);
+            } else if (typeof messageSellerFromProduct === 'function') {
+                // Fallback to old function
+                messageSellerFromProduct(currentSellerId, currentSellerName);
+            } else {
+                // Final fallback: redirect to account page Messages tab
+                console.log('Messaging functions not found, redirecting to account page');
+                window.location.href = 'account.html#messages';
+            }
+        }
+    </script>
+</body>
+</html>

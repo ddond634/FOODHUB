@@ -1,0 +1,29 @@
+# Core Framework
+Flask==3.0.0
+Werkzeug==3.0.1
+flask-cors==4.0.0
+
+# Database Drivers
+pymysql==1.1.0
+cryptography==41.0.7
+
+# Authentication & Security
+PyJWT==2.8.0
+python-dotenv==1.0.0
+
+# Email
+python-decouple==3.8
+
+# System Monitoring
+psutil==5.9.6
+
+# Production Server
+gunicorn==21.2.0
+
+# File Handling
+Pillow==10.1.0
+
+# Optional but Recommended
+# redis==5.0.1  # For caching and session storage
+# celery==5.3.4  # For background tasks
+# sentry-sdk[flask]==1.38.0  # For error tracking

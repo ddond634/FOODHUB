@@ -1,0 +1,3830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Account | Hub</title>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body.account-page {
+            background: linear-gradient(135deg, var(--fg-cream) 0%, var(--fg-muted) 100%);
+            min-height: 100vh;
+            padding-top: 100px;
+        }
+
+        .account-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .enhanced-account-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px 60px 20px;
+        }
+
+        .profile-card {
+            position: relative;
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(60,60,60,0.10);
+            margin-bottom: 40px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            gap: 32px;
+            padding: 32px 40px 32px 32px;
+        }
+
+        .profile-bg {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(120deg, #e0eafc 0%, #cfdef3 100%);
+            opacity: 0.5;
+            z-index: 0;
+        }
+
+        .profile-avatar {
+            z-index: 1;
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #f8fafc 60%, #e0eafc 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 5em;
+            color: #3d6b42;
+            box-shadow: 0 4px 16px rgba(60,60,60,0.08);
+            margin-right: 24px;
+        }
+
+        .profile-info {
+            z-index: 1;
+            flex: 1;
+        }
+
+        .profile-info h1 {
+            font-size: 2.2em;
+            margin: 0 0 10px 0;
+            font-weight: 700;
+            color: #2d3a2e;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .profile-info p {
+            color: #3d6b42;
+            margin: 0;
+            font-size: 1.1em;
+            opacity: 0.85;
+        }
+
+        .account-header {
+            background: linear-gradient(135deg, var(--fg-primary) 0%, #3d6b42 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 16px;
+            margin-bottom: 40px;
+            box-shadow: 0 8px 24px rgba(47, 82, 51, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .account-header::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+
+        .account-header h1 {
+            font-size: 2.5em;
+            color: white;
+            margin: 0 0 10px 0;
+            font-weight: 700;
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .account-header p {
+            color: rgba(255, 255, 255, 0.9);
+            margin: 0;
+            font-size: 1.1em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .account-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .account-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            .account-header {
+                padding: 30px 20px;
+            }
+            .account-header h1 {
+                font-size: 2em;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+
+        .account-section {
+            background: var(--fg-surface);
+            border: none;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .account-section::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--fg-accent) 0%, var(--fg-accent-hover) 100%);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .account-section:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        }
+
+        .account-section:hover::before {
+            transform: scaleX(1);
+        }
+
+        .account-section h2 {
+            font-size: 1.4em;
+            color: var(--fg-primary);
+            margin-top: 0;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--fg-cream);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .account-section h2::before {
+            content: "";
+            width: 4px;
+            height: 24px;
+            background: linear-gradient(135deg, var(--fg-accent) 0%, var(--fg-accent-hover) 100%);
+            border-radius: 2px;
+        }
+
+        .account-info {
+            margin-bottom: 24px;
+        }
+
+        .account-info label {
+            display: block;
+            font-weight: 600;
+            color: var(--fg-primary);
+            margin-bottom: 8px;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .account-info .value {
+            color: var(--fg-text);
+            padding: 14px 16px;
+            background: var(--fg-cream);
+            border: 2px solid transparent;
+            border-radius: 10px;
+            font-size: 1em;
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .account-info .value:hover {
+            background: var(--fg-muted);
+            border-color: var(--fg-accent-15);
+        }
+
+        .account-info input[type="text"],
+        .account-info input[type="email"],
+        .account-info input[type="password"],
+        .account-info select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid var(--fg-cream);
+            border-radius: 10px;
+            font-size: 1em;
+            box-sizing: border-box;
+            background: var(--fg-surface);
+            color: var(--fg-text);
+            transition: all 0.3s ease;
+            font-family: "Poppins", sans-serif;
+        }
+
+        .account-info input:focus,
+        .account-info select:focus {
+            outline: none;
+            border-color: var(--fg-accent);
+            box-shadow: 0 0 0 4px var(--fg-accent-15);
+            background: white;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+            flex-wrap: wrap;
+        }
+
+        .form-actions button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: "Poppins", sans-serif;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--fg-accent) 0%, var(--fg-accent-hover) 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(196, 127, 27, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(196, 127, 27, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: var(--fg-cream);
+            color: var(--fg-primary);
+            border: 2px solid var(--fg-cream);
+        }
+
+        .btn-secondary:hover {
+            background: var(--fg-muted);
+            border-color: var(--fg-accent-15);
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
+        }
+
+        .error {
+            color: #dc3545;
+            font-size: 0.85em;
+            margin-top: 8px;
+            display: none;
+            padding: 8px 12px;
+            background: rgba(220, 53, 69, 0.1);
+            border-radius: 6px;
+            border-left: 3px solid #dc3545;
+        }
+
+        .error.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        .success {
+            color: #28a745;
+            font-size: 0.85em;
+            margin-top: 8px;
+            display: none;
+            padding: 8px 12px;
+            background: rgba(40, 167, 69, 0.1);
+            border-radius: 6px;
+            border-left: 3px solid #28a745;
+        }
+
+        .success.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .account-actions {
+            grid-column: 1 / -1;
+        }
+
+        .account-actions .form-actions {
+            flex-direction: row-reverse;
+            justify-content: flex-start;
+        }
+
+        .role-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            color: white;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .role-badge.seller {
+            background: rgba(40, 167, 69, 0.9);
+        }
+
+        .role-badge.rider {
+            background: rgba(23, 162, 184, 0.9);
+        }
+
+        .role-badge.admin {
+            background: rgba(253, 126, 20, 0.9);
+        }
+
+        .divider {
+            grid-column: 1 / -1;
+            border-top: 2px solid var(--fg-cream);
+            margin: 30px 0;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Icon enhancements */
+        .account-section h2 i {
+            color: var(--fg-accent);
+            font-size: 1.2em;
+        }
+
+        /* Loading state */
+        .account-info .value:empty::after {
+            content: "Loading...";
+            color: #999;
+            font-style: italic;
+        }
+
+        /* Verification status styling */
+        #verificationStatus,
+        #riderVerificationStatus {
+            font-weight: 600;
+        }
+
+        #verificationStatus:contains("Verified"),
+        #riderVerificationStatus:contains("Verified") {
+            color: #28a745;
+        }
+
+        /* Smooth transitions for form visibility */
+        #editProfileForm,
+        #passwordForm {
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Enhanced button icons */
+        .form-actions button i {
+            font-size: 0.9em;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.65);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
+            padding: 20px;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal-overlay .modal-content {
+            background: white;
+            border-radius: 20px;
+            max-width: 1000px;
+            width: 92%;
+            max-height: 85vh;
+            height: auto;
+            overflow: hidden;
+            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
+            animation: slideUp 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        .modal-overlay .modal-content form {
+            display: flex !important;
+            flex-direction: column !important;
+            height: 100% !important;
+            min-height: 0 !important;
+            overflow: hidden !important;
+        }
+        @media (max-width: 768px) {
+            .modal-overlay .modal-content {
+                width: 98%;
+                max-width: none;
+                max-height: 90vh;
+                border-radius: 12px;
+            }
+        }
+        @media (max-height: 700px) {
+            .modal-overlay .modal-content {
+                max-height: 95vh;
+            }
+        }
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        .modal-overlay .modal-header {
+            padding: 40px 50px 30px;
+            border-bottom: 1px solid #e8e8e8;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #ffffff;
+            flex-shrink: 0;
+        }
+        @media (max-width: 768px) {
+            .modal-overlay .modal-header {
+                padding: 24px 24px 20px;
+            }
+        }
+        .modal-overlay .modal-header h2 {
+            margin: 0;
+            font-size: 28px;
+            color: #2c3e50;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        @media (max-width: 768px) {
+            .modal-overlay .modal-header h2 {
+                font-size: 20px;
+            }
+        }
+        .modal-overlay .modal-header h2 i {
+            color: var(--fg-accent);
+            font-size: 24px;
+        }
+        .modal-overlay .modal-close {
+            background: #f5f7fa;
+            border: none;
+            font-size: 24px;
+            color: #7a8a9e;
+            cursor: pointer;
+            padding: 0;
+            width: 42px;
+            height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s;
+            flex-shrink: 0;
+        }
+        .modal-overlay .modal-close:hover {
+            background: var(--fg-accent);
+            color: white;
+            transform: rotate(90deg) scale(1.05);
+        }
+        .modal-overlay .modal-content .modal-body,
+        #editProfileModal .modal-content .modal-body {
+            padding: 50px !important;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+            flex: 1 1 auto !important;
+            min-height: 0 !important;
+            background: #fafbfc !important;
+            scrollbar-gutter: stable both-edges !important;
+            box-sizing: border-box !important;
+            display: block !important;
+        }
+        .modal-overlay .modal-content .modal-body::-webkit-scrollbar,
+        #editProfileModal .modal-content .modal-body::-webkit-scrollbar {
+            width: 14px !important;
+            -webkit-appearance: none !important;
+        }
+        .modal-overlay .modal-content .modal-body::-webkit-scrollbar-track,
+        #editProfileModal .modal-content .modal-body::-webkit-scrollbar-track {
+            background: #e8e8e8 !important;
+            border-radius: 10px !important;
+            margin: 8px 0 !important;
+        }
+        .modal-overlay .modal-content .modal-body::-webkit-scrollbar-thumb,
+        #editProfileModal .modal-content .modal-body::-webkit-scrollbar-thumb {
+            background: #888 !important;
+            border-radius: 10px !important;
+            border: 3px solid #e8e8e8 !important;
+            min-height: 30px !important;
+        }
+        .modal-overlay .modal-content .modal-body::-webkit-scrollbar-thumb:hover,
+        #editProfileModal .modal-content .modal-body::-webkit-scrollbar-thumb:hover {
+            background: #666 !important;
+        }
+        .modal-overlay .modal-content .modal-body::-webkit-scrollbar-thumb:active,
+        #editProfileModal .modal-content .modal-body::-webkit-scrollbar-thumb:active {
+            background: #555 !important;
+        }
+        /* Firefox scrollbar */
+        .modal-overlay .modal-content .modal-body,
+        #editProfileModal .modal-content .modal-body {
+            scrollbar-width: auto !important;
+            scrollbar-color: #888 #e8e8e8 !important;
+        }
+        @media (max-width: 768px) {
+            .modal-overlay .modal-content .modal-body,
+            #editProfileModal .modal-content .modal-body {
+                padding: 30px 24px !important;
+            }
+            .modal-overlay .modal-footer {
+                padding: 20px 24px !important;
+            }
+        }
+        @media (max-height: 700px) {
+            .modal-overlay .modal-content {
+                max-height: 98vh !important;
+            }
+        }
+        .modal-overlay .modal-body .info-grid {
+            gap: 28px 36px;
+            max-width: 100%;
+        }
+        @media (max-width: 768px) {
+            .modal-overlay .modal-body .info-grid {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+        }
+        .modal-overlay .modal-body .account-info {
+            margin-bottom: 0;
+        }
+        .modal-overlay .modal-body .account-info label {
+            font-size: 12px;
+            font-weight: 700;
+            color: #5a6c7d;
+            margin-bottom: 10px;
+            display: block;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+        .modal-overlay .modal-body .account-info input {
+            padding: 14px 18px;
+            font-size: 15px;
+            border: 1px solid #dce1e7;
+            border-radius: 10px;
+            transition: all 0.3s;
+            width: 100%;
+            box-sizing: border-box;
+            background: white;
+            color: #2c3e50;
+        }
+        .modal-overlay .modal-body .account-info input:hover {
+            border-color: #c0c8d1;
+        }
+        @media (max-width: 768px) {
+            .modal-overlay .modal-body .account-info input {
+                padding: 10px 14px;
+                font-size: 14px;
+            }
+        }
+        .modal-overlay .modal-body .account-info input:focus {
+            border-color: var(--fg-accent);
+            box-shadow: 0 0 0 4px rgba(61, 107, 66, 0.08);
+            outline: none;
+        }
+        .modal-overlay .modal-body .account-info input[type="file"] {
+            padding: 10px;
+            border: 2px dashed #dce1e7;
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .modal-overlay .modal-body .account-info input[type="file"]:hover {
+            border-color: var(--fg-accent);
+            background: #f8f9fa;
+        }
+        .modal-overlay .modal-body .account-info input[type="file"]:focus {
+            border-color: var(--fg-accent);
+            box-shadow: 0 0 0 4px rgba(61, 107, 66, 0.08);
+            outline: none;
+        }
+        .modal-overlay .modal-body .account-info select {
+            padding: 14px 18px;
+            font-size: 15px;
+            border: 1px solid #dce1e7;
+            border-radius: 10px;
+            transition: all 0.3s;
+            width: 100%;
+            box-sizing: border-box;
+            background: white;
+            color: #2c3e50;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 18px center;
+            padding-right: 45px;
+        }
+        .modal-overlay .modal-body .account-info select:hover:not(:disabled) {
+            border-color: #c0c8d1;
+        }
+        .modal-overlay .modal-body .account-info select:focus {
+            border-color: var(--fg-accent);
+            box-shadow: 0 0 0 4px rgba(61, 107, 66, 0.08);
+            outline: none;
+        }
+        .modal-overlay .modal-body .account-info select:disabled {
+            background: #f5f5f5;
+            color: #6b7280;
+            cursor: not-allowed;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239ca3af' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+        }
+        .modal-overlay .modal-body .account-info input[readonly] {
+            background: #f9fafb;
+            color: #6b7280;
+            cursor: not-allowed;
+        }
+        .modal-overlay .modal-footer {
+            padding: 28px 50px !important;
+            border-top: 1px solid #e8e8e8 !important;
+            display: flex !important;
+            gap: 14px !important;
+            justify-content: flex-end !important;
+            background: #ffffff !important;
+            flex-shrink: 0 !important;
+            margin-top: 0 !important;
+        }
+        @media (max-width: 768px) {
+            .modal-overlay .modal-footer {
+                padding: 20px 24px;
+                flex-wrap: wrap;
+            }
+        }
+        .modal-overlay .modal-footer button {
+            padding: 14px 32px;
+            font-size: 15px;
+            font-weight: 600;
+            border-radius: 10px;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+        .modal-overlay .modal-footer .btn-primary {
+            background: linear-gradient(135deg, var(--fg-accent) 0%, #2d5a3d 100%);
+            color: white;
+            box-shadow: 0 4px 14px rgba(61, 107, 66, 0.25);
+        }
+        .modal-overlay .modal-footer .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(61, 107, 66, 0.35);
+        }
+        .modal-overlay .modal-footer .btn-secondary {
+            background: #f5f7fa;
+            color: #5a6c7d;
+            border: 1px solid #dce1e7;
+        }
+        .modal-overlay .modal-footer .btn-secondary:hover {
+            background: #e8ecf1;
+            border-color: #c0c8d1;
+        }
+
+        /* Make Personal Information and Security & Password sections the same width */
+        #securitySection,
+        .account-section#securitySection,
+        .account-section:first-of-type {
+            grid-column: 1 / -1 !important;
+            width: 100%;
+        }
+        @media (min-width: 900px) {
+            .account-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .account-section#securitySection,
+            .account-section:first-of-type {
+                min-width: 0;
+                width: 100%;
+            }
+        }
+
+        .enhanced-profile-card {
+            background: linear-gradient(120deg, #e0eafc 0%, #cfdef3 100%);
+            border-radius: 24px;
+            box-shadow: 0 8px 32px rgba(60,60,60,0.12);
+            display: flex;
+            align-items: center;
+            gap: 32px;
+            padding: 36px 48px 36px 36px;
+            margin-bottom: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+        .enhanced-profile-card .profile-bg {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle at 80% 20%, #3d6b42 0%, transparent 70%);
+            opacity: 0.12;
+            z-index: 0;
+        }
+        .enhanced-profile-card .profile-avatar {
+            z-index: 1;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 16px rgba(60,60,60,0.10);
+            margin-right: 28px;
+            overflow: hidden;
+        }
+        .enhanced-profile-card .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 4px solid #3d6b42;
+        }
+        .enhanced-profile-card .profile-info {
+            z-index: 1;
+            flex: 1;
+        }
+        .enhanced-profile-card .profile-info h1 {
+            font-size: 2.3em;
+            margin: 0 0 12px 0;
+            font-weight: 700;
+            color: #2d3a2e;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .enhanced-profile-card .profile-info .profile-email {
+            color: #3d6b42;
+            margin: 0;
+            font-size: 1.15em;
+            opacity: 0.92;
+            font-weight: 500;
+            letter-spacing: 0.02em;
+        }
+        @media (max-width: 900px) {
+            .enhanced-profile-card { flex-direction: column; align-items: flex-start; padding: 24px; gap: 16px; }
+            .enhanced-profile-card .profile-avatar { margin-right: 0; margin-bottom: 12px; }
+        }
+
+        /* Reviews Section Styles */
+        .review-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+        }
+
+        .review-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+            transform: translateY(-2px);
+        }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .review-product-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
+
+        .review-product-image {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 2px solid var(--fg-cream);
+        }
+
+        .review-product-details h4 {
+            margin: 0 0 4px 0;
+            color: var(--fg-primary);
+            font-size: 1.1em;
+        }
+
+        .review-product-details p {
+            margin: 0;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .review-rating {
+            display: flex;
+            gap: 4px;
+            font-size: 1.2em;
+        }
+
+        .review-rating .star {
+            color: #ffc107;
+        }
+
+        .review-rating .star-empty {
+            color: #ddd;
+        }
+
+        .review-content {
+            color: var(--fg-text);
+            line-height: 1.6;
+            margin: 12px 0;
+            padding: 12px;
+            background: var(--fg-cream);
+            border-radius: 8px;
+        }
+
+        .review-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85em;
+            color: #888;
+            margin-top: 12px;
+        }
+
+        .review-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .review-actions button {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.85em;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-delete {
+            background: #f44336;
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background: #d32f2f;
+        }
+
+        /* Reviewable Orders Styles */
+        .reviewable-item {
+            background: white;
+            border: 2px solid var(--fg-cream);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            transition: all 0.3s ease;
+        }
+
+        .reviewable-item:hover {
+            border-color: var(--fg-accent);
+            box-shadow: 0 4px 12px rgba(196, 127, 27, 0.15);
+        }
+
+        .reviewable-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
+
+        .reviewable-info img {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        .btn-write-review {
+            background: linear-gradient(135deg, var(--fg-accent), var(--fg-accent-hover));
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-write-review:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(196, 127, 27, 0.3);
+        }
+
+        /* Review Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-close {
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #999;
+            transition: color 0.2s;
+        }
+
+        .modal-close:hover {
+            color: #333;
+        }
+
+        .rating-input {
+            display: flex;
+            gap: 8px;
+            font-size: 2em;
+            margin: 15px 0;
+        }
+
+        .rating-input .star {
+            cursor: pointer;
+            color: #ddd;
+            transition: all 0.2s ease;
+        }
+
+        .rating-input .star.active,
+        .rating-input .star:hover {
+            color: #ffc107;
+            transform: scale(1.1);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: var(--fg-primary);
+            margin-bottom: 8px;
+        }
+
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--fg-cream);
+            border-radius: 8px;
+            font-family: "Poppins", sans-serif;
+            font-size: 1em;
+            resize: vertical;
+            min-height: 100px;
+            box-sizing: border-box;
+        }
+
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--fg-accent);
+            box-shadow: 0 0 0 3px rgba(196, 127, 27, 0.1);
+        }
+
+        .char-count {
+            text-align: right;
+            font-size: 0.85em;
+            color: #888;
+            margin-top: 4px;
+        }
+
+        @media (max-width: 768px) {
+            .review-header {
+                flex-direction: column;
+            }
+
+            .reviewable-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+
+    </style>
+</head>
+<body class="account-page">
+    <a class="skip-link" href="#account-container">Skip to content</a>
+
+    <!-- Navbar (copied from index.html for consistent design) -->
+    <div class="navbar" id="navbar">
+        <div class="logo">
+            <a href="index.html">Hub</a>
+        </div>
+
+        <div class="search-bar">
+            <input type="text" placeholder="Search food, drinks, etc...">
+            <button><i class="fa fa-search"></i></button>
+        </div>
+
+        <!-- Single categories toggle: opens a dropdown panel with multiple category links -->
+        <div class="categories-dropdown">
+            <button id="categoriesToggle" class="categories-toggle" aria-expanded="false" aria-controls="categoriesPanel" aria-haspopup="true" title="Categories">
+                <i class="fa fa-th-large" aria-hidden="true"></i>
+                <i class="fa fa-caret-down caret" aria-hidden="true"></i>
+            </button>
+
+            <div id="categoriesPanel" class="categories-panel" hidden>
+                <a href="shop.html?category=Baking" class="panel-item" data-category="Baking">
+                    <i class="fa fa-bread-slice" aria-hidden="true"></i>
+                    <span>Baking</span>
+                </a>
+                <a href="shop.html?category=Coffee & Tea" class="panel-item" data-category="Coffee & Tea">
+                    <i class="fa fa-coffee" aria-hidden="true"></i>
+                    <span>Coffee & Tea</span>
+                </a>
+                <a href="shop.html?category=Snacks" class="panel-item" data-category="Snacks">
+                    <i class="fa fa-cookie-bite" aria-hidden="true"></i>
+                    <span>Snacks</span>
+                </a>
+                <a href="shop.html?category=Specialty" class="panel-item" data-category="Specialty">
+                    <i class="fa fa-globe" aria-hidden="true"></i>
+                    <span>Specialty</span>
+                </a>
+                <a href="shop.html?category=Organic" class="panel-item" data-category="Organic">
+                    <i class="fa fa-leaf" aria-hidden="true"></i>
+                    <span>Organic</span>
+                </a>
+                <a href="#mealkits" class="panel-item" data-target="mealkits">
+                    <i class="fa fa-box-open" aria-hidden="true"></i>
+                    <span>Meal Kits</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="nav-icons">
+            <a href="wishlist.html" id="wishlistBtn" title="Wishlist" class="icon-with-badge">
+                <i class="fa fa-heart"></i>
+                <span class="badge">0</span>
+            </a>
+            <a href="cart.html" id="cartBtn" title="Shopping Cart" class="icon-with-badge">
+                <i class="fa fa-shopping-cart"></i>
+                <span class="badge">0</span>
+            </a>
+            <a href="account.html" title="Account"><i class="fa fa-user"></i></a>
+            
+            <!-- Wishlist Dropdown -->
+            <div id="wishlistDropdown" class="cart-dropdown" hidden>
+                <div class="dropdown-header">Recently Added to Wishlist</div>
+                <div class="dropdown-items">
+                    <div class="dropdown-item">
+                        <img src="https://source.unsplash.com/60x60/?burger" alt="Product" loading="lazy">
+                        <div class="item-details">
+                            <p class="item-name">Cheeseburger Deluxe</p>
+                            <p class="item-price">₱199</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="dropdown-footer">
+                    <p class="items-count">0 items in wishlist</p>
+                    <button class="view-btn">View My Wishlist</button>
+                </div>
+            </div>
+
+            <!-- Cart Dropdown -->
+            <div id="cartDropdown" class="cart-dropdown" hidden>
+                <div class="dropdown-header">Recently Added Products</div>
+                <div class="dropdown-items">
+                    <div class="dropdown-item">
+                        <img src="https://source.unsplash.com/60x60/?milktea" alt="Product" loading="lazy">
+                        <div class="item-details">
+                            <p class="item-name">Sample Product</p>
+                            <p class="item-price">₱0</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="dropdown-footer">
+                    <p class="items-count">0 More Products In Cart</p>
+                    <a class="view-btn" href="cart.html">View My Shopping Cart</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="account-container enhanced-account-container">
+        <div class="profile-card enhanced-profile-card">
+            <div class="profile-bg"></div>
+            <div class="profile-avatar">
+                <img id="profileAvatarImg" src="https://ui-avatars.com/api/?name=Customer&background=3d6b42&color=fff&size=128" alt="Avatar" />
+            </div>
+            <div class="profile-info">
+                <h1>My Account <span class="role-badge" id="roleBadge">Customer</span></h1>
+                <p id="accountEmail" class="profile-email"><i class="fas fa-envelope"></i> Loading...</p>
+            </div>
+        </div>
+        <div class="account-content">
+            <div class="account-grid">
+                <div class="account-section">
+                    <h2><i class="fas fa-user"></i> Personal Information</h2>
+                    <div class="info-grid">
+                        <div class="account-info">
+                            <label>Full Name</label>
+                            <div class="value" id="fullNameDisplay">—</div>
+                        </div>
+                        <div class="account-info">
+                            <label>Phone</label>
+                            <div class="value" id="phoneDisplay">—</div>
+                        </div>
+                        <div class="account-info">
+                            <label>Email Address</label>
+                            <div class="value" id="emailDisplay">—</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Address Information -->
+                    <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid #e5e7eb;">
+                        <h3 style="font-size: 16px; font-weight: 600; color: var(--fg-primary); margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+                            <i class="fas fa-map-marker-alt" style="color: var(--fg-accent);"></i>
+                            Address Information
+                        </h3>
+                        <div class="info-grid">
+                            <div class="account-info">
+                                <label>Address Line 1</label>
+                                <div class="value" id="addressLine1Display">—</div>
+                            </div>
+                            <div class="account-info">
+                                <label>Address Line 2</label>
+                                <div class="value" id="addressLine2Display">—</div>
+                            </div>
+                            <div class="account-info">
+                                <label>Region</label>
+                                <div class="value" id="regionDisplay">—</div>
+                            </div>
+                            <div class="account-info">
+                                <label>Province</label>
+                                <div class="value" id="provinceDisplay">—</div>
+                            </div>
+                            <div class="account-info">
+                                <label>City/Municipality</label>
+                                <div class="value" id="cityDisplay">—</div>
+                            </div>
+                            <div class="account-info">
+                                <label>Postal Code</label>
+                                <div class="value" id="postalCodeDisplay">—</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="account-info">
+                        <label>Account Created</label>
+                        <div class="value" id="createdDate">—</div>
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn-primary" onclick="editProfile()"><i class="fas fa-edit"></i> Edit Profile</button>
+                    </div>
+                </div>
+
+                <!-- Role-Specific Information -->
+                <div class="account-section" id="sellerInfo" style="display: none;">
+                    <h2><i class="fas fa-store"></i> Seller Information</h2>
+                    <div class="account-info">
+                        <label>Business Name</label>
+                        <div class="value" id="businessName">—</div>
+                    </div>
+                    <div class="account-info">
+                        <label>Category</label>
+                        <div class="value" id="category">—</div>
+                    </div>
+                    <div class="account-info">
+                        <label>Verification Status</label>
+                        <div class="value" id="verificationStatus">Pending</div>
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn-primary" onclick="goToSellerDashboard()"><i class="fas fa-tachometer-alt"></i> Go to Dashboard</button>
+                    </div>
+                </div>
+
+                <div class="account-section" id="riderInfo" style="display: none;">
+                    <h2><i class="fas fa-motorcycle"></i> Rider Information</h2>
+                    <div class="account-info">
+                        <label>Vehicle Type</label>
+                        <div class="value" id="vehicleType">—</div>
+                    </div>
+                    <div class="account-info">
+                        <label>Driver License</label>
+                        <div class="value" id="driverLicense">—</div>
+                    </div>
+                    <div class="account-info">
+                        <label>Verification Status</label>
+                        <div class="value" id="riderVerificationStatus">Pending</div>
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn-primary" onclick="goToRiderDashboard()"><i class="fas fa-tachometer-alt"></i> Go to Dashboard</button>
+                    </div>
+                </div>
+
+                <!-- Order History Section -->
+                <div class="account-section" id="orderHistorySection" style="grid-column: 1 / -1;">
+                    <h2><i class="fas fa-shopping-bag"></i> My Orders</h2>
+                    <div id="orderHistoryContainer">
+                        <div style="text-align: center; padding: 40px;">
+                            <div class="spinner" style="margin: 0 auto;"></div>
+                            <p>Loading orders...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- My Reviews Section -->
+                <div class="account-section" id="myReviewsSection" style="grid-column: 1 / -1;">
+                    <h2><i class="fas fa-star"></i> My Reviews</h2>
+                    <p style="color: #666; margin-bottom: 20px;">Review products you've purchased and request returns or refunds</p>
+                    <div id="reviewsContainer">
+                        <div style="text-align: center; padding: 40px;">
+                            <div class="spinner" style="margin: 0 auto;"></div>
+                            <p>Loading products...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Edit Profile Modal -->
+                <div class="modal-overlay" id="editProfileModal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h2><i class="fas fa-edit"></i> Edit Personal Information</h2>
+                            <button type="button" class="modal-close" onclick="closeEditModal()">&times;</button>
+                        </div>
+                        <form onsubmit="saveProfile(event)">
+                            <div class="modal-body">
+                                <div class="info-grid">
+                                    <div class="account-info">
+                                        <label for="editFirstName">First Name <span style="color: #ef4444;">*</span></label>
+                                        <input type="text" id="editFirstName" required>
+                                        <div class="error" id="firstNameError"></div>
+                                    </div>
+                                    <div class="account-info">
+                                        <label for="editMiddleName">Middle Name <span style="color: #6b7280; font-size: 12px; font-weight: normal;">(Optional)</span></label>
+                                        <input type="text" id="editMiddleName" placeholder="Enter middle name">
+                                    </div>
+                                    <div class="account-info">
+                                        <label for="editLastName">Last Name <span style="color: #ef4444;">*</span></label>
+                                        <input type="text" id="editLastName" required>
+                                        <div class="error" id="lastNameError"></div>
+                                    </div>
+                                    <div class="account-info">
+                                        <label for="editSuffix">Suffix <span style="color: #6b7280; font-size: 12px; font-weight: normal;">(Optional)</span></label>
+                                        <input type="text" id="editSuffix" placeholder="e.g., Jr., Sr., III" maxlength="10">
+                                        <small style="display: block; margin-top: 6px; color: #6b7280; font-size: 12px;">
+                                            <i class="fas fa-info-circle"></i> Examples: Jr., Sr., II, III, IV
+                                        </small>
+                                    </div>
+                                    <div class="account-info">
+                                        <label for="editPhone">Phone <span style="color: #ef4444;">*</span></label>
+                                        <input type="text" id="editPhone" placeholder="09171234567" required>
+                                        <div class="error" id="phoneError"></div>
+                                    </div>
+                                    <div class="account-info">
+                                        <label for="editEmail">Email Address <span style="color: #ef4444;">*</span></label>
+                                        <input type="email" id="editEmail" placeholder="your.email@example.com" required>
+                                        <div class="error" id="emailError"></div>
+                                    </div>
+                                    <div class="account-info" style="grid-column: 1 / -1;">
+                                        <label for="editAvatarFile">
+                                            <i class="fas fa-image" style="margin-right: 6px;"></i>
+                                            Profile Picture
+                                        </label>
+                                        <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
+                                            <div style="position: relative;">
+                                                <div id="avatarPreviewContainer" style="width: 100px; height: 100px; border-radius: 50%; background: linear-gradient(135deg, #f8fafc 60%, #e0eafc 100%); border: 3px solid #dce1e7; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative;">
+                                                    <img id="avatarPreviewImg" src="" alt="Preview" style="width: 100%; height: 100%; object-fit: cover; display: none;">
+                                                    <i class="fas fa-user" id="avatarPreviewIcon" style="font-size: 40px; color: #9ca3af;"></i>
+                                                </div>
+                                                <div id="avatarUploadProgress" style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.7); color: white; padding: 8px 12px; border-radius: 8px; font-size: 12px; z-index: 10;">
+                                                    <i class="fas fa-spinner fa-spin"></i> Uploading...
+                                                </div>
+                                            </div>
+                                            <div style="flex: 1; min-width: 200px;">
+                                                <input type="file" id="editAvatarFile" accept="image/*" style="padding: 10px; border: 1px solid #dce1e7; border-radius: 10px; width: 100%; cursor: pointer; background: white;" onchange="handleAvatarUpload(event)">
+                                                <small style="display: block; margin-top: 6px; color: #6b7280; font-size: 12px;">
+                                                    <i class="fas fa-info-circle"></i> Recommended: Square image, max 5MB (JPG, PNG, GIF)
+                                                </small>
+                                                <div id="avatarUploadError" style="display: none; margin-top: 8px; padding: 8px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 6px; color: #991b1b; font-size: 12px;"></div>
+                                                <div id="avatarUploadSuccess" style="display: none; margin-top: 8px; padding: 8px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; color: #166534; font-size: 12px;">
+                                                    <i class="fas fa-check-circle"></i> Avatar updated successfully!
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="account-info">
+                                        <label for="editAddressLine1">Address Line 1</label>
+                                        <input type="text" id="editAddressLine1" placeholder="Street, Building">
+                                    </div>
+                                    <div class="account-info">
+                                        <label for="editAddressLine2">Address Line 2</label>
+                                        <input type="text" id="editAddressLine2" placeholder="Barangay / Additional info">
+                                    </div>
+                                    <div class="account-info">
+                                        <label for="editRegion">
+                                            <i class="fas fa-map-marker-alt" style="margin-right: 6px;"></i>
+                                            Region
+                                        </label>
+                                        <input type="text" id="editRegion" value="Region IV-A (CALABARZON)" readonly style="padding: 14px 18px; font-size: 15px; border: 1px solid #dce1e7; border-radius: 10px; width: 100%; box-sizing: border-box; background: #f9fafb; color: #6b7280; cursor: not-allowed;">
+                                    </div>
+                                    <div class="account-info">
+                                        <label for="editProvince">
+                                            <i class="fas fa-map" style="margin-right: 6px;"></i>
+                                            Province <span style="color: #ef4444;">*</span>
+                                        </label>
+                                        <select id="editProvince" disabled onchange="handleProvinceChange()" style="padding: 14px 18px; font-size: 15px; border: 1px solid #dce1e7; border-radius: 10px; width: 100%; box-sizing: border-box; background: #f5f5f5; color: #6b7280; cursor: not-allowed;">
+                                            <option value="">Select Province</option>
+                                        </select>
+                                    </div>
+                                    <div class="account-info">
+                                        <label for="editCity">
+                                            <i class="fas fa-city" style="margin-right: 6px;"></i>
+                                            City/Municipality <span style="color: #ef4444;">*</span>
+                                        </label>
+                                        <select id="editCity" disabled onchange="handleCityChange()" style="padding: 14px 18px; font-size: 15px; border: 1px solid #dce1e7; border-radius: 10px; width: 100%; box-sizing: border-box; background: #f5f5f5; color: #6b7280; cursor: not-allowed;">
+                                            <option value="">Select City</option>
+                                        </select>
+                                    </div>
+                                    <div class="account-info">
+                                        <label for="editPostalCode">
+                                            <i class="fas fa-mail-bulk" style="margin-right: 6px;"></i>
+                                            Postal Code
+                                        </label>
+                                        <input type="text" id="editPostalCode" placeholder="Postal Code" readonly style="padding: 14px 18px; font-size: 15px; border: 1px solid #dce1e7; border-radius: 10px; width: 100%; box-sizing: border-box; background: #f9fafb; color: #6b7280; cursor: not-allowed;">
+                                    </div>
+                                </div>
+                                <div class="success" id="profileSuccess" style="display: none;"></div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn-secondary" onclick="closeEditModal()"><i class="fas fa-times"></i> Cancel</button>
+                                <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Save Changes</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Security Section -->
+                <div class="account-section" id="securitySection" style="grid-column: 1 / -1;">
+                    <h2><i class="fas fa-shield-alt"></i> Security & Password</h2>
+                    <form onsubmit="changePassword(event)" id="passwordForm" style="display: none;">
+                        <div class="account-info">
+                            <label for="currentPassword">Current Password</label>
+                            <input type="password" id="currentPassword" required>
+                            <div class="error" id="currentPasswordError"></div>
+                        </div>
+                        <div class="info-grid">
+                            <div class="account-info">
+                                <label for="newPassword">New Password</label>
+                                <input type="password" id="newPassword" required>
+                                <div class="error" id="newPasswordError"></div>
+                            </div>
+                            <div class="account-info">
+                                <label for="confirmPassword">Confirm Password</label>
+                                <input type="password" id="confirmPassword" required>
+                                <div class="error" id="confirmPasswordError"></div>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn-secondary" onclick="togglePasswordForm()"><i class="fas fa-times"></i> Cancel</button>
+                            <button type="submit" class="btn-primary"><i class="fas fa-key"></i> Change Password</button>
+                        </div>
+                        <div class="success" id="passwordSuccess"></div>
+                    </form>
+                    <div id="passwordFormToggle">
+                        <button class="btn-secondary" onclick="togglePasswordForm()"><i class="fas fa-key"></i> Change Password</button>
+                    </div>
+                </div>
+
+                <!-- Account Actions -->
+                <div class="account-section account-actions">
+                    <h2><i class="fas fa-cog"></i> Account Actions</h2>
+                    <div class="form-actions">
+                        <button class="btn-danger" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Review Modal -->
+    <div id="reviewModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-star"></i> Write a Review</h2>
+                <span class="modal-close" onclick="closeReviewModal()">&times;</span>
+            </div>
+            <form onsubmit="submitReview(event)">
+                <input type="hidden" id="reviewOrderId">
+                <input type="hidden" id="reviewProductId">
+                <input type="hidden" id="reviewRatingValue" value="0">
+                
+                <div class="review-product-info" style="margin-bottom: 20px;">
+                    <img id="reviewProductImage" src="" alt="Product" class="review-product-image">
+                    <div class="review-product-details">
+                        <h4 id="reviewProductName"></h4>
+                        <p id="reviewSellerName"></p>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Rating *</label>
+                    <div class="rating-input">
+                        <i class="fas fa-star star" onclick="setRating(1)"></i>
+                        <i class="fas fa-star star" onclick="setRating(2)"></i>
+                        <i class="fas fa-star star" onclick="setRating(3)"></i>
+                        <i class="fas fa-star star" onclick="setRating(4)"></i>
+                        <i class="fas fa-star star" onclick="setRating(5)"></i>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Your Review (Optional)</label>
+                    <textarea id="reviewComment" placeholder="Share your experience with this product..." maxlength="500" oninput="updateCharCount()"></textarea>
+                    <div class="char-count" id="charCount">0/500</div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" onclick="closeReviewModal()">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-paper-plane"></i> Submit Review
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/notifications.js"></script>
+    <script src="js/auth-guard.js"></script>
+    <script src="js/session-validator.js"></script>
+    <script src="js/script.js"></script>
+    <script>
+        // Region IV-A (CALABARZON) Address Data Structure
+        const calabarzonData = {
+            region: "Region IV-A (CALABARZON)",
+            provinces: [
+                    {
+                        province: "Cavite",
+                        cities: [
+                            { city: "Cavite City", postalCode: "4100" },
+                            { city: "Bacoor", postalCode: "4102" },
+                            { city: "Imus", postalCode: "4103" },
+                            { city: "Kawit", postalCode: "4104" },
+                            { city: "Noveleta", postalCode: "4105" },
+                            { city: "Rosario", postalCode: "4106" },
+                            { city: "General Trias", postalCode: "4107" },
+                            { city: "Tanza", postalCode: "4108" },
+                            { city: "Trece Martires", postalCode: "4109" },
+                            { city: "Dasmariñas", postalCode: "4114" },
+                            { city: "General Mariano Alvarez", postalCode: "4117" },
+                            { city: "Silang", postalCode: "4118" },
+                            { city: "Amadeo", postalCode: "4119" },
+                            { city: "Tagaytay", postalCode: "4120" },
+                            { city: "Indang", postalCode: "4122" },
+                            { city: "Alfonso", postalCode: "4123" },
+                            { city: "General Emilio Aguinaldo", postalCode: "4124" },
+                            { city: "Magallanes", postalCode: "4113" },
+                            { city: "Maragondon", postalCode: "4112" },
+                            { city: "Naic", postalCode: "4110" },
+                            { city: "Ternate", postalCode: "4111" }
+                        ]
+                    },
+                    {
+                        province: "Laguna",
+                        cities: [
+                            { city: "Santa Rosa", postalCode: "4026" },
+                            { city: "Calamba", postalCode: "4027" },
+                            { city: "San Pedro", postalCode: "4023" },
+                            { city: "Biñan", postalCode: "4024" },
+                            { city: "Los Baños", postalCode: "4030" },
+                            { city: "San Pablo", postalCode: "4000" },
+                            { city: "Cabuyao", postalCode: "4025" },
+                            { city: "Calauan", postalCode: "4012" },
+                            { city: "Alaminos", postalCode: "4001" },
+                            { city: "Bay", postalCode: "4033" },
+                            { city: "Liliw", postalCode: "4004" },
+                            { city: "Nagcarlan", postalCode: "4002" },
+                            { city: "Pagsanjan", postalCode: "4008" },
+                            { city: "Paete", postalCode: "4016" },
+                            { city: "Pakil", postalCode: "4017" },
+                            { city: "Pangil", postalCode: "4018" },
+                            { city: "Pila", postalCode: "4010" },
+                            { city: "Rizal", postalCode: "4003" },
+                            { city: "San Antonio", postalCode: "4020" },
+                            { city: "Santa Cruz", postalCode: "4009" },
+                            { city: "Santa Maria", postalCode: "4022" },
+                            { city: "Siniloan", postalCode: "4019" },
+                            { city: "Victoria", postalCode: "4011" }
+                        ]
+                    },
+                    {
+                        province: "Batangas",
+                        cities: [
+                            { city: "Batangas City", postalCode: "4200" },
+                            { city: "Lipa", postalCode: "4217" },
+                            { city: "Tanauan", postalCode: "4232" },
+                            { city: "Bauan", postalCode: "4201" },
+                            { city: "Calaca", postalCode: "4212" },
+                            { city: "Calatagan", postalCode: "4215" },
+                            { city: "Cuenca", postalCode: "4222" },
+                            { city: "Ibaan", postalCode: "4230" },
+                            { city: "Laurel", postalCode: "4221" },
+                            { city: "Lemery", postalCode: "4209" },
+                            { city: "Lian", postalCode: "4216" },
+                            { city: "Lobo", postalCode: "4229" },
+                            { city: "Mabini", postalCode: "4202" },
+                            { city: "Malvar", postalCode: "4233" },
+                            { city: "Mataasnakahoy", postalCode: "4223" },
+                            { city: "Nasugbu", postalCode: "4231" },
+                            { city: "Padre Garcia", postalCode: "4224" },
+                            { city: "Rosario", postalCode: "4225" },
+                            { city: "San Jose", postalCode: "4227" },
+                            { city: "San Juan", postalCode: "4226" },
+                            { city: "San Luis", postalCode: "4210" },
+                            { city: "San Nicolas", postalCode: "4207" },
+                            { city: "San Pascual", postalCode: "4204" },
+                            { city: "Santa Teresita", postalCode: "4206" },
+                            { city: "Santo Tomas", postalCode: "4234" },
+                            { city: "Taal", postalCode: "4208" },
+                            { city: "Talisay", postalCode: "4220" },
+                            { city: "Taysan", postalCode: "4228" },
+                            { city: "Tingloy", postalCode: "4203" },
+                            { city: "Tuy", postalCode: "4214" }
+                        ]
+                    },
+                    {
+                        province: "Rizal",
+                        cities: [
+                            { city: "Antipolo", postalCode: "1870" },
+                            { city: "Cainta", postalCode: "1900" },
+                            { city: "Taytay", postalCode: "1920" },
+                            { city: "Binangonan", postalCode: "1940" },
+                            { city: "Angono", postalCode: "1930" },
+                            { city: "Baras", postalCode: "1970" },
+                            { city: "Cardona", postalCode: "1950" },
+                            { city: "Jalajala", postalCode: "1990" },
+                            { city: "Morong", postalCode: "1960" },
+                            { city: "Pililla", postalCode: "1910" },
+                            { city: "Rodriguez", postalCode: "1860" },
+                            { city: "San Mateo", postalCode: "1850" },
+                            { city: "Tanay", postalCode: "1980" },
+                            { city: "Teresa", postalCode: "1880" }
+                        ]
+                    },
+                    {
+                        province: "Quezon",
+                        cities: [
+                            { city: "Lucena", postalCode: "4301" },
+                            { city: "Tayabas", postalCode: "4327" },
+                            { city: "Sariaya", postalCode: "4322" },
+                            { city: "Candelaria", postalCode: "4323" },
+                            { city: "Dolores", postalCode: "4326" },
+                            { city: "Tiaong", postalCode: "4325" },
+                            { city: "San Antonio", postalCode: "4324" },
+                            { city: "Lopez", postalCode: "4316" },
+                            { city: "Gumaca", postalCode: "4307" },
+                            { city: "Atimonan", postalCode: "4331" },
+                            { city: "Unisan", postalCode: "4305" },
+                            { city: "Pitogo", postalCode: "4308" },
+                            { city: "Mulanay", postalCode: "4312" },
+                            { city: "San Francisco", postalCode: "4315" },
+                            { city: "San Narciso", postalCode: "4313" },
+                            { city: "Buenavista", postalCode: "4320" },
+                            { city: "Catanauan", postalCode: "4311" },
+                            { city: "General Luna", postalCode: "4310" },
+                            { city: "Macalelon", postalCode: "4309" },
+                            { city: "Mulanay", postalCode: "4312" },
+                            { city: "Padre Burgos", postalCode: "4303" },
+                            { city: "Pagbilao", postalCode: "4302" },
+                            { city: "Perez", postalCode: "4334" },
+                            { city: "Plaridel", postalCode: "4306" },
+                            { city: "Polillo", postalCode: "4339" },
+                            { city: "Quezon", postalCode: "4338" },
+                            { city: "Real", postalCode: "4335" },
+                            { city: "Sampaloc", postalCode: "4329" },
+                            { city: "San Andres", postalCode: "4314" },
+                            { city: "Tagkawayan", postalCode: "4321" }
+                        ]
+                    }
+                ]
+        };
+
+        // Initialize address dropdowns - populate provinces for CALABARZON
+        function initializeAddressDropdowns() {
+            const provinceSelect = document.getElementById('editProvince');
+            if (!provinceSelect) return;
+            
+            // Populate provinces for CALABARZON
+            calabarzonData.provinces.forEach((province, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = province.province;
+                provinceSelect.appendChild(option);
+            });
+            
+            // Enable province dropdown
+            provinceSelect.disabled = false;
+            provinceSelect.style.background = 'white';
+            provinceSelect.style.color = '#2c3e50';
+            provinceSelect.style.cursor = 'pointer';
+        }
+
+        // Handle province change
+        function handleProvinceChange() {
+            const provinceSelect = document.getElementById('editProvince');
+            const citySelect = document.getElementById('editCity');
+            const postalCodeInput = document.getElementById('editPostalCode');
+            
+            const provinceIndex = provinceSelect.value;
+            
+            // Reset city and postal code
+            citySelect.innerHTML = '<option value="">Select City</option>';
+            citySelect.disabled = true;
+            postalCodeInput.value = '';
+            
+            if (!provinceIndex) return;
+            
+            const province = calabarzonData.provinces[provinceIndex];
+            if (!province) return;
+            
+            // Populate cities
+            province.cities.forEach((city, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = city.city;
+                // Store postal code in data attribute for easy access
+                option.dataset.postalCode = city.postalCode || '';
+                citySelect.appendChild(option);
+            });
+            
+            console.log(`✅ Cities loaded for ${province.province}: ${province.cities.length} cities`);
+            
+            citySelect.disabled = false;
+            citySelect.style.background = 'white';
+            citySelect.style.color = '#2c3e50';
+            citySelect.style.cursor = 'pointer';
+        }
+
+        // Handle city change
+        function handleCityChange() {
+            const provinceSelect = document.getElementById('editProvince');
+            const citySelect = document.getElementById('editCity');
+            const postalCodeInput = document.getElementById('editPostalCode');
+            
+            if (!provinceSelect || !citySelect || !postalCodeInput) return;
+            
+            const provinceIndex = provinceSelect.value;
+            const cityIndex = citySelect.value;
+            
+            // Clear postal code if no province or city selected
+            if (!provinceIndex || !cityIndex) {
+                postalCodeInput.value = '';
+                return;
+            }
+            
+            const province = calabarzonData.provinces[provinceIndex];
+            if (!province) {
+                postalCodeInput.value = '';
+                return;
+            }
+            
+            const city = province.cities[cityIndex];
+            if (!city) {
+                postalCodeInput.value = '';
+                return;
+            }
+            
+            // Set postal code
+            if (city.postalCode) {
+                postalCodeInput.value = city.postalCode;
+                console.log('✅ Postal code updated to:', city.postalCode);
+            } else {
+                postalCodeInput.value = '';
+            }
+        }
+
+        // Set address values from saved data
+        function setAddressFromSaved(region, province, city, postalCode) {
+            if (!province || !city) return;
+            
+            const provinceSelect = document.getElementById('editProvince');
+            const citySelect = document.getElementById('editCity');
+            const postalCodeInput = document.getElementById('editPostalCode');
+            
+            if (!provinceSelect || !citySelect || !postalCodeInput) return;
+            
+            // Find matching province in CALABARZON
+            let provinceIndex = -1;
+            for (let i = 0; i < calabarzonData.provinces.length; i++) {
+                if (calabarzonData.provinces[i].province === province) {
+                    provinceIndex = i;
+                    break;
+                }
+            }
+            
+            if (provinceIndex === -1) return;
+            
+            provinceSelect.value = provinceIndex;
+            handleProvinceChange();
+            
+            // Find matching city
+            const provinceData = calabarzonData.provinces[provinceIndex];
+            let cityIndex = -1;
+            for (let i = 0; i < provinceData.cities.length; i++) {
+                if (provinceData.cities[i].city === city) {
+                    cityIndex = i;
+                    break;
+                }
+            }
+            
+            if (cityIndex === -1) return;
+            
+            citySelect.value = cityIndex;
+            handleCityChange();
+            
+            // Set postal code if provided
+            if (postalCode) {
+                postalCodeInput.value = postalCode;
+            }
+        }
+
+        // Get address values for saving
+        function getAddressValues() {
+            const provinceSelect = document.getElementById('editProvince');
+            const citySelect = document.getElementById('editCity');
+            const postalCodeInput = document.getElementById('editPostalCode');
+            
+            const provinceIndex = provinceSelect.value;
+            const cityIndex = citySelect.value;
+            
+            if (!provinceIndex || !cityIndex) {
+                return {
+                    region: calabarzonData.region,
+                    province: '',
+                    city: '',
+                    postal_code: ''
+                };
+            }
+            
+            const province = calabarzonData.provinces[provinceIndex];
+            const city = province.cities[cityIndex];
+            
+            return {
+                region: calabarzonData.region,
+                province: province.province,
+                city: city.city,
+                postal_code: postalCodeInput.value || city.postalCode
+            };
+        }
+
+        // Immediate authentication check - prevent any display without valid token
+        (function() {
+            const token = localStorage.getItem('hub_access_token');
+            if (!token) {
+                // No token, redirect immediately before any content loads
+                window.location.href = '/loginregister.html';
+                return;
+            }
+        })();
+
+        // Session check: redirect if no token
+        function checkSession() {
+            const token = localStorage.getItem('hub_access_token');
+            if (!token) {
+                window.location.href = '/loginregister.html';
+                return;
+            }
+        }
+
+        // Load user profile on page load
+        async function loadProfile() {
+            console.log('=== LOAD PROFILE START ===');
+            checkSession();
+            const token = localStorage.getItem('hub_access_token');
+            if (!token) {
+                console.warn('No token found, skipping profile load');
+                return;
+            }
+
+            try {
+                // Always fetch fresh data with cache-busting
+                const timestamp = `?t=${Date.now()}`;
+                const url = `/api/me${timestamp}`;
+                console.log('Fetching profile from:', url);
+                console.log('Using authFetch:', typeof authFetch);
+                
+                const response = await authFetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Cache-Control': 'no-cache',
+                        'Pragma': 'no-cache'
+                    }
+                });
+
+                console.log('Load profile response:', { 
+                    status: response.status, 
+                    statusText: response.statusText,
+                    ok: response.ok 
+                });
+
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        console.warn('Unauthorized, redirecting to login');
+                        localStorage.removeItem('hub_access_token');
+                        window.location.href = '/loginregister.html';
+                        return;
+                    }
+                    const errorText = await response.text().catch(() => 'Unknown error');
+                    console.error('Failed to load profile:', { status: response.status, errorText });
+                    throw new Error(`Failed to load profile (Status: ${response.status})`);
+                }
+
+                let data;
+                try {
+                    const responseText = await response.text();
+                    console.log('Response text:', responseText);
+                    data = JSON.parse(responseText);
+                } catch (parseError) {
+                    console.error('Failed to parse response as JSON:', parseError);
+                    throw new Error('Invalid response from server');
+                }
+                
+                console.log('Parsed profile data:', data);
+                console.log('Data check:', { 
+                    success: data.success, 
+                    hasData: !!data.data,
+                    dataKeys: data.data ? Object.keys(data.data) : []
+                });
+                
+                if (data.success && data.data) {
+                    console.log('✅ Profile data found, populating UI...');
+                    console.log('User data:', {
+                        first_name: data.data.first_name,
+                        last_name: data.data.last_name,
+                        email: data.data.email,
+                        phone: data.data.phone,
+                        address_line1: data.data.address_line1,
+                        province: data.data.province,
+                        city: data.data.city
+                    });
+                    populateProfile(data.data);
+                    console.log('✅ Profile populated successfully');
+                } else if (data.data) {
+                    // Handle case where data is directly in response
+                    console.log('Profile data found (alternative format), populating UI...');
+                    populateProfile(data.data);
+                } else {
+                    console.warn('⚠️ No profile data in response:', data);
+                    throw new Error('No profile data received');
+                }
+                
+                console.log('=== LOAD PROFILE SUCCESS ===');
+            } catch (error) {
+                console.error('❌ Load profile error:', error);
+                console.error('Error stack:', error.stack);
+                alert('Failed to load profile. Redirecting to login.');
+                window.location.href = '/loginregister.html';
+                console.log('=== LOAD PROFILE FAILED ===');
+            }
+        }
+
+        function getUserIdFromToken() {
+            const token = localStorage.getItem('hub_access_token');
+            if (!token) return null;
+            try {
+                const parts = token.split('.');
+                const decoded = JSON.parse(atob(parts[1]));
+                return decoded.user_id;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function getRoleFromToken() {
+            const token = localStorage.getItem('hub_access_token');
+            if (!token) return 'customer';
+            try {
+                const parts = token.split('.');
+                const decoded = JSON.parse(atob(parts[1]));
+                return decoded.role || 'customer';
+            } catch (e) {
+                return 'customer';
+            }
+        }
+
+        function populateProfile(user) {
+            console.log('=== POPULATE PROFILE START ===');
+            console.log('User object received:', user);
+            
+            if (!user) {
+                console.error('No user object provided to populateProfile');
+                return;
+            }
+            
+            const role = getRoleFromToken();
+            console.log('User role:', role);
+            
+            try {
+                // Set header info
+                const accountEmailEl = document.getElementById('accountEmail');
+                if (accountEmailEl) {
+                    accountEmailEl.innerHTML = '<i class="fas fa-envelope"></i> ' + (user.email || 'Loading...');
+                }
+                
+                const roleBadgeEl = document.getElementById('roleBadge');
+                if (roleBadgeEl) {
+                    roleBadgeEl.textContent = role.charAt(0).toUpperCase() + role.slice(1);
+                    roleBadgeEl.className = 'role-badge ' + role;
+                }
+
+                // Personal info - format full name
+                const fullName = formatFullName(user.first_name, user.middle_name, user.last_name, user.suffix);
+                console.log('Formatted full name:', fullName);
+                
+                const fullNameDisplayEl = document.getElementById('fullNameDisplay');
+                if (fullNameDisplayEl) {
+                    fullNameDisplayEl.textContent = fullName || '—';
+                }
+                
+                const emailDisplayEl = document.getElementById('emailDisplay');
+                if (emailDisplayEl) {
+                    emailDisplayEl.textContent = user.email || '—';
+                }
+                
+                const phoneDisplayEl = document.getElementById('phoneDisplay');
+                if (phoneDisplayEl) {
+                    phoneDisplayEl.textContent = user.phone || '—';
+                }
+                
+                // Address information
+                const addressLine1DisplayEl = document.getElementById('addressLine1Display');
+                if (addressLine1DisplayEl) {
+                    addressLine1DisplayEl.textContent = user.address_line1 || '—';
+                }
+                
+                const addressLine2DisplayEl = document.getElementById('addressLine2Display');
+                if (addressLine2DisplayEl) {
+                    addressLine2DisplayEl.textContent = user.address_line2 || '—';
+                }
+                
+                const regionDisplayEl = document.getElementById('regionDisplay');
+                if (regionDisplayEl) {
+                    regionDisplayEl.textContent = user.region || 'Region IV-A (CALABARZON)';
+                }
+                
+                const provinceDisplayEl = document.getElementById('provinceDisplay');
+                if (provinceDisplayEl) {
+                    provinceDisplayEl.textContent = user.province || '—';
+                }
+                
+                const cityDisplayEl = document.getElementById('cityDisplay');
+                if (cityDisplayEl) {
+                    cityDisplayEl.textContent = user.city || '—';
+                }
+                
+                const postalCodeDisplayEl = document.getElementById('postalCodeDisplay');
+                if (postalCodeDisplayEl) {
+                    postalCodeDisplayEl.textContent = user.postal_code || '—';
+                }
+                
+                if (user.created_at) {
+                    const date = new Date(user.created_at);
+                    const createdDateEl = document.getElementById('createdDate');
+                    if (createdDateEl) {
+                        createdDateEl.textContent = date.toLocaleDateString();
+                    }
+                }
+
+                // Set edit form initial values
+                const editFirstNameEl = document.getElementById('editFirstName');
+                if (editFirstNameEl) {
+                    editFirstNameEl.value = user.first_name || '';
+                    console.log('Set editFirstName:', user.first_name);
+                }
+                
+                const editMiddleNameEl = document.getElementById('editMiddleName');
+                if (editMiddleNameEl) {
+                    editMiddleNameEl.value = user.middle_name || '';
+                }
+                
+                const editLastNameEl = document.getElementById('editLastName');
+                if (editLastNameEl) {
+                    editLastNameEl.value = user.last_name || '';
+                    console.log('Set editLastName:', user.last_name);
+                }
+                
+                const editSuffixEl = document.getElementById('editSuffix');
+                if (editSuffixEl) {
+                    editSuffixEl.value = user.suffix || '';
+                }
+                
+                const editPhoneEl = document.getElementById('editPhone');
+                if (editPhoneEl) {
+                    editPhoneEl.value = user.phone || '';
+                    console.log('Set editPhone:', user.phone);
+                }
+                
+                const editEmailEl = document.getElementById('editEmail');
+                if (editEmailEl) {
+                    editEmailEl.value = user.email || '';
+                    console.log('Set editEmail:', user.email);
+                }
+                
+                const editAddressLine1El = document.getElementById('editAddressLine1');
+                if (editAddressLine1El) {
+                    editAddressLine1El.value = user.address_line1 || '';
+                    console.log('Set editAddressLine1:', user.address_line1);
+                }
+                
+                const editAddressLine2El = document.getElementById('editAddressLine2');
+                if (editAddressLine2El) {
+                    editAddressLine2El.value = user.address_line2 || '';
+                }
+                
+                // Set address dropdowns if values exist
+                if (user.region && user.province && user.city) {
+                    console.log('Setting address dropdowns:', { region: user.region, province: user.province, city: user.city });
+                    setAddressFromSaved(user.region, user.province, user.city, user.postal_code);
+                } else {
+                    console.log('Address values missing, skipping dropdown setup');
+                }
+                
+                // Set avatar preview
+                updateAvatarPreview(user.avatar_url);
+
+                // Show role-specific sections
+                if (role === 'seller' && user.seller) {
+                    const sellerInfoEl = document.getElementById('sellerInfo');
+                    if (sellerInfoEl) {
+                        sellerInfoEl.style.display = 'block';
+                    }
+                    const businessNameEl = document.getElementById('businessName');
+                    if (businessNameEl) {
+                        businessNameEl.textContent = user.seller.business_name || '—';
+                    }
+                    const categoryEl = document.getElementById('category');
+                    if (categoryEl) {
+                        categoryEl.textContent = user.seller.category || '—';
+                    }
+                    const verificationStatusEl = document.getElementById('verificationStatus');
+                    if (verificationStatusEl) {
+                        verificationStatusEl.innerHTML = 
+                            (user.seller.verified ? '<i class="fas fa-check-circle" style="color: #28a745;"></i> Verified' : '<i class="fas fa-clock" style="color: #ffc107;"></i> Pending Review');
+                    }
+                }
+
+                if (role === 'rider' && user.rider) {
+                    const riderInfoEl = document.getElementById('riderInfo');
+                    if (riderInfoEl) {
+                        riderInfoEl.style.display = 'block';
+                    }
+                    const vehicleTypeEl = document.getElementById('vehicleType');
+                    if (vehicleTypeEl) {
+                        vehicleTypeEl.textContent = user.rider.vehicle_type || '—';
+                    }
+                    const driverLicenseEl = document.getElementById('driverLicense');
+                    if (driverLicenseEl) {
+                        driverLicenseEl.textContent = user.rider.driver_license || '—';
+                    }
+                    const riderVerificationStatusEl = document.getElementById('riderVerificationStatus');
+                    if (riderVerificationStatusEl) {
+                        riderVerificationStatusEl.innerHTML = 
+                            (user.rider.verified ? '<i class="fas fa-check-circle" style="color: #28a745;"></i> Verified' : '<i class="fas fa-clock" style="color: #ffc107;"></i> Pending Review');
+                    }
+                }
+                
+                console.log('=== POPULATE PROFILE SUCCESS ===');
+            } catch (error) {
+                console.error('❌ Error in populateProfile:', error);
+                console.error('Error stack:', error.stack);
+            }
+        }
+
+        // Format full name helper function
+        function formatFullName(firstName, middleName, lastName, suffix) {
+            if (!firstName && !lastName) return '';
+            
+            const parts = [];
+            if (firstName) parts.push(firstName);
+            if (middleName) parts.push(middleName);
+            if (lastName) parts.push(lastName);
+            if (suffix) parts.push(suffix);
+            
+            return parts.join(' ');
+        }
+
+        function editProfile() {
+            // Modal values are already populated by populateProfile when profile loads
+            // Show modal
+            document.getElementById('editProfileModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeEditModal() {
+            document.getElementById('editProfileModal').classList.remove('active');
+            document.body.style.overflow = 'auto';
+            clearErrors();
+        }
+
+        // Close modal when clicking outside
+        document.addEventListener('click', function(event) {
+            const modal = document.getElementById('editProfileModal');
+            if (event.target === modal) {
+                closeEditModal();
+            }
+        });
+
+        // Validation functions (shared with cart.html)
+        function validatePhoneNumber(phone) {
+            if (!phone) return { valid: false, message: 'Phone number is required' };
+            // Remove spaces, dashes, and parentheses
+            const cleaned = phone.replace(/[\s\-\(\)]/g, '');
+            // Philippine format: +639XXXXXXXXX, 639XXXXXXXXX, 09XXXXXXXXX, or 9XXXXXXXXX
+            const patterns = [
+                /^\+639\d{9}$/,
+                /^639\d{9}$/,
+                /^09\d{9}$/,
+                /^9\d{9}$/
+            ];
+            const isValid = patterns.some(pattern => pattern.test(cleaned));
+            return {
+                valid: isValid,
+                message: isValid ? '' : 'Invalid Philippine phone number format (e.g., 09171234567 or +639171234567)'
+            };
+        }
+
+        function validateEmail(email) {
+            if (!email) return { valid: false, message: 'Email is required' };
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            const isValid = emailRegex.test(email);
+            return {
+                valid: isValid,
+                message: isValid ? '' : 'Invalid email format'
+            };
+        }
+
+        // Ensure authFetch is available (fallback if script.js not loaded)
+        if (typeof authFetch !== 'function') {
+            window.authFetch = async function authFetch(url, options = {}) {
+                const token = localStorage.getItem('hub_access_token');
+                if (!token) {
+                    console.error('No authentication token found');
+                    window.location.href = '/loginregister.html';
+                    throw new Error('Not authenticated');
+                }
+                
+                const headers = {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                    ...options.headers
+                };
+                
+                const API_BASE = window.location.origin;
+                const response = await fetch(API_BASE + url, {
+                    ...options,
+                    headers
+                });
+                
+                if (response.status === 401) {
+                    localStorage.removeItem('hub_access_token');
+                    window.location.href = '/loginregister.html';
+                    throw new Error('Unauthorized');
+                }
+                
+                return response;
+            };
+        }
+
+        async function saveProfile(event) {
+            event.preventDefault();
+            clearErrors();
+
+            console.log('=== SAVE PROFILE START ===');
+            
+            const firstName = document.getElementById('editFirstName').value.trim();
+            const middleName = document.getElementById('editMiddleName').value.trim();
+            const lastName = document.getElementById('editLastName').value.trim();
+            const suffix = document.getElementById('editSuffix').value.trim();
+            const phone = document.getElementById('editPhone').value.trim();
+            const emailInput = document.getElementById('editEmail');
+            const email = emailInput ? emailInput.value.trim() : '';
+            const token = localStorage.getItem('hub_access_token');
+            const userId = getUserIdFromToken();
+
+            console.log('Form values:', { firstName, middleName, lastName, suffix, phone, email, userId });
+
+            if (!firstName) {
+                showError('firstNameError', 'First name is required');
+                return;
+            }
+            if (!lastName) {
+                showError('lastNameError', 'Last name is required');
+                return;
+            }
+            
+            // Validate phone number
+            const phoneValidation = validatePhoneNumber(phone);
+            if (!phoneValidation.valid) {
+                showError('phoneError', phoneValidation.message);
+                return;
+            }
+            
+            // Validate email if field exists
+            if (emailInput) {
+                const emailValidation = validateEmail(email);
+                if (!emailValidation.valid) {
+                    showError('emailError', emailValidation.message);
+                    return;
+                }
+            }
+
+            try {
+                // Get address values from dropdowns
+                const addressValues = getAddressValues();
+                console.log('Address values:', addressValues);
+                
+                const payload = { 
+                    first_name: firstName,
+                    middle_name: middleName || null,
+                    last_name: lastName,
+                    suffix: suffix || null,
+                    phone: phone,
+                    email: email || null,
+                    address_line1: document.getElementById('editAddressLine1').value.trim(),
+                    address_line2: document.getElementById('editAddressLine2').value.trim(),
+                    city: addressValues.city,
+                    province: addressValues.province,
+                    region: addressValues.region,
+                    postal_code: addressValues.postal_code
+                };
+                
+                console.log('Sending payload to /api/me PUT:', payload);
+                console.log('Using authFetch:', typeof authFetch);
+                
+                const response = await authFetch('/api/me', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                console.log('Response received:', { status: response.status, statusText: response.statusText, ok: response.ok });
+
+                let data;
+                try {
+                    const responseText = await response.text();
+                    console.log('Response text:', responseText);
+                    data = JSON.parse(responseText);
+                } catch (parseError) {
+                    console.error('Failed to parse response as JSON:', parseError);
+                    throw new Error('Invalid response from server');
+                }
+                
+                console.log('Parsed response data:', data);
+                console.log('Response check:', { 
+                    status: response.status, 
+                    ok: response.ok, 
+                    success: data.success,
+                    hasData: !!data.data 
+                });
+
+                if (response.ok && data.success) {
+                    console.log('✅ Profile save successful! Response data:', data.data);
+                    
+                    // Show success message immediately
+                    showSuccess('profileSuccess', 'Profile updated successfully!');
+                    if (window.notify) {
+                        notify.success('Profile updated successfully!');
+                    }
+                    
+                    // CRITICAL: Reload profile from database to verify save and get all fields
+                    console.log('🔄 Reloading profile from database to verify save...');
+                    try {
+                        // Wait a moment for database to be ready
+                        await new Promise(resolve => setTimeout(resolve, 300));
+                        await loadProfile();
+                        console.log('✅ Profile reloaded successfully after save');
+                    } catch (reloadError) {
+                        console.error('❌ Error reloading profile after save:', reloadError);
+                        // Fallback: Update UI from form values
+                        console.log('Using fallback: updating UI from form values');
+                        const fullName = formatFullName(firstName, middleName, lastName, suffix);
+                        document.getElementById('fullNameDisplay').textContent = fullName || '—';
+                        document.getElementById('phoneDisplay').textContent = phone || '—';
+                        if (emailInput && document.getElementById('emailDisplay')) {
+                            document.getElementById('emailDisplay').textContent = email || '—';
+                        }
+                        
+                        const addressLine1 = document.getElementById('editAddressLine1').value.trim();
+                        const addressLine2 = document.getElementById('editAddressLine2').value.trim();
+                        
+                        document.getElementById('addressLine1Display').textContent = addressLine1 || '—';
+                        document.getElementById('addressLine2Display').textContent = addressLine2 || '—';
+                        document.getElementById('regionDisplay').textContent = addressValues.region || 'Region IV-A (CALABARZON)';
+                        document.getElementById('provinceDisplay').textContent = addressValues.province || '—';
+                        document.getElementById('cityDisplay').textContent = addressValues.city || '—';
+                        document.getElementById('postalCodeDisplay').textContent = addressValues.postal_code || '—';
+                    }
+                    
+                    // Notify other pages (like cart.html) that profile was updated
+                    try {
+                        localStorage.setItem('hub_profile_updated', Date.now().toString());
+                        window.dispatchEvent(new CustomEvent('profileUpdated'));
+                        setTimeout(() => {
+                            localStorage.removeItem('hub_profile_updated');
+                        }, 100);
+                    } catch (e) {
+                        console.warn('Could not notify other pages of profile update:', e);
+                    }
+                    
+                    // Close modal after short delay
+                    setTimeout(() => {
+                        closeEditModal();
+                    }, 1000);
+                    
+                    console.log('=== SAVE PROFILE SUCCESS ===');
+                } else {
+                    // Handle error response
+                    const errorMessage = data.error || data.message || `Update failed (Status: ${response.status})`;
+                    console.error('❌ Profile save failed:', { 
+                        status: response.status, 
+                        statusText: response.statusText,
+                        error: errorMessage, 
+                        data 
+                    });
+                    
+                    // Show error in a visible location
+                    showError('firstNameError', errorMessage);
+                    if (window.notify) {
+                        notify.error(errorMessage);
+                    }
+                    
+                    // Also show in success/error message area
+                    const profileSuccessEl = document.getElementById('profileSuccess');
+                    if (profileSuccessEl) {
+                        profileSuccessEl.textContent = errorMessage;
+                        profileSuccessEl.style.color = '#ef4444';
+                        profileSuccessEl.style.display = 'block';
+                    }
+                    
+                    console.log('=== SAVE PROFILE FAILED ===');
+                }
+            } catch (error) {
+                console.error('❌ Save profile exception:', error);
+                console.error('Error stack:', error.stack);
+                const errorMessage = error.message || 'Server error. Please try again.';
+                showError('firstNameError', errorMessage);
+                if (window.notify) {
+                    notify.error(errorMessage);
+                }
+                
+                // Show error in success/error message area
+                const profileSuccessEl = document.getElementById('profileSuccess');
+                if (profileSuccessEl) {
+                    profileSuccessEl.textContent = errorMessage;
+                    profileSuccessEl.style.color = '#ef4444';
+                    profileSuccessEl.style.display = 'block';
+                }
+                
+                console.log('=== SAVE PROFILE EXCEPTION ===');
+            }
+        }
+
+        // Avatar upload functions
+        function updateAvatarPreview(avatarUrl) {
+            const previewImg = document.getElementById('avatarPreviewImg');
+            const previewIcon = document.getElementById('avatarPreviewIcon');
+            const profileAvatarImg = document.getElementById('profileAvatarImg');
+            
+            if (avatarUrl) {
+                // Use full URL if it's already a complete URL, otherwise prepend the base URL
+                const fullUrl = avatarUrl.startsWith('http') ? avatarUrl : (avatarUrl.startsWith('/') ? avatarUrl : '/' + avatarUrl);
+                previewImg.src = fullUrl;
+                previewImg.style.display = 'block';
+                previewIcon.style.display = 'none';
+                
+                // Also update the main profile avatar
+                if (profileAvatarImg) {
+                    profileAvatarImg.src = fullUrl;
+                }
+            } else {
+                previewImg.style.display = 'none';
+                previewIcon.style.display = 'block';
+            }
+        }
+        
+        function updateAvatarsAcrossSite(avatarUrl) {
+            // Update profile avatar on account page
+            const profileAvatarImg = document.getElementById('profileAvatarImg');
+            if (profileAvatarImg) {
+                profileAvatarImg.src = avatarUrl;
+            }
+            
+            // Update avatar preview in modal
+            updateAvatarPreview(avatarUrl);
+            
+            // Dispatch custom event for other pages to listen to
+            window.dispatchEvent(new CustomEvent('avatarUpdated', { detail: { avatarUrl } }));
+        }
+        
+        async function handleAvatarUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            // Validate file type
+            if (!file.type.startsWith('image/')) {
+                showAvatarError('Please select a valid image file (JPG, PNG, GIF)');
+                event.target.value = '';
+                return;
+            }
+            
+            // Validate file size (5MB max)
+            if (file.size > 5 * 1024 * 1024) {
+                showAvatarError('Image size must be less than 5MB');
+                event.target.value = '';
+                return;
+            }
+            
+            // Show preview immediately
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const previewImg = document.getElementById('avatarPreviewImg');
+                const previewIcon = document.getElementById('avatarPreviewIcon');
+                previewImg.src = e.target.result;
+                previewImg.style.display = 'block';
+                previewIcon.style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+            
+            // Hide previous messages
+            hideAvatarMessages();
+            
+            // Show upload progress
+            const progressDiv = document.getElementById('avatarUploadProgress');
+            progressDiv.style.display = 'block';
+            
+            try {
+                // Create FormData
+                const formData = new FormData();
+                formData.append('picture', file);
+                
+                // Upload to server
+                const response = await authFetch('/api/upload/profile-picture', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                // Hide progress
+                progressDiv.style.display = 'none';
+                
+                if (response.ok && data.success) {
+                    const avatarUrl = data.data?.url || data.data?.path;
+                    
+                    if (avatarUrl) {
+                        // Update avatars across the site
+                        updateAvatarsAcrossSite(avatarUrl);
+                        
+                        // Show success message
+                        const successDiv = document.getElementById('avatarUploadSuccess');
+                        successDiv.style.display = 'block';
+                        
+                        // Hide success message after 3 seconds
+                        setTimeout(() => {
+                            successDiv.style.display = 'none';
+                        }, 3000);
+                        
+                        // Reload user data to get updated avatar
+                        if (typeof loadProfile === 'function') {
+                            loadProfile();
+                        }
+                    }
+                } else {
+                    showAvatarError(data.error || 'Failed to upload avatar. Please try again.');
+                    // Reset preview
+                    const previewImg = document.getElementById('avatarPreviewImg');
+                    const previewIcon = document.getElementById('avatarPreviewIcon');
+                    previewImg.style.display = 'none';
+                    previewIcon.style.display = 'block';
+                    event.target.value = '';
+                }
+            } catch (error) {
+                console.error('Avatar upload error:', error);
+                progressDiv.style.display = 'none';
+                showAvatarError('An error occurred while uploading. Please try again.');
+                // Reset preview
+                const previewImg = document.getElementById('avatarPreviewImg');
+                const previewIcon = document.getElementById('avatarPreviewIcon');
+                previewImg.style.display = 'none';
+                previewIcon.style.display = 'block';
+                event.target.value = '';
+            }
+        }
+        
+        function showAvatarError(message) {
+            const errorDiv = document.getElementById('avatarUploadError');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+        
+        function hideAvatarMessages() {
+            document.getElementById('avatarUploadError').style.display = 'none';
+            document.getElementById('avatarUploadSuccess').style.display = 'none';
+        }
+
+        function togglePasswordForm() {
+            const form = document.getElementById('passwordForm');
+            const toggle = document.getElementById('passwordFormToggle');
+            
+            if (form.style.display === 'none') {
+                form.style.display = 'block';
+                toggle.style.display = 'none';
+            } else {
+                form.style.display = 'none';
+                toggle.style.display = 'block';
+                clearPasswordErrors();
+            }
+        }
+
+        async function changePassword(event) {
+            event.preventDefault();
+            clearPasswordErrors();
+
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const token = localStorage.getItem('hub_access_token');
+
+            if (!currentPassword) {
+                showError('currentPasswordError', 'Current password is required');
+                return;
+            }
+            if (!newPassword || newPassword.length < 6) {
+                showError('newPasswordError', 'New password must be at least 6 characters');
+                return;
+            }
+            if (newPassword !== confirmPassword) {
+                showError('confirmPasswordError', 'Passwords do not match');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/auth/change-password', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer ' + token,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        current_password: currentPassword,
+                        new_password: newPassword
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showSuccess('passwordSuccess', 'Password changed successfully!');
+                    document.getElementById('passwordForm').reset();
+                    setTimeout(() => {
+                        togglePasswordForm();
+                    }, 1500);
+                } else {
+                    showError('currentPasswordError', data.error || 'Password change failed');
+                }
+            } catch (error) {
+                console.error('Change password error:', error);
+                showError('currentPasswordError', 'Server error. Please try again.');
+            }
+        }
+
+        function logout() {
+            // Clear authentication data
+            localStorage.removeItem('hub_access_token');
+            localStorage.removeItem('hub_refresh_token');
+            
+            // Clear cart and wishlist data (all user-specific versions)
+            Object.keys(localStorage).forEach(key => {
+                if (key.startsWith('hub_cart_v1') || key.startsWith('hub_wishlist_v1')) {
+                    localStorage.removeItem(key);
+                }
+            });
+            
+            // Clear any other user-related data
+            if(window.hubAuthGuard) {
+                window.hubAuthGuard.cleanup();
+            }
+            
+            // Set flag for logout notification
+            sessionStorage.setItem('just_logged_out', 'true');
+            
+            // Show logout notification
+            if(window.notify) {
+                window.notify.success('You have been logged out successfully.');
+            }
+            
+            // Redirect to home page after a brief delay
+            setTimeout(() => {
+                window.location.href = '/index.html';
+            }, 800);
+        }
+
+        function goToSellerDashboard() {
+            window.location.href = '/seller_dashboard.html';
+        }
+
+        function goToRiderDashboard() {
+            window.location.href = '/rider_dashboard.html';
+        }
+
+        function showError(id, message) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.textContent = message;
+                el.classList.add('show');
+            }
+        }
+
+        function showSuccess(id, message) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.textContent = message;
+                el.classList.add('show');
+            }
+        }
+
+        function clearErrors() {
+            document.querySelectorAll('#editProfileForm .error').forEach(el => {
+                el.classList.remove('show');
+                el.textContent = '';
+            });
+        }
+
+        function clearPasswordErrors() {
+            document.querySelectorAll('#passwordForm .error').forEach(el => {
+                el.classList.remove('show');
+                el.textContent = '';
+            });
+        }
+
+        // Enhance: Dynamically update avatar and email if user info is loaded
+        function updateProfileCard(user) {
+            const role = getRoleFromToken();
+            document.getElementById('roleBadge').textContent = role.charAt(0).toUpperCase() + role.slice(1);
+            document.getElementById('roleBadge').className = 'role-badge ' + role;
+            document.getElementById('accountEmail').innerHTML = '<i class="fas fa-envelope"></i> ' + (user.email || 'Loading...');
+            // Avatar - use actual avatar_url if available, otherwise use initials
+            let avatarUrl;
+            if (user.avatar_url) {
+                avatarUrl = user.avatar_url.startsWith('http') ? user.avatar_url : (user.avatar_url.startsWith('/') ? user.avatar_url : '/' + user.avatar_url);
+            } else {
+                avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.first_name||'')}${user.last_name?('+'+user.last_name):''}&background=3d6b42&color=fff&size=128`;
+            }
+            document.getElementById('profileAvatarImg').src = avatarUrl;
+        }
+        // Patch into loadProfile's populateProfile
+        const origPopulateProfile = window.populateProfile;
+        window.populateProfile = function(user) {
+            origPopulateProfile(user);
+            updateProfileCard(user);
+        };
+
+        // Load profile when page loads
+        // Load order history
+        async function loadOrderHistory() {
+            const token = localStorage.getItem('hub_access_token');
+            if (!token) return;
+
+            const container = document.getElementById('orderHistoryContainer');
+            if (!container) return;
+
+            try {
+                // Get user ID from token
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                const userId = payload.user_id;
+
+                const response = await fetch(`/api/users/${userId}/orders`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to load orders');
+                }
+
+                const data = await response.json();
+                const orders = data.data || data || [];
+
+                if (orders.length === 0) {
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 40px;">
+                            <i class="fas fa-shopping-bag" style="font-size: 48px; color: #ccc; margin-bottom: 16px;"></i>
+                            <p style="color: #666; font-size: 16px;">You haven't placed any orders yet.</p>
+                            <a href="index.html" style="display: inline-block; margin-top: 16px; padding: 12px 24px; background: var(--fg-accent); color: white; text-decoration: none; border-radius: 8px;">Start Shopping</a>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = `
+                    <div style="display: grid; gap: 16px;">
+                        ${orders.map(order => {
+                            const date = new Date(order.created_at);
+                            const status = order.status || 'placed';
+                            const statusColors = {
+                                'placed': '#3b82f6',
+                                'pending': '#3b82f6',
+                                'processing': '#f59e0b',
+                                'ready': '#8b5cf6',
+                                'dispatched': '#8b5cf6',
+                                'in-transit': '#6366f1',
+                                'delivered': '#10b981',
+                                'completed': '#10b981',
+                                'cancelled': '#ef4444'
+                            };
+                            const statusLabels = {
+                                'placed': 'Placed',
+                                'pending': 'Pending',
+                                'processing': 'Processing',
+                                'ready': 'Ready for Pickup',
+                                'dispatched': 'Rider Pick-Up Scheduled',
+                                'in-transit': 'On the Way',
+                                'delivered': 'Delivered',
+                                'completed': 'Completed',
+                                'cancelled': 'Cancelled'
+                            };
+                            return `
+                                <div style="background: white; border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s;" 
+                                     onmouseover="this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)'" 
+                                     onmouseout="this.style.boxShadow='none'">
+                                    <div style="flex: 1;">
+                                        <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 8px;">
+                                            <h3 style="margin: 0; font-size: 18px; color: var(--fg-primary);">Order #${order.id}</h3>
+                                            <span style="padding: 4px 12px; border-radius: 12px; background: ${statusColors[status] || '#6b7280'}; color: white; font-size: 12px; font-weight: 600;">
+                                                ${statusLabels[status] || status.charAt(0).toUpperCase() + status.slice(1)}
+                                            </span>
+                                        </div>
+                                        <p style="margin: 4px 0; color: #666; font-size: 14px;">
+                                            ${date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                                        </p>
+                                        <p style="margin: 4px 0; color: #666; font-size: 14px;">
+                                            ${order.payment || 'Cash on Delivery'}
+                                        </p>
+                                    </div>
+                                    <div style="text-align: right; margin-left: 20px;">
+                                        <div style="font-size: 20px; font-weight: 700; color: var(--fg-accent); margin-bottom: 8px;">
+                                            ₱${parseFloat(order.total || 0).toFixed(2)}
+                                        </div>
+                                        <div style="display: flex; gap: 8px; justify-content: flex-end; align-items: flex-end;">
+                                            <a href="order-confirmation.html?order_id=${order.id}" 
+                                               style="display: inline-flex; align-items: center; justify-content: center; padding: 8px 16px; background: var(--fg-primary); color: white; text-decoration: none; border-radius: 6px; font-size: 14px; font-weight: 600; height: 32px; box-sizing: border-box;">
+                                                View Details
+                                            </a>
+                                            ${(status === 'delivered' || status === 'completed') ? 
+                                                (order.has_rider_review ? `
+                                                    <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px; min-width: 140px;">
+                                                        <div style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border-radius: 8px; font-size: 14px; font-weight: 600; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);">
+                                                            <i class="fas fa-check-circle" style="font-size: 16px;"></i>
+                                                            <span>Reviewed</span>
+                                                        </div>
+                                                        <div style="display: flex; align-items: center; gap: 6px; padding: 6px 12px; background: #fef3c7; border-radius: 6px; border: 1px solid #fbbf24;">
+                                                            <div style="display: flex; gap: 1px;">
+                                                                ${Array.from({length: 5}, (_, i) => 
+                                                                    i < (order.rider_rating || 0) 
+                                                                    ? '<i class="fas fa-star" style="color: #f59e0b; font-size: 14px;"></i>'
+                                                                    : '<i class="far fa-star" style="color: #d1d5db; font-size: 14px;"></i>'
+                                                                ).join('')}
+                                                            </div>
+                                                            <span style="font-size: 13px; font-weight: 700; color: #92400e;">${order.rider_rating}/5</span>
+                                                        </div>
+                                                        ${order.rider_comment ? `
+                                                            <div style="font-size: 12px; color: #64748b; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-style: italic; padding: 4px 8px; background: #f8fafc; border-radius: 4px; border-left: 3px solid #cbd5e1;" 
+                                                                 title="${order.rider_comment.replace(/"/g, '&quot;')}">
+                                                                <i class="fas fa-quote-left" style="font-size: 10px; opacity: 0.5;"></i> ${order.rider_comment}
+                                                            </div>
+                                                        ` : ''}
+                                                    </div>
+                                                ` : `
+                                                    <button onclick="openRatingModal(${order.id})" 
+                                                            style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);"
+                                                            onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(16, 185, 129, 0.4)'"
+                                                            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(16, 185, 129, 0.3)'">
+                                                        <i class="fas fa-star"></i> Rate Rider
+                                                    </button>
+                                                `)
+                                            : ''}
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Error loading order history:', error);
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #ef4444;">
+                        <i class="fas fa-exclamation-circle" style="font-size: 48px; margin-bottom: 16px;"></i>
+                        <p>Failed to load orders. Please try again later.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Rating Modal Functions
+        let currentRatingOrderId = null;
+        
+        async function openRatingModal(orderId) {
+            // Double-check if review already exists (safeguard)
+            try {
+                const token = localStorage.getItem('hub_access_token');
+                if (!token) {
+                    if (window.notify) {
+                        notify.error('Please log in to submit a rating');
+                    } else {
+                        alert('Please log in to submit a rating');
+                    }
+                    return;
+                }
+                
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                const userId = payload.user_id;
+                
+                // Fetch orders to check review status
+                const response = await fetch(`/api/users/${userId}/orders`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    const order = data.data?.find(o => o.id === orderId);
+                    
+                    if (order && order.has_rider_review) {
+                        if (window.notify) {
+                            notify.warning('You have already reviewed this order', 3000);
+                        } else {
+                            alert('You have already reviewed this order');
+                        }
+                        return;
+                    }
+                }
+            } catch (error) {
+                console.warn('Could not verify review status:', error);
+                // Continue to open modal if verification fails
+            }
+            
+            currentRatingOrderId = orderId;
+            const modal = document.getElementById('ratingModal');
+            if (modal) {
+                modal.style.display = 'flex';
+                // Reset form
+                document.getElementById('ratingForm').reset();
+                // Reset stars
+                document.querySelectorAll('.star-rating .star').forEach(star => {
+                    star.classList.remove('active');
+                });
+                document.getElementById('ratingValue').value = '';
+            }
+        }
+        
+        function closeRatingModal() {
+            const modal = document.getElementById('ratingModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+        
+        function setRating(rating) {
+            document.getElementById('ratingValue').value = rating;
+            const stars = document.querySelectorAll('.star-rating .star');
+            stars.forEach((star, index) => {
+                if (index < rating) {
+                    star.classList.add('active');
+                } else {
+                    star.classList.remove('active');
+                }
+            });
+        }
+        
+        async function submitRating(event) {
+            event.preventDefault();
+            const rating = parseInt(document.getElementById('ratingValue').value);
+            const comment = document.getElementById('ratingComment').value.trim();
+            
+            if (!rating || rating < 1 || rating > 5) {
+                if (window.notify) {
+                    notify.error('Please select a rating between 1 and 5 stars');
+                } else {
+                    alert('Please select a rating between 1 and 5 stars');
+                }
+                return;
+            }
+            
+            const token = localStorage.getItem('hub_access_token');
+            if (!token) {
+                if (window.notify) {
+                    notify.error('Please log in to submit a rating');
+                } else {
+                    alert('Please log in to submit a rating');
+                }
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/orders/${currentRatingOrderId}/rate-rider`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ rating, comment })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    // Show success notification with customer message from API
+                    const successMessage = data.data?.customer_message || 'Thank you! Your rider review has been submitted successfully.';
+                    if (window.notify) {
+                        notify.success(successMessage, 5000);
+                    } else {
+                        alert(successMessage);
+                    }
+                    closeRatingModal();
+                    
+                    // Update the UI in real-time without page reload
+                    updateOrderRatingButton(currentRatingOrderId, rating, comment);
+                } else {
+                    const errorMessage = data.error || 'Failed to submit rating. Please try again.';
+                    if (window.notify) {
+                        notify.error(errorMessage, 5000);
+                    } else {
+                        alert(errorMessage);
+                    }
+                }
+            } catch (error) {
+                console.error('Error submitting rating:', error);
+                if (window.notify) {
+                    notify.error('Failed to submit rating. Please try again.', 5000);
+                } else {
+                    alert('Failed to submit rating. Please try again.');
+                }
+            }
+        }
+        
+        // Helper function to update order rating button UI in real-time
+        function updateOrderRatingButton(orderId, rating, comment) {
+            // Find all order cards and update the one that matches
+            const orderCards = document.querySelectorAll('[style*="background: white"][style*="border: 1px solid"]');
+            
+            orderCards.forEach(card => {
+                const orderIdText = card.querySelector('h3');
+                if (orderIdText && orderIdText.textContent.includes(`Order #${orderId}`)) {
+                    // Find the button container
+                    const buttonContainer = card.querySelector('div[style*="display: flex; gap: 8px"]');
+                    if (buttonContainer) {
+                        // Find the Rate Rider button
+                        const rateButton = buttonContainer.querySelector('button[onclick*="openRatingModal"]');
+                        if (rateButton) {
+                            // Create star HTML
+                            const starsHtml = Array.from({length: 5}, (_, i) => 
+                                i < rating 
+                                ? '<i class="fas fa-star" style="color: #f59e0b; font-size: 14px;"></i>'
+                                : '<i class="far fa-star" style="color: #d1d5db; font-size: 14px;"></i>'
+                            ).join('');
+                            
+                            // Replace with reviewed badge
+                            const reviewedBadge = document.createElement('div');
+                            reviewedBadge.style.cssText = 'display: flex; flex-direction: column; align-items: flex-end; gap: 6px; min-width: 140px;';
+                            reviewedBadge.innerHTML = `
+                                <div style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border-radius: 8px; font-size: 14px; font-weight: 600; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);">
+                                    <i class="fas fa-check-circle" style="font-size: 16px;"></i>
+                                    <span>Reviewed</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 6px; padding: 6px 12px; background: #fef3c7; border-radius: 6px; border: 1px solid #fbbf24;">
+                                    <div style="display: flex; gap: 1px;">
+                                        ${starsHtml}
+                                    </div>
+                                    <span style="font-size: 13px; font-weight: 700; color: #92400e;">${rating}/5</span>
+                                </div>
+                                ${comment ? `
+                                    <div style="font-size: 12px; color: #64748b; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-style: italic; padding: 4px 8px; background: #f8fafc; border-radius: 4px; border-left: 3px solid #cbd5e1;" 
+                                         title="${comment.replace(/"/g, '&quot;')}">
+                                        <i class="fas fa-quote-left" style="font-size: 10px; opacity: 0.5;"></i> ${comment}
+                                    </div>
+                                ` : ''}
+                            `;
+                            rateButton.replaceWith(reviewedBadge);
+                        }
+                    }
+                }
+            });
+        }
+
+        // Helper function to get status color
+        function getStatusColor(status) {
+            const statusMap = {
+                'pending': '#ffc107',
+                'approved': '#28a745',
+                'rejected': '#dc3545',
+                'processing': '#17a2b8',
+                'completed': '#28a745',
+                'request_info': '#ff9800'
+            };
+            return statusMap[status] || '#6c757d';
+        }
+
+        // Helper function to format request status
+        function formatRequestStatus(request) {
+            if (request.status === 'completed' || request.refund_processed_at) {
+                return 'Refund Completed';
+            } else if (request.status === 'processing') {
+                if (request.request_type === 'return' || request.request_type === 'both') {
+                    if (request.item_received_at) {
+                        return 'Item Received - Refund Processing';
+                    }
+                    return 'Return in Progress';
+                }
+                return 'Refund Processing';
+            } else if (request.status === 'approved' || request.seller_response === 'approved') {
+                if (request.request_type === 'return' || request.request_type === 'both') {
+                    if (request.item_received_at) {
+                        return 'Item Returned to Seller - Awaiting Refund';
+                    } else if (request.pickup_completed_at) {
+                        return 'Item Picked Up - Returning to Seller';
+                    } else if (request.pickup_rider_id) {
+                        return 'Rider Assigned - Pickup Scheduled';
+                    }
+                    return 'Approved - Rider Will Pick Up';
+                } else {
+                    // Refund-only request
+                    return 'Approved - Refund Processing';
+                }
+            } else if (request.seller_response === 'rejected' || request.status === 'rejected') {
+                return 'Rejected';
+            } else if (request.seller_response === 'request_info') {
+                return 'More Info Requested';
+            }
+            return 'Pending Review';
+        }
+
+        // View request details
+        async function viewRequestDetails(requestId) {
+            const token = localStorage.getItem('hub_access_token');
+            if (!token) return;
+
+            try {
+                const response = await authFetch(`/api/customer/return-refund-requests/${requestId}`);
+                if (!response.ok) throw new Error('Failed to load request details');
+
+                const data = await response.json();
+                const request = data.data?.request || data.request;
+
+                // Create and show modal with detailed status
+                showRequestDetailsModal(request);
+            } catch (error) {
+                console.error('Error loading request details:', error);
+                alert('Failed to load request details. Please try again.');
+            }
+        }
+
+        // Show request details modal
+        function showRequestDetailsModal(request) {
+            const modal = document.getElementById('requestDetailsModal');
+            if (!modal) {
+                // Create modal if it doesn't exist
+                const modalHTML = `
+                    <div id="requestDetailsModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; align-items: center; justify-content: center;">
+                        <div style="background: white; border-radius: 12px; padding: 30px; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                                <h2 style="margin: 0; font-size: 24px; color: var(--fg-primary);">Request Details</h2>
+                                <button onclick="closeRequestDetailsModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #666;">&times;</button>
+                            </div>
+                            <div id="requestDetailsContent"></div>
+                        </div>
+                    </div>
+                `;
+                document.body.insertAdjacentHTML('beforeend', modalHTML);
+            }
+
+            const content = document.getElementById('requestDetailsContent');
+            const statusColor = getStatusColor(request.seller_response || request.status);
+            const statusText = formatRequestStatus(request);
+
+            content.innerHTML = `
+                <div style="margin-bottom: 20px;">
+                    <div style="padding: 12px; background: #f8f9fa; border-left: 3px solid ${statusColor}; border-radius: 4px; margin-bottom: 20px;">
+                        <strong style="color: ${statusColor}; font-size: 16px;">Status: ${statusText}</strong>
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <strong>Request Type:</strong> ${request.request_type.charAt(0).toUpperCase() + request.request_type.slice(1)}
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <strong>Reason:</strong>
+                        <div style="margin-top: 8px; padding: 12px; background: #f8f9fa; border-radius: 4px;">${request.reason || 'N/A'}</div>
+                    </div>
+                    
+                    ${request.evidence_images && request.evidence_images.length > 0 ? `
+                        <div style="margin-bottom: 15px;">
+                            <strong>Evidence Images:</strong>
+                            <div style="margin-top: 8px; display: flex; gap: 10px; flex-wrap: wrap;">
+                                ${request.evidence_images.map(img => `
+                                    <img src="${img.startsWith('http') ? img : 'http://127.0.0.1:5000' + img}" 
+                                         style="width: 100px; height: 100px; object-fit: cover; border-radius: 4px; cursor: pointer;"
+                                         onclick="window.open('${img.startsWith('http') ? img : 'http://127.0.0.1:5000' + img}', '_blank')">
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    ${request.rejection_reason ? `
+                        <div style="margin-bottom: 15px; padding: 12px; background: #f8d7da; border-radius: 4px;">
+                            <strong style="color: #721c24;">Rejection Reason:</strong>
+                            <div style="margin-top: 8px; color: #721c24;">${request.rejection_reason}</div>
+                        </div>
+                    ` : ''}
+                    
+                    <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e0e0e0;">
+                        <h3 style="font-size: 16px; margin-bottom: 12px;">Timeline</h3>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="width: 12px; height: 12px; border-radius: 50%; background: #28a745;"></div>
+                                <span><strong>Request Submitted:</strong> ${new Date(request.created_at).toLocaleString()}</span>
+                            </div>
+                            ${request.pickup_scheduled_at ? `
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <div style="width: 12px; height: 12px; border-radius: 50%; background: #17a2b8;"></div>
+                                    <span><strong>Pickup Scheduled:</strong> ${new Date(request.pickup_scheduled_at).toLocaleString()}</span>
+                                </div>
+                            ` : ''}
+                            ${request.pickup_completed_at ? `
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <div style="width: 12px; height: 12px; border-radius: 50%; background: #28a745;"></div>
+                                    <span><strong>Pickup Completed:</strong> ${new Date(request.pickup_completed_at).toLocaleString()}</span>
+                                </div>
+                            ` : ''}
+                            ${request.item_received_at ? `
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <div style="width: 12px; height: 12px; border-radius: 50%; background: #28a745;"></div>
+                                    <span><strong>Item Received by Seller:</strong> ${new Date(request.item_received_at).toLocaleString()}</span>
+                                </div>
+                            ` : ''}
+                            ${request.refund_processed_at ? `
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <div style="width: 12px; height: 12px; border-radius: 50%; background: #28a745;"></div>
+                                    <span><strong>Refund Processed:</strong> ${new Date(request.refund_processed_at).toLocaleString()}</span>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('requestDetailsModal').style.display = 'flex';
+        }
+
+        function closeRequestDetailsModal() {
+            const modal = document.getElementById('requestDetailsModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        // Load reviewable products
+        async function loadReviewableProducts() {
+            const container = document.getElementById('reviewsContainer');
+            if (!container) return;
+
+            const token = localStorage.getItem('hub_access_token');
+            if (!token) return;
+
+            try {
+                const response = await authFetch('/api/customer/products/reviewable');
+                if (!response.ok) throw new Error('Failed to load products');
+
+                const data = await response.json();
+                const products = data.data?.products || data.products || [];
+
+                if (products.length === 0) {
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 40px;">
+                            <i class="fas fa-box-open" style="font-size: 48px; color: #ccc; margin-bottom: 16px;"></i>
+                            <p style="color: #666; font-size: 16px;">No products available for review yet.</p>
+                            <p style="color: #999; font-size: 14px; margin-top: 8px;">Products from delivered orders will appear here.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = `
+                    <div style="display: grid; gap: 16px;">
+                        ${products.map(product => {
+                            const deliveredDate = product.delivered_at ? new Date(product.delivered_at) : null;
+                            const hasReview = product.review_id;
+                            const hasReturnRequest = product.return_refund_request;
+                            const returnStatus = hasReturnRequest ? product.return_refund_request.status : null;
+                            
+                            return `
+                                <div style="background: white; border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s;" 
+                                     onmouseover="this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)'" 
+                                     onmouseout="this.style.boxShadow='none'">
+                                    <div style="flex: 1; display: flex; gap: 16px; align-items: center;">
+                                        <img src="${product.product_image ? `http://127.0.0.1:5000${product.product_image}` : 'https://via.placeholder.com/80'}" 
+                                             alt="${product.product_name}" 
+                                             style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px; flex-shrink: 0;"
+                                             onerror="this.src='https://via.placeholder.com/80'">
+                                        <div style="flex: 1;">
+                                            <h3 style="margin: 0 0 8px 0; font-size: 18px; color: var(--fg-primary);">${product.product_name || 'Product'}</h3>
+                                            <p style="margin: 4px 0; color: #666; font-size: 14px;">
+                                                <strong>Order #${product.order_id}</strong> • Quantity: ${product.quantity} • Price: ₱${parseFloat(product.price || 0).toFixed(2)}
+                                            </p>
+                                            <p style="margin: 4px 0; color: #666; font-size: 14px;">
+                                                Seller: ${product.seller_name || 'N/A'}
+                                            </p>
+                                            ${deliveredDate ? `
+                                                <p style="margin: 4px 0; color: #666; font-size: 14px;">
+                                                    Delivered: ${deliveredDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                                                </p>
+                                            ` : ''}
+                                            ${hasReturnRequest ? `
+                                                <div style="margin-top: 8px; padding: 8px 12px; background: #f0fdf4; border-left: 3px solid ${getStatusColor(product.return_refund_request.seller_response || product.return_refund_request.status)}; border-radius: 4px; display: inline-block;">
+                                                    <strong style="color: ${getStatusColor(product.return_refund_request.seller_response || product.return_refund_request.status)}; font-size: 14px;">
+                                                        Return/Refund Request: ${formatRequestStatus(product.return_refund_request)}
+                                                    </strong>
+                                                </div>
+                                            ` : ''}
+                                        </div>
+                                    </div>
+                                    <div style="text-align: right; margin-left: 20px; display: flex; flex-direction: column; gap: 10px; align-items: flex-end; min-width: 200px;">
+                                        ${hasReview ? `
+                                            <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px; width: 100%;">
+                                                <div style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border-radius: 8px; font-size: 14px; font-weight: 600; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3); width: 100%; justify-content: center;">
+                                                    <i class="fas fa-check-circle" style="font-size: 16px;"></i>
+                                                    <span>Reviewed</span>
+                                                </div>
+                                                <div style="display: flex; align-items: center; gap: 6px; padding: 8px 14px; background: #fef3c7; border-radius: 6px; border: 1px solid #fbbf24; width: 100%; justify-content: center;">
+                                                    <div style="display: flex; gap: 1px;">
+                                                        ${Array.from({length: 5}, (_, i) => 
+                                                            i < (product.existing_rating || 0) 
+                                                            ? '<i class="fas fa-star" style="color: #f59e0b; font-size: 14px;"></i>'
+                                                            : '<i class="far fa-star" style="color: #d1d5db; font-size: 14px;"></i>'
+                                                        ).join('')}
+                                                    </div>
+                                                    <span style="font-size: 13px; font-weight: 700; color: #92400e;">${product.existing_rating}/5</span>
+                                                </div>
+                                                ${product.existing_comment ? `
+                                                    <div style="font-size: 13px; color: #64748b; width: 100%; padding: 10px 12px; background: #f8fafc; border-radius: 6px; border-left: 3px solid #cbd5e1; word-wrap: break-word; white-space: normal; line-height: 1.5; max-height: 100px; overflow-y: auto;" 
+                                                         title="${(product.existing_comment || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;')}">
+                                                        <i class="fas fa-quote-left" style="font-size: 11px; opacity: 0.6; margin-right: 6px;"></i>
+                                                        <span style="font-style: italic;">${(product.existing_comment || '').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;')}</span>
+                                                    </div>
+                                                ` : ''}
+                                            </div>
+                                            <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
+                                                <button onclick="openProductReviewModal(${product.product_id}, ${product.order_id}, ${product.order_item_id}, ${product.existing_rating || 0}, '${(product.existing_comment || '').replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, ' ').replace(/\r/g, '')}')" 
+                                                        style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 16px; background: #64748b; color: white; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; font-weight: 600; transition: all 0.2s; width: 100%;"
+                                                        onmouseover="this.style.background='#475569'; this.style.transform='translateY(-1px)'"
+                                                        onmouseout="this.style.background='#64748b'; this.style.transform='translateY(0)'">
+                                                    <i class="fas fa-edit"></i> Edit Review
+                                                </button>
+                                                ${!hasReturnRequest ? `
+                                                    <button onclick="openReturnRefundModal(${product.order_id}, ${product.order_item_id}, '${(product.product_name || '').replace(/'/g, "\\'").replace(/"/g, '&quot;')}')" 
+                                                            style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 16px; background: #ef4444; color: white; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; font-weight: 600; transition: all 0.2s; width: 100%;"
+                                                            onmouseover="this.style.background='#dc2626'; this.style.transform='translateY(-1px)'"
+                                                            onmouseout="this.style.background='#ef4444'; this.style.transform='translateY(0)'">
+                                                        <i class="fas fa-undo"></i> Return/Refund
+                                                    </button>
+                                                ` : hasReturnRequest ? `
+                                                    <button onclick="viewRequestDetails(${product.return_refund_request.id})" 
+                                                            style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 16px; background: var(--fg-primary); color: white; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; font-weight: 600; transition: all 0.2s; width: 100%;"
+                                                            onmouseover="this.style.opacity='0.9'; this.style.transform='translateY(-1px)'"
+                                                            onmouseout="this.style.opacity='1'; this.style.transform='translateY(0)'">
+                                                        <i class="fas fa-info-circle"></i> View Details
+                                                    </button>
+                                                ` : ''}
+                                            </div>
+                                        ` : `
+                                            <button onclick="openProductReviewModal(${product.product_id}, ${product.order_id}, ${product.order_item_id})" 
+                                                    style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 18px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s; box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3); width: 100%;"
+                                                    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(59, 130, 246, 0.4)'"
+                                                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(59, 130, 246, 0.3)'">
+                                                <i class="fas fa-star"></i> Write Review
+                                            </button>
+                                        `}
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Error loading reviewable products:', error);
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #ef4444;">
+                        <i class="fas fa-exclamation-circle" style="font-size: 48px; margin-bottom: 16px;"></i>
+                        <p>Failed to load products. Please try again later.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Product Review Modal Functions
+        let currentReviewProductId = null;
+        let currentReviewOrderId = null;
+        let currentReviewOrderItemId = null;
+
+        function openProductReviewModal(productId, orderId, orderItemId, existingRating = 0, existingComment = '') {
+            currentReviewProductId = productId;
+            currentReviewOrderId = orderId;
+            currentReviewOrderItemId = orderItemId;
+            
+            const modal = document.getElementById('productReviewModal');
+            if (modal) {
+                modal.style.display = 'flex';
+                // Reset form
+                document.getElementById('productReviewForm').reset();
+                // Set existing values if editing
+                if (existingRating > 0) {
+                    setProductRating(existingRating);
+                } else {
+                    document.querySelectorAll('.product-star-rating .star').forEach(star => {
+                        star.classList.remove('active');
+                    });
+                }
+                document.getElementById('productReviewComment').value = existingComment || '';
+                document.getElementById('productRatingValue').value = existingRating || '';
+            }
+        }
+
+        function closeProductReviewModal() {
+            const modal = document.getElementById('productReviewModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        function setProductRating(rating) {
+            document.getElementById('productRatingValue').value = rating;
+            const stars = document.querySelectorAll('.product-star-rating .star');
+            stars.forEach((star, index) => {
+                if (index < rating) {
+                    star.classList.add('active');
+                } else {
+                    star.classList.remove('active');
+                }
+            });
+        }
+
+        async function submitProductReview(event) {
+            event.preventDefault();
+            const rating = parseInt(document.getElementById('productRatingValue').value);
+            const comment = document.getElementById('productReviewComment').value.trim();
+
+            if (!rating || rating < 1 || rating > 5) {
+                if (window.notify) {
+                    notify.error('Please select a rating between 1 and 5 stars');
+                } else {
+                    alert('Please select a rating between 1 and 5 stars');
+                }
+                return;
+            }
+
+            const token = localStorage.getItem('hub_access_token');
+            if (!token) {
+                if (window.notify) {
+                    notify.error('Please log in to submit a review');
+                } else {
+                    alert('Please log in to submit a review');
+                }
+                return;
+            }
+
+            try {
+                const response = await authFetch(`/api/customer/products/${currentReviewProductId}/review`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        order_id: currentReviewOrderId,
+                        rating: rating,
+                        comment: comment
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    // Show success notification with customer message from API
+                    const successMessage = data.data?.customer_message || 'Thank you! Your review has been submitted successfully.';
+                    if (window.notify) {
+                        notify.success(successMessage, 5000);
+                    } else {
+                        alert(successMessage);
+                    }
+                    closeProductReviewModal();
+                    loadReviewableProducts(); // Refresh products
+                } else {
+                    const errorMessage = data.error || 'Failed to submit review. Please try again.';
+                    if (window.notify) {
+                        notify.error(errorMessage, 5000);
+                    } else {
+                        alert(errorMessage);
+                    }
+                }
+            } catch (error) {
+                console.error('Error submitting review:', error);
+                if (window.notify) {
+                    notify.error('Failed to submit review. Please try again.', 5000);
+                } else {
+                    alert('Failed to submit review. Please try again.');
+                }
+            }
+        }
+
+        // Return/Refund Modal Functions
+        let currentReturnOrderId = null;
+        let currentReturnOrderItemId = null;
+
+        function openReturnRefundModal(orderId, orderItemId, productName) {
+            currentReturnOrderId = orderId;
+            currentReturnOrderItemId = orderItemId;
+            
+            const modal = document.getElementById('returnRefundModal');
+            if (modal) {
+                modal.style.display = 'flex';
+                document.getElementById('returnRefundProductName').textContent = productName;
+                document.getElementById('returnRefundForm').reset();
+            }
+        }
+
+        function closeReturnRefundModal() {
+            const modal = document.getElementById('returnRefundModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        async function submitReturnRefund(event) {
+            event.preventDefault();
+            const requestType = document.getElementById('returnRefundType').value;
+            const reason = document.getElementById('returnRefundReason').value.trim();
+
+            if (!reason) {
+                alert('Please provide a reason for your return/refund request');
+                return;
+            }
+
+            const token = localStorage.getItem('hub_access_token');
+            if (!token) {
+                alert('Please log in to submit a request');
+                return;
+            }
+
+            try {
+                const response = await authFetch(`/api/customer/orders/${currentReturnOrderId}/items/${currentReturnOrderItemId}/return-refund`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        request_type: requestType,
+                        reason: reason
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    alert('Your return/refund request has been submitted successfully!');
+                    closeReturnRefundModal();
+                    loadReviewableProducts(); // Refresh products
+                } else {
+                    alert(data.error || 'Failed to submit request. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error submitting return/refund request:', error);
+                alert('Failed to submit request. Please try again.');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize address dropdowns
+            initializeAddressDropdowns();
+            
+            loadProfile();
+            loadOrderHistory();
+            loadReviewableProducts();
+            
+            // Close modals when clicking outside
+            const ratingModal = document.getElementById('ratingModal');
+            if (ratingModal) {
+                ratingModal.addEventListener('click', (e) => {
+                    if (e.target === ratingModal) {
+                        closeRatingModal();
+                    }
+                });
+            }
+            
+            const productReviewModal = document.getElementById('productReviewModal');
+            if (productReviewModal) {
+                productReviewModal.addEventListener('click', (e) => {
+                    if (e.target === productReviewModal) {
+                        closeProductReviewModal();
+                    }
+                });
+            }
+            
+            const returnRefundModal = document.getElementById('returnRefundModal');
+            if (returnRefundModal) {
+                returnRefundModal.addEventListener('click', (e) => {
+                    if (e.target === returnRefundModal) {
+                        closeReturnRefundModal();
+                    }
+                });
+            }
+        });
+    </script>
+    
+    <!-- Rating Modal -->
+    <div id="ratingModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; align-items: center; justify-content: center;">
+        <div style="background: white; border-radius: 12px; padding: 30px; max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="margin: 0; font-size: 24px; color: var(--fg-primary);">Rate Your Delivery</h2>
+                <button onclick="closeRatingModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #666;">&times;</button>
+            </div>
+            
+            <form id="ratingForm" onsubmit="submitRating(event)">
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 10px; font-weight: 600; color: var(--fg-primary);">Rating *</label>
+                    <div class="star-rating" style="display: flex; gap: 8px; font-size: 32px;">
+                        <span class="star" onclick="setRating(1)" style="cursor: pointer; color: #ddd;">★</span>
+                        <span class="star" onclick="setRating(2)" style="cursor: pointer; color: #ddd;">★</span>
+                        <span class="star" onclick="setRating(3)" style="cursor: pointer; color: #ddd;">★</span>
+                        <span class="star" onclick="setRating(4)" style="cursor: pointer; color: #ddd;">★</span>
+                        <span class="star" onclick="setRating(5)" style="cursor: pointer; color: #ddd;">★</span>
+                    </div>
+                    <input type="hidden" id="ratingValue" required>
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <label for="ratingComment" style="display: block; margin-bottom: 10px; font-weight: 600; color: var(--fg-primary);">Feedback (Optional)</label>
+                    <textarea id="ratingComment" 
+                              placeholder="Share your experience with the delivery..."
+                              style="width: 100%; min-height: 100px; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-family: inherit; font-size: 14px; resize: vertical;"></textarea>
+                </div>
+                
+                <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                    <button type="button" onclick="closeRatingModal()" 
+                            style="padding: 10px 20px; background: #f3f4f6; color: #374151; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer;">
+                        Cancel
+                    </button>
+                    <button type="submit" 
+                            style="padding: 10px 20px; background: var(--fg-accent); color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer;">
+                        Submit Rating
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <style>
+        .star-rating .star.active,
+        .product-star-rating .star.active {
+            color: #fbbf24 !important;
+        }
+        .star-rating .star:hover,
+        .product-star-rating .star:hover {
+            color: #fbbf24;
+        }
+    </style>
+    
+    <!-- Product Review Modal -->
+    <div id="productReviewModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; align-items: center; justify-content: center;">
+        <div style="background: white; border-radius: 12px; padding: 30px; max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="margin: 0; font-size: 24px; color: var(--fg-primary);">Review Product</h2>
+                <button onclick="closeProductReviewModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #666;">&times;</button>
+            </div>
+            
+            <form id="productReviewForm" onsubmit="submitProductReview(event)">
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 10px; font-weight: 600; color: var(--fg-primary);">Rating *</label>
+                    <div class="product-star-rating" style="display: flex; gap: 8px; font-size: 32px;">
+                        <span class="star" onclick="setProductRating(1)" style="cursor: pointer; color: #ddd;">★</span>
+                        <span class="star" onclick="setProductRating(2)" style="cursor: pointer; color: #ddd;">★</span>
+                        <span class="star" onclick="setProductRating(3)" style="cursor: pointer; color: #ddd;">★</span>
+                        <span class="star" onclick="setProductRating(4)" style="cursor: pointer; color: #ddd;">★</span>
+                        <span class="star" onclick="setProductRating(5)" style="cursor: pointer; color: #ddd;">★</span>
+                    </div>
+                    <input type="hidden" id="productRatingValue" required>
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <label for="productReviewComment" style="display: block; margin-bottom: 10px; font-weight: 600; color: var(--fg-primary);">Review Comment (Optional)</label>
+                    <textarea id="productReviewComment" 
+                              placeholder="Share your experience with this product..."
+                              style="width: 100%; min-height: 100px; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-family: inherit; font-size: 14px; resize: vertical;"></textarea>
+                </div>
+                
+                <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                    <button type="button" onclick="closeProductReviewModal()" 
+                            style="padding: 10px 20px; background: #f3f4f6; color: #374151; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer;">
+                        Cancel
+                    </button>
+                    <button type="submit" 
+                            style="padding: 10px 20px; background: var(--fg-accent); color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer;">
+                        Submit Review
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Return/Refund Request Modal -->
+    <div id="returnRefundModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; align-items: center; justify-content: center;">
+        <div style="background: white; border-radius: 12px; padding: 30px; max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="margin: 0; font-size: 24px; color: var(--fg-primary);">Request Return/Refund</h2>
+                <button onclick="closeReturnRefundModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #666;">&times;</button>
+            </div>
+            
+            <div style="margin-bottom: 20px; padding: 12px; background: #f8f9fa; border-radius: 8px;">
+                <strong>Product:</strong> <span id="returnRefundProductName"></span>
+            </div>
+            
+            <form id="returnRefundForm" onsubmit="submitReturnRefund(event)">
+                <div style="margin-bottom: 20px;">
+                    <label for="returnRefundType" style="display: block; margin-bottom: 10px; font-weight: 600; color: var(--fg-primary);">Request Type *</label>
+                    <select id="returnRefundType" required style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px;">
+                        <option value="return">Return Item</option>
+                        <option value="refund">Refund Only</option>
+                        <option value="both">Return & Refund</option>
+                    </select>
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <label for="returnRefundReason" style="display: block; margin-bottom: 10px; font-weight: 600; color: var(--fg-primary);">Reason *</label>
+                    <textarea id="returnRefundReason" 
+                              placeholder="Please explain why you want to return/refund this item..."
+                              required
+                              style="width: 100%; min-height: 120px; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-family: inherit; font-size: 14px; resize: vertical;"></textarea>
+                    <small style="color: #666; font-size: 12px; margin-top: 4px; display: block;">
+                        Common reasons: Defective item, Wrong item received, Item not as described, Changed mind, etc.
+                    </small>
+                </div>
+                
+                <div style="padding: 12px; background: #fff3cd; border-left: 3px solid #ffc107; border-radius: 4px; margin-bottom: 20px;">
+                    <strong style="color: #856404;">Return Policy:</strong>
+                    <ul style="margin: 8px 0 0 0; padding-left: 20px; color: #856404; font-size: 13px;">
+                        <li>Returns must be requested within 7 days of delivery</li>
+                        <li>Items must be in original condition</li>
+                        <li>Refunds will be processed within 5-7 business days</li>
+                    </ul>
+                </div>
+                
+                <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                    <button type="button" onclick="closeReturnRefundModal()" 
+                            style="padding: 10px 20px; background: #f3f4f6; color: #374151; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer;">
+                        Cancel
+                    </button>
+                    <button type="submit" 
+                            style="padding: 10px 20px; background: #dc3545; color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer;">
+                        Submit Request
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

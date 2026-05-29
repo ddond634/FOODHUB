@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Our Services - Hub</title>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+	<link rel="stylesheet" href="css/style.css">
+	<meta name="description" content="Hub Services - delivery, business accounts, vendor partnerships">
+</head>
+<body>
+	<a class="skip-link" href="#main">Skip to content</a>
+
+	<!-- Navbar -->
+	<div class="navbar" id="navbar">
+		<div class="logo">
+			<a href="index.html">Hub</a>
+		</div>
+
+		<div class="search-bar">
+			<input type="text" placeholder="Search food, drinks, etc...">
+			<button><i class="fa fa-search"></i></button>
+		</div>
+
+		<div class="categories-dropdown">
+			<button id="categoriesToggle" class="categories-toggle" aria-expanded="false" aria-controls="categoriesPanel" aria-haspopup="true" title="Categories">
+				<i class="fa fa-th-large" aria-hidden="true"></i>
+				<i class="fa fa-caret-down caret" aria-hidden="true"></i>
+			</button>
+
+			<div id="categoriesPanel" class="categories-panel" hidden>
+				<a href="shop.html?category=Baking" class="panel-item" data-category="Baking">
+					<i class="fa fa-bread-slice" aria-hidden="true"></i>
+					<span>Baking</span>
+				</a>
+				<a href="shop.html?category=Coffee & Tea" class="panel-item" data-category="Coffee & Tea">
+					<i class="fa fa-coffee" aria-hidden="true"></i>
+					<span>Coffee & Tea</span>
+				</a>
+				<a href="shop.html?category=Snacks" class="panel-item" data-category="Snacks">
+					<i class="fa fa-cookie-bite" aria-hidden="true"></i>
+					<span>Snacks</span>
+				</a>
+				<a href="shop.html?category=Organic" class="panel-item" data-category="Organic">
+					<i class="fa fa-leaf" aria-hidden="true"></i>
+					<span>Organic</span>
+				</a>
+				<a href="shop.html?category=Meal Kits" class="panel-item" data-category="Meal Kits">
+					<i class="fa fa-box-open" aria-hidden="true"></i>
+					<span>Meal Kits</span>
+				</a>
+			</div>
+		</div>
+
+		<div class="nav-icons">
+			<a href="wishlist.html" id="wishlistBtn" title="Wishlist" class="icon-with-badge">
+				<i class="fa fa-heart"></i>
+				<span class="badge">0</span>
+			</a>
+			<a href="cart.html" id="cartBtn" title="Shopping Cart" class="icon-with-badge">
+				<i class="fa fa-shopping-cart"></i>
+				<span class="badge">0</span>
+			</a>
+			<a href="account.html" title="Account"><i class="fa fa-user"></i></a>
+
+			<div id="wishlistDropdown" class="cart-dropdown" hidden>
+				<div class="dropdown-header">Recently Added to Wishlist</div>
+				<div class="dropdown-items">
+					<p class="muted">No items yet</p>
+				</div>
+				<div class="dropdown-footer">
+					<button class="view-btn">View My Wishlist</button>
+				</div>
+			</div>
+
+			<div id="cartDropdown" class="cart-dropdown" hidden>
+				<div class="dropdown-header">Recently Added Products</div>
+				<div class="dropdown-items">
+					<p class="muted">Cart is empty</p>
+				</div>
+				<div class="dropdown-footer">
+					<a class="view-btn" href="cart.html">View My Shopping Cart</a>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Hero Section -->
+	<section class="page-hero services-hero hero" id="main" role="region" aria-label="Our Services">
+		<div class="hero-inner">
+			<h1>Our Services</h1>
+			<p class="lead">From fast delivery to business accounts and vendor partnerships — we've got you covered.</p>
+		</div>
+	</section>
+
+	<main class="page-main">
+		<section class="content container services-content">
+			
+			<div class="services-intro">
+				<p class="intro-text">Hub connects customers with quality food vendors through a seamless platform. Whether you're ordering for yourself, managing a business account, or looking to partner as a vendor, we have tailored solutions for you.</p>
+			</div>
+
+			<!-- Services Grid -->
+			<div class="services-grid">
+				
+				<!-- Service 1: Delivery -->
+				<div class="service-card">
+					<div class="service-icon">
+						<i class="fa fa-truck-fast"></i>
+					</div>
+					<h3>Fast Delivery</h3>
+					<p>Get your favorite meals delivered quickly. We work with local vendors to ensure fresh food arrives at your doorstep within 30-45 minutes.</p>
+					<ul class="service-features">
+						<li><i class="fa fa-check"></i> Real-time order tracking</li>
+						<li><i class="fa fa-check"></i> Contactless delivery options</li>
+						<li><i class="fa fa-check"></i> Flexible delivery windows</li>
+						<li><i class="fa fa-check"></i> Multiple payment methods</li>
+					</ul>
+				</div>
+
+				<!-- Service 2: Business Accounts -->
+				<div class="service-card highlight">
+					<div class="service-badge">Popular</div>
+					<div class="service-icon">
+						<i class="fa fa-briefcase"></i>
+					</div>
+					<h3>Business Accounts</h3>
+					<p>Streamline meal ordering for your team with a Hub Business Account. Perfect for offices, events, and corporate catering.</p>
+					<ul class="service-features">
+						<li><i class="fa fa-check"></i> Consolidated billing & invoices</li>
+						<li><i class="fa fa-check"></i> Team ordering for groups</li>
+						<li><i class="fa fa-check"></i> Scheduled recurring orders</li>
+						<li><i class="fa fa-check"></i> Dedicated account manager</li>
+					</ul>
+					<a href="contact_us.html" class="btn service-cta">Get Started</a>
+				</div>
+
+				<!-- Service 3: Vendor Partnerships -->
+				<div class="service-card">
+					<div class="service-icon">
+						<i class="fa fa-handshake"></i>
+					</div>
+					<h3>Vendor Partnerships</h3>
+					<p>Join our growing network of vendors and reach thousands of customers. We provide the platform, you provide great food.</p>
+					<ul class="service-features">
+						<li><i class="fa fa-check"></i> Access to a large customer base</li>
+						<li><i class="fa fa-check"></i> Easy-to-use vendor dashboard</li>
+						<li><i class="fa fa-check"></i> Marketing & promotional support</li>
+						<li><i class="fa fa-check"></i> Transparent commission structure</li>
+					</ul>
+					<a href="contact_us.html" class="btn service-cta">Become a Partner</a>
+				</div>
+
+				<!-- Service 4: Catering -->
+				<div class="service-card">
+					<div class="service-icon">
+						<i class="fa fa-utensils"></i>
+					</div>
+					<h3>Catering Services</h3>
+					<p>Planning an event? Our catering service connects you with vendors who can handle small gatherings to large corporate events.</p>
+					<ul class="service-features">
+						<li><i class="fa fa-check"></i> Custom menu planning</li>
+						<li><i class="fa fa-check"></i> On-time bulk delivery</li>
+						<li><i class="fa fa-check"></i> Dietary accommodations</li>
+						<li><i class="fa fa-check"></i> Professional setup options</li>
+					</ul>
+				</div>
+
+				<!-- Service 5: Subscription Plans -->
+				<div class="service-card">
+					<div class="service-icon">
+						<i class="fa fa-calendar-check"></i>
+					</div>
+					<h3>Subscription Plans</h3>
+					<p>Save time and money with our subscription meal plans. Choose from daily, weekly, or monthly delivery schedules.</p>
+					<ul class="service-features">
+						<li><i class="fa fa-check"></i> Flexible meal schedules</li>
+						<li><i class="fa fa-check"></i> Exclusive subscriber discounts</li>
+						<li><i class="fa fa-check"></i> Priority delivery slots</li>
+						<li><i class="fa fa-check"></i> Cancel or pause anytime</li>
+					</ul>
+				</div>
+
+				<!-- Service 6: Support -->
+				<div class="service-card">
+					<div class="service-icon">
+						<i class="fa fa-headset"></i>
+					</div>
+					<h3>24/7 Support</h3>
+					<p>Our customer support team is always ready to help with orders, refunds, vendor inquiries, or technical issues.</p>
+					<ul class="service-features">
+						<li><i class="fa fa-check"></i> Live chat support</li>
+						<li><i class="fa fa-check"></i> Email & phone assistance</li>
+						<li><i class="fa fa-check"></i> Fast issue resolution</li>
+						<li><i class="fa fa-check"></i> Multilingual support staff</li>
+					</ul>
+				</div>
+
+			</div>
+
+			<!-- CTA Section -->
+			<div class="services-cta-section">
+				<h2>Ready to Get Started?</h2>
+				<p>Whether you're a customer, business, or vendor, Hub has the right solution for you.</p>
+				<div class="cta-buttons">
+					<a href="shop.html" class="btn">Browse Products</a>
+					<a href="contact_us.html" class="btn secondary">Contact Sales</a>
+				</div>
+			</div>
+
+		</section>
+	</main>
+
+	<footer class="site-footer" role="contentinfo">
+		<div class="footer-content">
+			<div class="footer-grid">
+				<div class="footer-brand">
+					<a href="index.html" class="footer-logo">Hub</a>
+					<p class="footer-tagline">Food & Gourmet delivered with care.</p>
+					<div class="footer-socials" aria-label="Social media">
+						<a href="#" aria-label="Facebook"><i class="fa-brands fa-facebook"></i></a>
+						<a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+						<a href="#" aria-label="Twitter"><i class="fa-brands fa-x-twitter"></i></a>
+					</div>
+				</div>
+
+				<div class="footer-column">
+					<h4>Quick Links</h4>
+					<nav class="footer-nav" aria-label="Quick Links">
+						<a href="about_us.html">About Us</a>
+						<a href="our_services.html">Our Services</a>
+						<a href="contact_us.html">Contact Us</a>
+						<a href="shop.html">Shop</a>
+					</nav>
+				</div>
+
+				<div class="footer-column">
+					<h4>Customer Care</h4>
+					<nav class="footer-nav" aria-label="Customer Care">
+						<a href="#products">Products</a>
+						<a href="#testimonials">Testimonials</a>
+						<a href="#newsletter">Newsletter</a>
+						<a href="#">Support</a>
+					</nav>
+				</div>
+
+				<div class="footer-column">
+					<h4>My Account</h4>
+					<nav class="footer-nav" aria-label="Account">
+						<a href="account.html">My Account</a>
+						<a href="cart.html">Shopping Cart</a>
+						<a href="wishlist.html">Wishlist</a>
+						<a href="#">Order History</a>
+					</nav>
+				</div>
+			</div>
+		</div>
+		<div class="footer-bottom">
+			<p>© <span id="year"></span> Hub. All rights reserved.</p>
+		</div>
+	</footer>
+
+	<script src="js/role-guard.js"></script>
+	<script src="js/session-validator.js"></script>
+	<script src="js/script.js"></script>
+	<script src="js/messenger-global.js"></script>
+	<script>
+		const y = document.getElementById('year');
+		if (y) y.textContent = new Date().getFullYear();
+	</script>
+</body>
+</html>
