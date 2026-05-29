@@ -1587,37 +1587,72 @@ function handleLogin(ev){
     ok=false;
   } 
   if(ok){
-    fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})})
-      .then(r=>{
-        const status = r.status;
-        return r.json().then(resp => ({status, resp}));
-      })
-      .then(({status, resp})=>{
-        if(resp && resp.success){
-          // Save tokens for API usage
-          if(resp.token) localStorage.setItem('hub_access_token', resp.token);
-          if(resp.refresh_token) localStorage.setItem('hub_refresh_token', resp.refresh_token);
-          
-          // Show success notification
-          if(window.notify) {
-            window.notify.success('Login successful! Welcome back.');
+    // Try Supabase Auth first (client-side) so deployed frontend can authenticate without local backend
+    const SUPABASE_REF = 'sfeccfbdmbwoblixyoti';
+    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNmZWNjZmJkbWJ3b2JsaXh5b3RpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwODAwNTksImV4cCI6MjA5NTY1NjA1OX0.uM7DX7T-PQqPsMIwh-Fna1BUtVkkOhR4PiT2YqYlhIE';
+    const supaUrl = `https://${SUPABASE_REF}.supabase.co/auth/v1/token?grant_type=password`;
+
+    fetch(supaUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_ANON,
+        'Authorization': `Bearer ${SUPABASE_ANON}`
+      },
+      body: JSON.stringify({ email, password })
+    })
+    .then(r => r.json().then(resp => ({ status: r.status, resp })))
+    .then(({ status, resp }) => {
+      if (resp && resp.access_token) {
+        // Supabase successful login
+        localStorage.setItem('hub_access_token', resp.access_token);
+        if (resp.refresh_token) localStorage.setItem('hub_refresh_token', resp.refresh_token);
+        if(window.notify) window.notify.success('Login successful! Welcome back.');
+        document.getElementById('loginForm').reset();
+
+        // Decode role if present in user metadata
+        let userRole = null;
+        try { if (resp.user && resp.user.role) userRole = resp.user.role; } catch(e){}
+
+        // Redirect by role or returnUrl
+        const returnUrl = localStorage.getItem('returnUrl');
+        if (returnUrl) { localStorage.removeItem('returnUrl'); window.location.href = returnUrl; return; }
+        if (userRole === 'seller') window.location.href = '/seller_dashboard.html';
+        else if (userRole === 'rider') window.location.href = '/rider_dashboard.html';
+        else if (userRole === 'admin') window.location.href = '/admin_dashboard.html';
+        else window.location.href = '/index.html';
+        return;
+      }
+
+      // Fallback: try legacy backend endpoint if Supabase auth fails
+      return fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})})
+        .then(r=>{ const status = r.status; return r.json().then(resp => ({status, resp})); })
+        .then(({status, resp})=>{
+          if(resp && resp.success){
+            if(resp.token) localStorage.setItem('hub_access_token', resp.token);
+            if(resp.refresh_token) localStorage.setItem('hub_refresh_token', resp.refresh_token);
+            if(window.notify) window.notify.success('Login successful! Welcome back.');
+            document.getElementById('loginForm').reset();
+            let userRole = null;
+            if(resp.token){ try{ const parts = resp.token.split('.'); const decoded = JSON.parse(atob(parts[1])); userRole = decoded.role; }catch(e){}}
+            const returnUrl = localStorage.getItem('returnUrl');
+            if(returnUrl){ localStorage.removeItem('returnUrl'); window.location.href = returnUrl; return; }
+            if(userRole==='seller') window.location.href='/seller_dashboard.html';
+            else if(userRole==='rider') window.location.href='/rider_dashboard.html';
+            else if(userRole==='admin') window.location.href='/admin_dashboard.html';
+            else window.location.href='/index.html';
+          } else {
+            showError('loginPasswordError', (resp && (resp.error || resp.message)) || 'Login failed');
+            if(window.notify) window.notify.error((resp && (resp.error || resp.message)) || 'Login failed');
           }
-          
-          document.getElementById('loginForm').reset();
-          
-          // Get user role from token
-          let userRole = null;
-          if(resp.token) {
-            try {
-              const parts = resp.token.split('.');
-              const decoded = JSON.parse(atob(parts[1]));
-              userRole = decoded.role;
-            } catch(e) {
-              console.error('Failed to decode token:', e);
-            }
-          }
-          
-          // Check for return URL first (from message seller flow)
+        }).catch(err=>{ console.error('fallback login error', err); showError('loginPasswordError','Server error'); if(window.notify) window.notify.error('Server error'); });
+    }).catch(err => {
+      console.error('Supabase auth error', err);
+      // Fallback to legacy backend
+      fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})})
+        .then(r=>r.json()).then(resp=>{ if(resp && resp.success){ if(resp.token) localStorage.setItem('hub_access_token', resp.token); if(resp.refresh_token) localStorage.setItem('hub_refresh_token', resp.refresh_token); if(window.notify) window.notify.success('Login successful! Welcome back.'); document.getElementById('loginForm').reset(); window.location.href='/index.html'; } else { showError('loginPasswordError','Login failed'); } })
+        .catch(e=>{ console.error('fallback error',e); showError('loginPasswordError','Server error'); });
+    });
           const returnUrl = localStorage.getItem('returnUrl');
           let redirectUrl;
           
