@@ -1,9 +1,14 @@
 {
   "version": 2,
+  "name": "foodhub-frontend",
   "builds": [
-    { "src": "frontend/**/*", "use": "@vercel/static" }
+    { "src": "frontend/**", "use": "@vercel/static" }
   ],
   "routes": [
-    { "src": "/(.*)", "dest": "/frontend/$1" }
-  ]
+    { "src": "^/$", "dest": "/frontend/index.html" },
+    { "src": "^/favicon.ico$", "dest": "/frontend/favicon.ico" },
+    { "src": "^/(.*)$", "dest": "/frontend/$1" },
+    { "src": "^/(.*)$", "dest": "/frontend/index.html" }
+  ],
+  "cleanUrls": true
 }
