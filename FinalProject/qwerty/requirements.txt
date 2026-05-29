@@ -27,3 +27,4 @@ Pillow==10.1.0
 # redis==5.0.1  # For caching and session storage
 # celery==5.3.4  # For background tasks
 # sentry-sdk[flask]==1.38.0  # For error tracking
+psycopg2-binary==2.9.12

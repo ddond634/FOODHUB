@@ -5,6 +5,11 @@ Provides connection pooling, transaction management, and safe query execution
 import os
 import sqlite3
 import pymysql
+try:
+    import psycopg2
+    import psycopg2.extras
+except Exception:
+    psycopg2 = None
 from contextlib import contextmanager
 from threading import Lock
 import queue
@@ -42,6 +47,16 @@ class DatabasePool:
                 autocommit=False,
                 charset='utf8mb4'
             )
+        elif DB_ENGINE in ('postgres', 'supabase'):
+            if psycopg2 is None:
+                raise RuntimeError('psycopg2 is required for postgres/supabase DB_ENGINE. Install psycopg2-binary or psycopg2.')
+
+            db_url = os.environ.get('SUPABASE_DB_URL') or os.environ.get('DATABASE_URL')
+            if not db_url:
+                raise RuntimeError('SUPABASE_DB_URL (or DATABASE_URL) must be set for DB_ENGINE=postgres/supabase')
+
+            conn = psycopg2.connect(db_url)
+            # use RealDictCursor when creating cursors below
         else:
             conn = sqlite3.connect('qwerty.db', check_same_thread=False)
             conn.row_factory = sqlite3.Row
@@ -124,7 +139,11 @@ def get_db_connection():
     """
     pool = get_db_pool()
     conn = pool.get_connection()
-    cursor = conn.cursor()
+    # choose appropriate cursor factory for psycopg2 connections
+    if DB_ENGINE in ('postgres', 'supabase') and psycopg2 is not None:
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    else:
+        cursor = conn.cursor()
     
     try:
         yield conn, cursor
@@ -147,7 +166,10 @@ def transaction():
     """
     pool = get_db_pool()
     conn = pool.get_connection()
-    cursor = conn.cursor()
+    if DB_ENGINE in ('postgres', 'supabase') and psycopg2 is not None:
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    else:
+        cursor = conn.cursor()
     
     try:
         yield conn, cursor
@@ -187,7 +209,7 @@ class SafeQuery:
         if where:
             conditions = []
             for col, val in where.items():
-                if DB_ENGINE == 'mysql':
+                if DB_ENGINE in ('mysql', 'postgres', 'supabase'):
                     conditions.append(f"{col} = %s")
                 else:
                     conditions.append(f"{col} = ?")
@@ -221,7 +243,7 @@ class SafeQuery:
         """
         columns = ', '.join(data.keys())
         
-        if DB_ENGINE == 'mysql':
+        if DB_ENGINE in ('mysql', 'postgres', 'supabase'):
             placeholders = ', '.join(['%s'] * len(data))
         else:
             placeholders = ', '.join(['?'] * len(data))
@@ -248,7 +270,7 @@ class SafeQuery:
         params = []
         
         for col, val in data.items():
-            if DB_ENGINE == 'mysql':
+            if DB_ENGINE in ('mysql', 'postgres', 'supabase'):
                 set_parts.append(f"{col} = %s")
             else:
                 set_parts.append(f"{col} = ?")
@@ -258,11 +280,11 @@ class SafeQuery:
         
         if where:
             conditions = []
-            for col, val in where.items():
-                if DB_ENGINE == 'mysql':
-                    conditions.append(f"{col} = %s")
-                else:
-                    conditions.append(f"{col} = ?")
+                for col, val in where.items():
+                    if DB_ENGINE in ('mysql', 'postgres', 'supabase'):
+                        conditions.append(f"{col} = %s")
+                    else:
+                        conditions.append(f"{col} = ?")
                 params.append(val)
             
             query += " WHERE " + " AND ".join(conditions)
@@ -286,11 +308,11 @@ class SafeQuery:
         
         if where:
             conditions = []
-            for col, val in where.items():
-                if DB_ENGINE == 'mysql':
-                    conditions.append(f"{col} = %s")
-                else:
-                    conditions.append(f"{col} = ?")
+                for col, val in where.items():
+                    if DB_ENGINE in ('mysql', 'postgres', 'supabase'):
+                        conditions.append(f"{col} = %s")
+                    else:
+                        conditions.append(f"{col} = ?")
                 params.append(val)
             
             query += " WHERE " + " AND ".join(conditions)
