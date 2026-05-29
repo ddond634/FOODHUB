@@ -88,6 +88,28 @@
     window.showGlobalLoader = showGlobalLoader;
     window.hideGlobalLoader = hideGlobalLoader;
 
+    // Supabase Edge Function and storage configuration
+    const SUPABASE_PROJECT_REF = 'sfeccfbdmbwoblixyoti';
+    const SUPABASE_FUNCTIONS_BASE = `https://${SUPABASE_PROJECT_REF}.functions.supabase.co`;
+    const SUPABASE_PRODUCT_API = `${SUPABASE_FUNCTIONS_BASE}/product_api`;
+    const SUPABASE_ORDER_API = `${SUPABASE_FUNCTIONS_BASE}/create_order`;
+    const SUPABASE_STORAGE_BASE = `https://${SUPABASE_PROJECT_REF}.supabase.co/storage/v1/object/public/hub_uploads`;
+
+    window.SUPABASE_FUNCTIONS_BASE = SUPABASE_FUNCTIONS_BASE;
+    window.SUPABASE_PRODUCT_API = SUPABASE_PRODUCT_API;
+    window.SUPABASE_ORDER_API = SUPABASE_ORDER_API;
+    window.SUPABASE_STORAGE_BASE = SUPABASE_STORAGE_BASE;
+
+    function resolveStorageUrl(path) {
+      if (!path) return path;
+      if (typeof path !== 'string') return path;
+      if (path.startsWith('http://') || path.startsWith('https://')) return path;
+      const normalized = path.replace(/^\/+/, '').replace(/^uploads\//, '');
+      return `${SUPABASE_STORAGE_BASE}/${normalized}`;
+    }
+
+    window.resolveStorageUrl = resolveStorageUrl;
+
     // Monkey-patch fetch to automatically show loader for network requests
     if (window.fetch) {
       const origFetch = window.fetch.bind(window);
@@ -308,7 +330,7 @@
       const cartItems = items.slice(0, 5); // Show last 5 items
       itemsEl.innerHTML = cartItems.map(item => `
         <div class="dropdown-item">
-          <img src="http://127.0.0.1:5000${item.img_url || '/uploads/placeholder.jpg'}" 
+          <img src="${resolveStorageUrl(item.img_url || '/uploads/placeholder.jpg')}" 
                alt="${item.title}" loading="lazy" 
                onerror="this.src='https://via.placeholder.com/60'">
           <div class="item-details">
@@ -363,7 +385,7 @@
           
           return `
           <div class="dropdown-item">
-            <img src="http://127.0.0.1:5000/${item.image_url || 'uploads/placeholder.jpg'}" 
+            <img src="${resolveStorageUrl(item.image_url || 'uploads/placeholder.jpg')}" 
                  alt="${item.name || 'Product'}" loading="lazy"
                  onerror="this.src='https://via.placeholder.com/60'">
             <div class="item-details">
@@ -1172,8 +1194,8 @@
           }
           
           try {
-            const API_BASE = window.API_BASE || 'http://127.0.0.1:5000';
-            const response = await fetch(`${API_BASE}/api/products/suggestions?q=${encodeURIComponent(query)}`);
+            const productApiBase = window.SUPABASE_PRODUCT_API || window.location.origin;
+            const response = await fetch(`${productApiBase}/products/suggestions?q=${encodeURIComponent(query)}`);
             const data = await response.json();
             
             if (data.success && data.data && data.data.length > 0) {
@@ -1399,7 +1421,8 @@
         // Send order to backend API for persistence and ERP integration
         console.log('Order placed:', orderDetails);
         try{
-          fetch('/api/orders',{
+          const orderApiBase = window.SUPABASE_ORDER_API || window.location.origin;
+          fetch(orderApiBase,{
             method:'POST',
             headers:{ 'Content-Type':'application/json' },
             body: JSON.stringify(orderDetails)

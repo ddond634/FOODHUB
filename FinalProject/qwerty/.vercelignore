@@ -1,0 +1,11 @@
+venv/
+.venv/
+.local_packages/
+supabase/
+database/
+backend/
+node_modules/
+*.pyc
+__pycache__/
+.env
+*** End Patch

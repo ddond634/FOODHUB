@@ -205,7 +205,7 @@ function renderReturnRequests(requests) {
                 <td>#${req.order_id}</td>
                 <td>
                     <div style="display: flex; align-items: center; gap: 10px;">
-                        ${req.product_image ? `<img src="${req.product_image.startsWith('http') ? req.product_image : 'http://127.0.0.1:5000' + req.product_image}" 
+                        ${req.product_image ? `<img src="${req.product_image.startsWith('http') ? req.product_image : window.resolveStorageUrl(req.product_image)}" 
                              style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;" 
                              onerror="this.src='https://via.placeholder.com/40'">` : ''}
                         <span>${req.product_name || 'Product'}</span>
@@ -447,7 +447,7 @@ function showReturnRequestModal(request) {
                         </div>
                         <div style="display: flex; align-items: center; gap: 16px;">
                             ${request.product_image ? `
-                                <img src="${request.product_image.startsWith('http') ? request.product_image : 'http://127.0.0.1:5000' + request.product_image}" 
+                                <img src="${request.product_image.startsWith('http') ? request.product_image : window.resolveStorageUrl(request.product_image)}" 
                                      style="width: 100px; height: 100px; object-fit: cover; border-radius: 12px; border: 2px solid #e0e0e0;" 
                                      onerror="this.src='https://via.placeholder.com/100'">
                             ` : `
@@ -517,8 +517,8 @@ function showReturnRequestModal(request) {
                                     <div style="position: relative; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); cursor: pointer; transition: transform 0.3s;" 
                                          onmouseover="this.style.transform='scale(1.05)'" 
                                          onmouseout="this.style.transform='scale(1)'"
-                                         onclick="window.open('${img.startsWith('http') ? img : 'http://127.0.0.1:5000' + img}', '_blank')">
-                                        <img src="${img.startsWith('http') ? img : 'http://127.0.0.1:5000' + img}" 
+                                         onclick="window.open('${img.startsWith('http') ? img : window.resolveStorageUrl(img)}', '_blank')">
+                                        <img src="${img.startsWith('http') ? img : window.resolveStorageUrl(img)}" 
                                              style="width: 100%; height: 120px; object-fit: cover; display: block;"
                                              onerror="this.src='https://via.placeholder.com/120'">
                                         <div style="position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.6); color: white; border-radius: 6px; padding: 4px 8px; font-size: 11px;">
@@ -2121,7 +2121,8 @@ async function loadProductForEdit(productId) {
         // Load existing images (from image_urls or img_url)
         // First try to fetch fresh product data with images using the public endpoint
         try {
-            const freshProductResponse = await fetch(`http://127.0.0.1:5000/api/products/${productId}`);
+            const productApiBase = window.SUPABASE_PRODUCT_API || window.location.origin;
+            const freshProductResponse = await fetch(`${productApiBase}/products/${productId}`);
             if (freshProductResponse.ok) {
                 const freshProduct = await freshProductResponse.json();
                 if (freshProduct && freshProduct.id) {
@@ -2166,7 +2167,7 @@ async function loadProductForEdit(productId) {
                 
                 window.selectedProductImages.push({
                     file: null, // No file object for existing images
-                    preview: imageUrl.startsWith('http') ? imageUrl : `http://127.0.0.1:5000${imageUrl}`,
+                    preview: imageUrl.startsWith('http') ? imageUrl : window.resolveStorageUrl(imageUrl),
                     uploaded: true,
                     url: imageUrl.startsWith('/') ? imageUrl : `/${imageUrl.replace(/^\/+/, '')}`
                 });
@@ -3085,7 +3086,7 @@ async function loadProfileDataIntoEditModal() {
             const currentAvatarImg = document.getElementById('currentAvatarImg');
             const currentAvatarIcon = document.getElementById('currentAvatarIcon');
             if (user.avatar_url) {
-                const avatarUrl = user.avatar_url.startsWith('http') ? user.avatar_url : `http://127.0.0.1:5000${user.avatar_url}`;
+                const avatarUrl = user.avatar_url.startsWith('http') ? user.avatar_url : window.resolveStorageUrl(user.avatar_url);
                 if (currentAvatarImg) {
                     currentAvatarImg.src = avatarUrl;
                     currentAvatarImg.style.display = 'block';
@@ -5014,7 +5015,7 @@ async function loadProfile() {
         const profileAvatarImg = document.getElementById('profileAvatarImg');
         const profileAvatarLarge = document.getElementById('profileAvatarLarge');
         if (user.avatar_url) {
-            const avatarUrl = user.avatar_url.startsWith('http') ? user.avatar_url : `http://127.0.0.1:5000${user.avatar_url}`;
+            const avatarUrl = user.avatar_url.startsWith('http') ? user.avatar_url : window.resolveStorageUrl(user.avatar_url);
             if (profileAvatarImg) {
                 profileAvatarImg.src = avatarUrl;
                 profileAvatarImg.style.display = '';
@@ -5364,12 +5365,8 @@ async function loadShippingSettings() {
             return;
         }
 
-        const response = await fetch('http://localhost:5000/api/seller/settings/shipping', {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
+        const response = await authFetch('/api/seller/settings/shipping', {
+            method: 'GET'
         });
 
         if (response.ok) {
@@ -5505,12 +5502,8 @@ async function saveShippingSettings() {
         // Show loading state
         showShippingMessage('Saving settings...', 'info');
 
-        const response = await fetch('http://localhost:5000/api/seller/settings/shipping', {
+        const response = await authFetch('/api/seller/settings/shipping', {
             method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            },
             body: JSON.stringify({
                 free_shipping_threshold: threshold,
                 standard_shipping_fee: fee
