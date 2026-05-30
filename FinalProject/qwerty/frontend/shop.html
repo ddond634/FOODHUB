@@ -425,6 +425,11 @@
 	<script src="js/notifications.js"></script>
 	<script src="js/session-validator.js"></script>
 	<script src="js/cart-sync.js"></script>
+	<script>
+	if (typeof window.API_BASE === 'undefined') {
+		window.API_BASE = window.location.origin;
+	}
+	</script>
 	<script src="js/script.js"></script>
 	<script>
 	// Footer year

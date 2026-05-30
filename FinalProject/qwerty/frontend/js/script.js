@@ -135,7 +135,10 @@
           const legacyHost = url.hostname === 'localhost' || url.hostname === '127.0.0.1' || url.origin === window.location.origin;
           if (!legacyHost) return urlValue;
 
-          const resourcePath = path.replace(/^\/api/, '');
+          let resourcePath = path.replace(/^(?:\/api)+/, '');
+          if (!resourcePath.startsWith('/')) {
+            resourcePath = '/' + resourcePath;
+          }
           const query = url.search || '';
 
           if (resourcePath.startsWith('/cart') || resourcePath.startsWith('/wishlist')) {
