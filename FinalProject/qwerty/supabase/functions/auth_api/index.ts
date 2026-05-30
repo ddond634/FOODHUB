@@ -264,7 +264,10 @@ serve(async (req: Request) => {
 
       const updates: Record<string, unknown> = {};
       for (const [key, value] of Object.entries(body as Record<string, unknown>)) {
-        if (USER_FIELDS.has(key)) updates[key] = value;
+        if (!USER_FIELDS.has(key)) continue;
+        if (value === null || value === undefined) continue;
+        if (typeof value === "string" && value.trim() === "" && key !== "middle_name" && key !== "suffix" && key !== "address_line2") continue;
+        updates[key] = value;
       }
       if (!Object.keys(updates).length) {
         return json({ success: false, error: "No valid fields to update" }, 400);

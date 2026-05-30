@@ -1066,25 +1066,11 @@
             }
             
             // Load user profile data to auto-fill form (always fetch latest)
-            // Use a delay to ensure dropdowns are fully populated and DOM is ready
-            // Note: Modal observer will also trigger this, so we use a flag to prevent duplicates
-            if (!window.checkoutProfileLoading) {
-                window.checkoutProfileLoading = true;
-                setTimeout(async () => {
-                    console.log('🔄 Loading user profile for checkout...');
-                    await loadUserProfileForCheckout();
-                    
-                    // Setup real-time sync for form changes
-                    setupCheckoutFormSync();
-                    
-                    // Reset flag after a delay
-                    setTimeout(() => {
-                        window.checkoutProfileLoading = false;
-                    }, 1000);
-                }, 300);
-            } else {
-                console.log('⏭️ Profile loading already in progress, skipping duplicate call');
-            }
+            setTimeout(async () => {
+                console.log('🔄 Loading user profile for checkout...');
+                await loadUserProfileForCheckout(true);
+                setupCheckoutFormSync();
+            }, 300);
             
             // Only NOW open the modal
             modal.hidden = false;
@@ -1861,6 +1847,28 @@
             };
         }
 
+        function applyProfileToCheckoutForm(user) {
+            if (!user) return;
+
+            const firstNameInput = document.getElementById('checkoutFirstName');
+            const middleNameInput = document.getElementById('checkoutMiddleName');
+            const lastNameInput = document.getElementById('checkoutLastName');
+            const suffixInput = document.getElementById('checkoutSuffix');
+            const phoneInput = document.getElementById('checkoutPhone');
+            const emailInput = document.getElementById('checkoutEmail');
+            const addressLine1Input = document.getElementById('checkoutAddressLine1');
+            const addressLine2Input = document.getElementById('checkoutAddressLine2');
+
+            if (firstNameInput) firstNameInput.value = user.first_name || '';
+            if (middleNameInput) middleNameInput.value = user.middle_name || '';
+            if (lastNameInput) lastNameInput.value = user.last_name || '';
+            if (suffixInput) suffixInput.value = user.suffix || '';
+            if (phoneInput) phoneInput.value = user.phone || '';
+            if (emailInput) emailInput.value = user.email || '';
+            if (addressLine1Input) addressLine1Input.value = user.address_line1 || '';
+            if (addressLine2Input) addressLine2Input.value = user.address_line2 || '';
+        }
+
         // Load user profile data and populate checkout form (always fetches latest)
         async function loadUserProfileForCheckout(forceRefresh = true) {
             const token = localStorage.getItem('hub_access_token');
@@ -1869,10 +1877,24 @@
                 return;
             }
 
+            if (forceRefresh) {
+                checkoutAutofillCompleted = false;
+                checkoutAutofillInProgress = false;
+            }
+
             try {
-                // Always fetch latest data from backend with cache-busting
+                const cachedRaw = sessionStorage.getItem('hub_buyer_profile');
+                if (cachedRaw) {
+                    try {
+                        const cached = JSON.parse(cachedRaw);
+                        applyProfileToCheckoutForm(cached);
+                    } catch (e) {
+                        console.warn('Could not parse cached profile:', e);
+                    }
+                }
+
                 const timestamp = forceRefresh ? `?t=${Date.now()}` : '';
-                const response = await authFetch('/api/account/me', {
+                const response = await authFetch(`/api/account/me${timestamp}`, {
                     method: 'GET',
                     headers: {
                         'Cache-Control': 'no-cache',
@@ -1884,7 +1906,12 @@
                     const data = await response.json();
                     if (data.success && data.data) {
                         const user = data.data;
-                        
+                        try {
+                            sessionStorage.setItem('hub_buyer_profile', JSON.stringify(user));
+                        } catch (e) {
+                            console.warn('Could not cache profile:', e);
+                        }
+
                         console.log('🔄 Loading profile data into checkout form:', {
                             firstName: user.first_name,
                             lastName: user.last_name,
@@ -1893,60 +1920,11 @@
                             province: user.province,
                             city: user.city
                         });
+
+                        applyProfileToCheckoutForm(user);
                         
-                        // Populate name fields (always set, even if empty)
-                        const firstNameInput = document.getElementById('checkoutFirstName');
-                        const middleNameInput = document.getElementById('checkoutMiddleName');
-                        const lastNameInput = document.getElementById('checkoutLastName');
-                        const suffixInput = document.getElementById('checkoutSuffix');
-                        
-                        if (firstNameInput) firstNameInput.value = user.first_name || '';
-                        if (middleNameInput) middleNameInput.value = user.middle_name || '';
-                        if (lastNameInput) lastNameInput.value = user.last_name || '';
-                        if (suffixInput) suffixInput.value = user.suffix || '';
-                        
-                        // Populate phone and email
-                        const phoneInput = document.getElementById('checkoutPhone');
-                        const emailInput = document.getElementById('checkoutEmail');
-                        
-                        if (phoneInput) phoneInput.value = user.phone || '';
-                        if (emailInput) emailInput.value = user.email || '';
-                        
-                        // Populate address fields
-                        const addressLine1Input = document.getElementById('checkoutAddressLine1');
-                        const addressLine2Input = document.getElementById('checkoutAddressLine2');
-                        
-                        if (addressLine1Input) addressLine1Input.value = user.address_line1 || '';
-                        if (addressLine2Input) addressLine2Input.value = user.address_line2 || '';
-                        
-                        // Get dropdown elements
-                        const provinceSelect = document.getElementById('checkoutProvince');
-                        const citySelect = document.getElementById('checkoutCity');
-                        const postalCodeInput = document.getElementById('checkoutPostalCode');
-                        
-                        console.log('📥 Setting up address dropdowns:', {
-                            hasProvinceSelect: !!provinceSelect,
-                            hasCitySelect: !!citySelect,
-                            userProvince: user.province,
-                            userCity: user.city,
-                            userPostalCode: user.postal_code
-                        });
-                        
-                        // Warn if province/city are missing but postal code exists
-                        if (!user.province && !user.city && user.postal_code) {
-                            console.warn('⚠️ WARNING: Postal code exists (' + user.postal_code + ') but province/city are null. Please update your address in Personal Information section to save province and city.');
-                        }
-                        
-                        // Wait for dropdowns to be fully populated in DOM
                         await new Promise(resolve => setTimeout(resolve, 100));
-                        
-                        // SINGLE AUTOFILL CALL - This is the ONLY place that sets province/city values
-                        // The autofill function has built-in safeguards to prevent duplicate calls
-                        if (!checkoutAutofillCompleted) {
-                            await autofillProvinceAndCity(user.province, user.city, user.postal_code);
-                        } else {
-                            console.log('⏭️ Autofill already completed, skipping to prevent override');
-                        }
+                        await autofillProvinceAndCity(user.province, user.city, user.postal_code);
                         
                         console.log('✅ Checkout form populated with user profile data');
                     } else {
@@ -1958,7 +1936,6 @@
                 }
             } catch (error) {
                 console.error('Error loading user profile for checkout:', error);
-                // User can still fill manually
             }
         }
 
@@ -2400,6 +2377,8 @@
         // Also listen for custom events (for same-tab updates)
         window.addEventListener('profileUpdated', () => {
             console.log('Profile updated event received (same-tab), refreshing checkout form...');
+            checkoutAutofillCompleted = false;
+            checkoutAutofillInProgress = false;
             const modal = document.getElementById('checkoutModal');
             if (modal && !modal.hidden) {
                 loadUserProfileForCheckout(true);

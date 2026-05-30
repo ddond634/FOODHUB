@@ -9,7 +9,7 @@ DECLARE
 BEGIN
     payload := json_build_object(
         'order_id', NEW.id,
-        'user_id', NEW.user_id,
+        'customer_id', NEW.customer_id,
         'status', NEW.status,
         'created_at', NEW.created_at
     );

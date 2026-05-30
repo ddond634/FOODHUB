@@ -361,7 +361,7 @@ async function createOrder(userId: number, body: Record<string, unknown>) {
   const total = Number(body.total ?? subtotal + delivery);
   const addressWithDetails = `${fullAddress}|||${JSON.stringify({ ...customer, full_address: fullAddress })}`;
 
-  const { data: order, error: orderError } = await admin.from('orders').insert([{
+  const fullRow: Record<string, unknown> = {
     customer_id: userId,
     customer_name: customerName,
     customer_phone: phone,
@@ -372,7 +372,35 @@ async function createOrder(userId: number, body: Record<string, unknown>) {
     payment,
     status: 'ready',
     created_at: new Date().toISOString(),
-  }]).select('id').single();
+  };
+
+  let order: { id: number } | null = null;
+  let orderError: { message: string } | null = null;
+
+  const attempts: Record<string, unknown>[] = [
+    fullRow,
+    { ...fullRow, customer_id: undefined },
+    {
+      customer_name: customerName,
+      customer_phone: phone,
+      customer_address: addressWithDetails,
+      total,
+      payment,
+      status: 'ready',
+      created_at: fullRow.created_at,
+    },
+  ];
+
+  for (const row of attempts) {
+    const cleaned = Object.fromEntries(Object.entries(row).filter(([, v]) => v !== undefined));
+    const result = await admin.from('orders').insert([cleaned]).select('id').single();
+    if (!result.error && result.data) {
+      order = result.data as { id: number };
+      orderError = null;
+      break;
+    }
+    orderError = result.error;
+  }
 
   if (orderError || !order) return failure(orderError?.message || 'Failed to create order', 400);
 

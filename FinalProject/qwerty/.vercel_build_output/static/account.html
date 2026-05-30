@@ -1876,28 +1876,62 @@
             const provinceSelect = document.getElementById('editProvince');
             const citySelect = document.getElementById('editCity');
             const postalCodeInput = document.getElementById('editPostalCode');
-            
-            const provinceIndex = provinceSelect.value;
-            const cityIndex = citySelect.value;
-            
-            if (!provinceIndex || !cityIndex) {
+            const saved = window._lastProfileData || {};
+
+            const provinceIndex = provinceSelect?.value ?? '';
+            const cityIndex = citySelect?.value ?? '';
+            const pIdx = parseInt(provinceIndex, 10);
+            const cIdx = parseInt(cityIndex, 10);
+
+            if (Number.isNaN(pIdx) || Number.isNaN(cIdx) || pIdx < 0 || cIdx < 0) {
                 return {
-                    region: calabarzonData.region,
-                    province: '',
-                    city: '',
-                    postal_code: ''
+                    region: saved.region || calabarzonData.region,
+                    province: saved.province || '',
+                    city: saved.city || '',
+                    postal_code: saved.postal_code || postalCodeInput?.value || ''
                 };
             }
-            
-            const province = calabarzonData.provinces[provinceIndex];
-            const city = province.cities[cityIndex];
-            
+
+            const province = calabarzonData.provinces[pIdx];
+            const city = province?.cities[cIdx];
+            if (!province || !city) {
+                return {
+                    region: saved.region || calabarzonData.region,
+                    province: saved.province || '',
+                    city: saved.city || '',
+                    postal_code: saved.postal_code || postalCodeInput?.value || ''
+                };
+            }
+
             return {
                 region: calabarzonData.region,
                 province: province.province,
                 city: city.city,
-                postal_code: postalCodeInput.value || city.postalCode
+                postal_code: postalCodeInput?.value || city.postalCode
             };
+        }
+
+        function cacheProfileData(user) {
+            if (!user) return;
+            window._lastProfileData = {
+                first_name: user.first_name || '',
+                middle_name: user.middle_name || '',
+                last_name: user.last_name || '',
+                suffix: user.suffix || '',
+                email: user.email || '',
+                phone: user.phone || '',
+                address_line1: user.address_line1 || '',
+                address_line2: user.address_line2 || '',
+                region: user.region || calabarzonData.region,
+                province: user.province || '',
+                city: user.city || '',
+                postal_code: user.postal_code || ''
+            };
+            try {
+                sessionStorage.setItem('hub_buyer_profile', JSON.stringify(window._lastProfileData));
+            } catch (e) {
+                console.warn('Could not cache profile in sessionStorage:', e);
+            }
         }
 
         // Immediate authentication check - prevent any display without valid token
@@ -2057,6 +2091,8 @@
                 console.error('No user object provided to populateProfile');
                 return;
             }
+
+            cacheProfileData(user);
             
             const role = getRoleFromToken();
             console.log('User role:', role);
@@ -2428,6 +2464,7 @@
 
                 if (response.ok && data.success) {
                     console.log('✅ Profile save successful! Response data:', data.data);
+                    if (data.data) cacheProfileData(data.data);
                     
                     // Show success message immediately
                     showSuccess('profileSuccess', 'Profile updated successfully!');
