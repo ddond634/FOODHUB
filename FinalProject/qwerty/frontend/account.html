@@ -1932,7 +1932,7 @@
             try {
                 // Always fetch fresh data with cache-busting
                 const timestamp = `?t=${Date.now()}`;
-                const url = `/api/me${timestamp}`;
+                const url = `/api/account/me${timestamp}`;
                 console.log('Fetching profile from:', url);
                 console.log('Using authFetch:', typeof authFetch);
                 
@@ -2381,10 +2381,10 @@
                     postal_code: addressValues.postal_code
                 };
                 
-                console.log('Sending payload to /api/me PUT:', payload);
+                console.log('Sending payload to /api/account/me PUT:', payload);
                 console.log('Using authFetch:', typeof authFetch);
                 
-                const response = await authFetch('/api/me', {
+                const response = await authFetch('/api/account/me', {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json'
