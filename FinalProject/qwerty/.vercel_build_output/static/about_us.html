@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>About Us - Hub | Our Story, Mission & Team</title>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+	<link rel="stylesheet" href="css/style.css">
+	<meta name="description" content="Discover Hub's mission to connect people with outstanding food. Meet our team and learn how we support local vendors while delivering fresh, quality products.">
+</head>
+<body>
+	<a class="skip-link" href="#main">Skip to content</a>
+
+	<!-- Navbar (copied from index.html) -->
+	<div class="navbar" id="navbar">
+		<div class="logo">
+			<a href="index.html">Hub</a>
+		</div>
+
+		<div class="search-bar">
+			<input type="text" placeholder="Search food, drinks, etc...">
+			<button><i class="fa fa-search"></i></button>
+		</div>
+
+		<div class="categories-dropdown">
+			<button id="categoriesToggle" class="categories-toggle" aria-expanded="false" aria-controls="categoriesPanel" aria-haspopup="true" title="Categories">
+				<i class="fa fa-th-large" aria-hidden="true"></i>
+				<i class="fa fa-caret-down caret" aria-hidden="true"></i>
+			</button>
+
+			<div id="categoriesPanel" class="categories-panel" hidden>
+				<a href="shop.html?category=Baking" class="panel-item" data-category="Baking">
+					<i class="fa fa-bread-slice" aria-hidden="true"></i>
+					<span>Baking</span>
+				</a>
+				<a href="shop.html?category=Coffee & Tea" class="panel-item" data-category="Coffee & Tea">
+					<i class="fa fa-coffee" aria-hidden="true"></i>
+					<span>Coffee & Tea</span>
+				</a>
+				<a href="shop.html?category=Snacks" class="panel-item" data-category="Snacks">
+					<i class="fa fa-cookie-bite" aria-hidden="true"></i>
+					<span>Snacks</span>
+				</a>
+				<a href="shop.html?category=Organic" class="panel-item" data-category="Organic">
+					<i class="fa fa-leaf" aria-hidden="true"></i>
+					<span>Organic</span>
+				</a>
+				<a href="shop.html?category=Meal Kits" class="panel-item" data-category="Meal Kits">
+					<i class="fa fa-box-open" aria-hidden="true"></i>
+					<span>Meal Kits</span>
+				</a>
+			</div>
+		</div>
+
+		<div class="nav-icons">
+			<a href="wishlist.html" id="wishlistBtn" title="Wishlist" class="icon-with-badge">
+				<i class="fa fa-heart"></i>
+				<span class="badge">0</span>
+			</a>
+			<a href="cart.html" id="cartBtn" title="Shopping Cart" class="icon-with-badge">
+				<i class="fa fa-shopping-cart"></i>
+				<span class="badge">0</span>
+			</a>
+			<a href="account.html" title="Account"><i class="fa fa-user"></i></a>
+
+			<div id="wishlistDropdown" class="cart-dropdown" hidden>
+				<div class="dropdown-header">Recently Added to Wishlist</div>
+				<div class="dropdown-items">
+					<p class="muted">No items yet</p>
+				</div>
+				<div class="dropdown-footer">
+					<button class="view-btn">View My Wishlist</button>
+				</div>
+			</div>
+
+			<div id="cartDropdown" class="cart-dropdown" hidden>
+				<div class="dropdown-header">Recently Added Products</div>
+				<div class="dropdown-items">
+					<p class="muted">Cart is empty</p>
+				</div>
+				<div class="dropdown-footer">
+					<a class="view-btn" href="cart.html">View My Shopping Cart</a>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<style>
+		:root {
+			--about-primary: #2F5233;
+			--about-accent: #C47F1B;
+			--about-cream: #FAF3E0;
+			--about-soft: #FFF7EC;
+			--about-dark: #1F1F1F;
+			--about-green-light: #4A7C4E;
+			--about-gold-light: #D4A574;
+		}
+
+		.about-hero {
+			background: linear-gradient(135deg, #2F5233 0%, #1a3020 100%);
+			min-height: 65vh;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			position: relative;
+			overflow: hidden;
+		}
+
+		.about-hero::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background-image: 
+				radial-gradient(circle at 20% 50%, rgba(196, 127, 27, 0.15) 0%, transparent 50%),
+				radial-gradient(circle at 80% 80%, rgba(74, 124, 78, 0.15) 0%, transparent 50%),
+				url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="rgba(196,127,27,0.08)" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,165.3C1248,171,1344,149,1392,138.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>');
+			background-size: cover;
+			background-position: bottom;
+			animation: gentleFloat 20s ease-in-out infinite;
+		}
+
+		.about-hero::after {
+			content: '🌿';
+			position: absolute;
+			font-size: 8rem;
+			opacity: 0.03;
+			top: 20%;
+			right: 10%;
+			animation: rotate 40s linear infinite;
+		}
+
+		@keyframes gentleFloat {
+			0%, 100% { transform: translateY(0) scale(1); }
+			50% { transform: translateY(-15px) scale(1.02); }
+		}
+
+		@keyframes rotate {
+			from { transform: rotate(0deg); }
+			to { transform: rotate(360deg); }
+		}
+
+		.hero-inner {
+			position: relative;
+			z-index: 1;
+			text-align: center;
+			color: #FAF3E0;
+			max-width: 900px;
+			padding: 3rem 2rem;
+			animation: fadeInUp 1s ease-out;
+		}
+
+		@keyframes fadeInUp {
+			from {
+				opacity: 0;
+				transform: translateY(30px);
+			}
+			to {
+				opacity: 1;
+				transform: translateY(0);
+			}
+		}
+
+		.hero-inner h1 {
+			font-size: 3.8rem;
+			font-weight: 800;
+			margin-bottom: 1.5rem;
+			text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+			letter-spacing: -1px;
+			color: #FFF7EC;
+		}
+
+		.hero-inner .lead {
+			font-size: 1.4rem;
+			margin-bottom: 2rem;
+			line-height: 1.7;
+			opacity: 0.95;
+			font-weight: 300;
+			color: #FAF3E0;
+		}
+
+		.hero-stats {
+			display: flex;
+			gap: 3rem;
+			justify-content: center;
+			margin: 2.5rem 0;
+			flex-wrap: wrap;
+		}
+
+		.hero-stat {
+			text-align: center;
+			animation: fadeInUp 1s ease-out backwards;
+			background: rgba(196, 127, 27, 0.15);
+			padding: 1.5rem 2rem;
+			border-radius: 16px;
+			border: 2px solid rgba(196, 127, 27, 0.3);
+			backdrop-filter: blur(10px);
+			transition: all 0.3s ease;
+		}
+
+		.hero-stat:hover {
+			transform: translateY(-5px);
+			background: rgba(196, 127, 27, 0.25);
+			border-color: #C47F1B;
+		}
+
+		.hero-stat:nth-child(1) { animation-delay: 0.2s; }
+		.hero-stat:nth-child(2) { animation-delay: 0.4s; }
+		.hero-stat:nth-child(3) { animation-delay: 0.6s; }
+
+		.hero-stat-value {
+			font-size: 2.5rem;
+			font-weight: 800;
+			display: block;
+			margin-bottom: 0.5rem;
+			color: #C47F1B;
+			text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+		}
+
+		.hero-stat-label {
+			font-size: 0.9rem;
+			opacity: 0.95;
+			text-transform: uppercase;
+			letter-spacing: 1px;
+			color: #FAF3E0;
+		}
+
+		.two-column {
+			display: grid;
+			grid-template-columns: 2fr 1fr;
+			gap: 3rem;
+			margin: 3rem 0;
+		}
+
+		.two-column aside {
+			background: linear-gradient(135deg, #FFF7EC 0%, #FAF3E0 100%);
+			padding: 2.5rem;
+			border-radius: 20px;
+			box-shadow: 0 8px 24px rgba(47, 82, 51, 0.12);
+			border: 2px solid rgba(196, 127, 27, 0.2);
+			height: fit-content;
+			position: sticky;
+			top: 2rem;
+			transition: all 0.3s ease;
+		}
+
+		.two-column aside:hover {
+			box-shadow: 0 12px 32px rgba(47, 82, 51, 0.18);
+			border-color: #C47F1B;
+		}
+
+		.two-column aside h3 {
+			color: #2F5233;
+			margin-top: 0;
+			border-bottom: 3px solid #C47F1B;
+			padding-bottom: 0.75rem;
+			font-size: 1.4rem;
+		}
+
+		.two-column aside dl {
+			margin: 1.5rem 0;
+		}
+
+		.two-column aside dt {
+			font-weight: 700;
+			color: #C47F1B;
+			margin-top: 1rem;
+			font-size: 0.85rem;
+			text-transform: uppercase;
+			letter-spacing: 0.5px;
+		}
+
+		.two-column aside dd {
+			font-size: 1.5rem;
+			font-weight: 600;
+			color: #2F5233;
+			margin: 0.25rem 0;
+		}
+
+		.impact {
+			background: linear-gradient(135deg, #2F5233 0%, #1a3020 100%);
+			color: #FAF3E0;
+			padding: 4.5rem 2rem;
+			border-radius: 24px;
+			margin: 4rem 0;
+			box-shadow: 0 12px 48px rgba(47, 82, 51, 0.3);
+			border: 2px solid rgba(196, 127, 27, 0.3);
+			position: relative;
+			overflow: hidden;
+		}
+
+		.impact::before {
+			content: '🌾';
+			position: absolute;
+			font-size: 12rem;
+			opacity: 0.03;
+			top: -20%;
+			left: -5%;
+			transform: rotate(-15deg);
+		}
+
+		.impact h2 {
+			text-align: center;
+			margin-bottom: 1rem;
+			font-size: 2.8rem;
+			color: #FFF7EC;
+			position: relative;
+		}
+
+		.impact > .muted {
+			text-align: center;
+			opacity: 0.9;
+			margin-bottom: 3rem;
+			font-size: 1.15rem;
+			color: #FAF3E0;
+		}
+
+		.impact-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+			gap: 2rem;
+			position: relative;
+		}
+
+		.impact-card {
+			background: rgba(196, 127, 27, 0.15);
+			backdrop-filter: blur(10px);
+			padding: 2.5rem;
+			border-radius: 18px;
+			text-align: center;
+			border: 2px solid rgba(196, 127, 27, 0.3);
+			transition: all 0.3s ease;
+		}
+
+		.impact-card:hover {
+			transform: translateY(-8px);
+			background: rgba(196, 127, 27, 0.25);
+			border-color: #C47F1B;
+			box-shadow: 0 16px 40px rgba(196, 127, 27, 0.3);
+		}
+
+		.impact-value {
+			font-size: 3.5rem;
+			font-weight: 800;
+			margin-bottom: 0.5rem;
+			color: #C47F1B;
+			text-shadow: 2px 2px 6px rgba(0,0,0,0.3);
+		}
+
+		.impact-label {
+			font-size: 1rem;
+			opacity: 0.95;
+			text-transform: uppercase;
+			letter-spacing: 1px;
+			color: #FAF3E0;
+		}
+
+		.team-grid {
+			display: grid;
+			grid-template-columns: repeat(4, 1fr);
+			gap: 2rem;
+			margin: 2rem auto;
+			max-width: 1300px;
+			justify-items: center;
+		}
+
+		.team-card {
+			background: #FFF7EC;
+			padding: 2.5rem 1.5rem;
+			border-radius: 20px;
+			text-align: center;
+			box-shadow: 0 8px 24px rgba(47, 82, 51, 0.1);
+			transition: all 0.3s ease;
+			border: 2px solid transparent;
+			position: relative;
+			overflow: hidden;
+			width: 100%;
+			max-width: 310px;
+		}
+
+		.team-card h4 {
+			margin: 0 0 0.5rem;
+			color: #2F5233;
+			font-size: 1.5rem;
+			font-weight: 700;
+			white-space: nowrap;
+		}
+
+		.team-card::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			height: 5px;
+			background: linear-gradient(90deg, #2F5233, #C47F1B);
+			transform: scaleX(0);
+			transition: transform 0.3s ease;
+		}
+
+		.team-card:hover::before {
+			transform: scaleX(1);
+		}
+
+		.team-card:hover {
+			transform: translateY(-10px);
+			box-shadow: 0 16px 48px rgba(47, 82, 51, 0.2);
+			border-color: #C47F1B;
+			background: #FFFFFF;
+		}
+
+		.team-card .avatar {
+			width: 150px;
+			height: 150px;
+			margin: 0 auto 1.5rem;
+			border-radius: 50%;
+			overflow: hidden;
+			border: 5px solid #C47F1B;
+			box-shadow: 0 8px 20px rgba(196, 127, 27, 0.25);
+			transition: all 0.3s ease;
+		}
+
+		.team-card:hover .avatar {
+			transform: scale(1.08);
+			border-color: #2F5233;
+			box-shadow: 0 12px 30px rgba(47, 82, 51, 0.3);
+		}
+
+		.team-card .avatar img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+		}
+
+		.team-card h4 {
+			margin: 0 0 0.5rem;
+			color: #2F5233;
+			font-size: 1.5rem;
+			font-weight: 700;
+			white-space: nowrap;
+		}
+
+		.team-card strong {
+			color: #C47F1B;
+			display: block;
+			margin-bottom: 1rem;
+			font-size: 1rem;
+			font-weight: 600;
+		}
+
+		.team-card p {
+			color: #555;
+			line-height: 1.7;
+			margin: 0.5rem 0;
+		}
+
+		.team-card a {
+			color: #2F5233;
+			text-decoration: none;
+			font-weight: 600;
+			transition: color 0.2s;
+			border-bottom: 2px solid transparent;
+		}
+
+		.team-card a:hover {
+			color: #C47F1B;
+			border-bottom-color: #C47F1B;
+		}
+
+		.faq {
+			max-width: 850px;
+			margin: 3rem auto;
+		}
+
+		.faq h3 {
+			text-align: center;
+			margin-bottom: 2.5rem;
+			font-size: 2.3rem;
+			color: #2F5233;
+			position: relative;
+			padding-bottom: 1rem;
+		}
+
+		.faq h3::after {
+			content: '';
+			position: absolute;
+			bottom: 0;
+			left: 50%;
+			transform: translateX(-50%);
+			width: 100px;
+			height: 4px;
+			background: linear-gradient(90deg, #2F5233, #C47F1B);
+			border-radius: 2px;
+		}
+
+		.faq details {
+			background: #FFF7EC;
+			margin: 1.2rem 0;
+			padding: 1.75rem;
+			border-radius: 16px;
+			border: 2px solid rgba(196, 127, 27, 0.2);
+			transition: all 0.3s ease;
+			box-shadow: 0 4px 12px rgba(47, 82, 51, 0.08);
+		}
+
+		.faq details:hover {
+			border-color: #C47F1B;
+			box-shadow: 0 8px 20px rgba(196, 127, 27, 0.15);
+		}
+
+		.faq details[open] {
+			background: #FFFFFF;
+			border-color: #2F5233;
+			box-shadow: 0 8px 24px rgba(47, 82, 51, 0.15);
+		}
+
+		.faq summary {
+			font-weight: 700;
+			font-size: 1.15rem;
+			cursor: pointer;
+			color: #2F5233;
+			display: flex;
+			align-items: center;
+			transition: color 0.2s;
+		}
+
+		.faq summary:hover {
+			color: #C47F1B;
+		}
+
+		.faq summary::before {
+			content: '+';
+			margin-right: 1rem;
+			font-size: 1.8rem;
+			font-weight: 400;
+			color: #C47F1B;
+			transition: all 0.3s;
+			min-width: 30px;
+			text-align: center;
+		}
+
+		.faq details[open] summary::before {
+			content: '−';
+			color: #2F5233;
+		}
+
+		.faq details p {
+			margin-top: 1.25rem;
+			padding-left: 3rem;
+			color: #555;
+			line-height: 1.8;
+		}
+
+		.faq details p a {
+			color: #C47F1B;
+			font-weight: 600;
+			text-decoration: none;
+			border-bottom: 1px solid transparent;
+			transition: all 0.2s;
+		}
+
+		.faq details p a:hover {
+			color: #2F5233;
+			border-bottom-color: #2F5233;
+		}
+
+		.cta-row {
+			background: linear-gradient(135deg, #2F5233 0%, #1a3020 100%);
+			color: #FAF3E0;
+			padding: 3.5rem 2rem;
+			border-radius: 20px;
+			text-align: center;
+			margin: 4rem 0;
+			box-shadow: 0 12px 40px rgba(47, 82, 51, 0.25);
+			border: 2px solid rgba(196, 127, 27, 0.3);
+			position: relative;
+			overflow: hidden;
+		}
+
+		.cta-row::before {
+			content: '🍃';
+			position: absolute;
+			font-size: 10rem;
+			opacity: 0.03;
+			top: -30%;
+			right: -5%;
+			transform: rotate(25deg);
+		}
+
+		.cta-row h3 {
+			color: #FFF7EC;
+		}
+
+		.cta-row .muted {
+			color: #FAF3E0;
+			opacity: 0.95;
+			font-size: 1.2rem;
+			margin-bottom: 1.5rem;
+		}
+
+		.cta-row .btn {
+			background: #C47F1B;
+			color: white;
+			padding: 1.1rem 2.8rem;
+			font-size: 1.1rem;
+			font-weight: 600;
+			margin: 0.5rem;
+			transition: all 0.3s ease;
+			border: 2px solid #C47F1B;
+			border-radius: 12px;
+			text-decoration: none;
+			display: inline-block;
+		}
+
+		.cta-row .btn:hover {
+			transform: translateY(-4px);
+			box-shadow: 0 12px 32px rgba(196, 127, 27, 0.4);
+			background: #A86C12;
+		}
+
+		.cta-row .btn.secondary {
+			background: transparent;
+			color: #FAF3E0;
+			border: 2px solid #FAF3E0;
+		}
+
+		.cta-row .btn.secondary:hover {
+			background: #FAF3E0;
+			color: #2F5233;
+			transform: translateY(-4px);
+			box-shadow: 0 12px 32px rgba(250, 243, 224, 0.3);
+		}
+
+		.content h2 {
+			font-size: 2.4rem;
+			color: #2F5233;
+			margin: 3rem 0 1.5rem;
+			position: relative;
+			padding-bottom: 1rem;
+			font-weight: 700;
+		}
+
+		.content h2::after {
+			content: '';
+			position: absolute;
+			bottom: 0;
+			left: 0;
+			width: 90px;
+			height: 4px;
+			background: linear-gradient(90deg, #2F5233, #C47F1B);
+			border-radius: 2px;
+		}
+
+		.content h3 {
+			font-size: 1.7rem;
+			color: #2F5233;
+			margin: 2rem 0 1rem;
+			font-weight: 600;
+		}
+
+		.content ul {
+			list-style: none;
+			padding: 0;
+		}
+
+		.content ul li {
+			padding: 1rem 0;
+			padding-left: 2.5rem;
+			position: relative;
+			line-height: 1.8;
+			color: #444;
+		}
+
+		.content ul li::before {
+			content: '🌿';
+			position: absolute;
+			left: 0;
+			font-size: 1.2rem;
+		}
+
+		.content ul li strong {
+			color: #2F5233;
+			font-weight: 700;
+		}
+
+		.content p {
+			line-height: 1.9;
+			color: #555;
+			margin: 1.2rem 0;
+			font-size: 1.05rem;
+		}
+
+		.content a {
+			color: #C47F1B;
+			font-weight: 600;
+			text-decoration: none;
+			border-bottom: 1px solid transparent;
+			transition: all 0.2s;
+		}
+
+		.content a:hover {
+			color: #2F5233;
+			border-bottom-color: #2F5233;
+		}
+
+		.content hr {
+			border: none;
+			height: 2px;
+			background: linear-gradient(90deg, transparent, rgba(196, 127, 27, 0.3), transparent);
+			margin: 3.5rem 0;
+		}
+
+		/* Page container styling */
+		.page-main {
+			background: #FAF3E0;
+		}
+
+		.container {
+			max-width: 1200px;
+			margin: 0 auto;
+			padding: 0 2rem;
+		}
+
+		@media (max-width: 768px) {
+			.two-column {
+				grid-template-columns: 1fr;
+			}
+
+			.two-column aside {
+				position: static;
+			}
+
+			.hero-inner h1 {
+				font-size: 2.5rem;
+			}
+
+			.hero-inner .lead {
+				font-size: 1.2rem;
+			}
+
+			.hero-stats {
+				gap: 1rem;
+				flex-direction: column;
+			}
+
+			.hero-stat {
+				width: 100%;
+				max-width: 300px;
+			}
+
+			.hero-stat-value {
+				font-size: 2rem;
+			}
+
+			.team-grid {
+				grid-template-columns: 1fr;
+			}
+
+			.team-card .avatar {
+				width: 120px;
+				height: 120px;
+			}
+		}
+
+		@media (max-width: 1024px) and (min-width: 769px) {
+			.team-grid {
+				grid-template-columns: repeat(2, 1fr);
+			}
+
+			.impact {
+				padding: 2.5rem 1.5rem;
+			}
+
+			.impact h2 {
+				font-size: 2.2rem;
+			}
+
+			.impact-value {
+				font-size: 2.8rem;
+			}
+
+			.content h2 {
+				font-size: 2rem;
+			}
+
+			.content h3 {
+				font-size: 1.5rem;
+			}
+
+			.faq details p {
+				padding-left: 1rem;
+			}
+
+			.cta-row {
+				padding: 2.5rem 1.5rem;
+			}
+
+			.cta-row .btn {
+				display: block;
+				margin: 0.75rem auto;
+				max-width: 300px;
+			}
+		}
+	</style>
+
+	<section class="page-hero about-hero hero" id="main" aria-label="About Hub">
+		<div class="hero-inner">
+			<h1>About Hub</h1>
+			<p class="lead">We connect hungry people with outstanding food — delivered fast, fresh, and friendly.</p>
+			<div class="hero-stats">
+				<div class="hero-stat">
+					<span class="hero-stat-value">200+</span>
+					<span class="hero-stat-label">Local Vendors</span>
+				</div>
+				<div class="hero-stat">
+					<span class="hero-stat-value">1,200+</span>
+					<span class="hero-stat-label">Daily Deliveries</span>
+				</div>
+				<div class="hero-stat">
+					<span class="hero-stat-value">15%</span>
+					<span class="hero-stat-label">Less Food Waste</span>
+				</div>
+			</div>
+			<p><a class="btn" href="shop.html">Browse Products</a></p>
+		</div>
+	</section>
+
+	<main class="page-main">
+
+		<section class="content container">
+			<div class="two-column">
+				<div>
+					<h2>Our Mission</h2>
+					<p>At Hub, our mission is to revolutionize the way people experience food delivery. We're not just delivering meals — we're creating connections between passionate local producers and food lovers who appreciate quality and authenticity. Every order supports small businesses, reduces food waste, and brings joy to your table.</p>
+
+					<h3>What We Value</h3>
+					<ul>
+						<li><strong>Quality First:</strong> We partner only with vendors who share our commitment to fresh, high-quality ingredients and exceptional standards.</li>
+						<li><strong>Community Impact:</strong> Every purchase directly supports local sellers, small businesses, and the neighborhoods we serve.</li>
+						<li><strong>Reliability & Convenience:</strong> Lightning-fast delivery, real-time tracking, and crystal-clear communication at every step.</li>
+						<li><strong>Sustainability:</strong> We actively work to minimize food waste and use eco-friendly packaging wherever possible.</li>
+					</ul>
+
+					<h3>How We Work</h3>
+					<p>Quality starts with our rigorous vendor selection process. Each partner undergoes comprehensive vetting to ensure they meet our high standards for food safety, quality, and customer service. We provide ongoing support, regular quality audits, and a seamless technology platform that makes ordering effortless for customers and efficient for vendors.</p>
+					<p>Our dedicated team works around the clock to ensure every delivery meets our promise: fresh food, delivered fast, with a smile.</p>
+				</div>
+
+				<aside>
+					<h3>📊 Fast Facts</h3>
+					<dl>
+						<dt>Founded</dt>
+						<dd>2020</dd>
+						<dt>Active Vendors</dt>
+						<dd>200+</dd>
+						<dt>Daily Deliveries</dt>
+						<dd>1,200+</dd>
+						<dt>Avg. Delivery Time</dt>
+						<dd>28 mins</dd>
+						<dt>Customer Rating</dt>
+						<dd>4.8 ⭐</dd>
+					</dl>
+					<h3>💬 Contact Us</h3>
+					<p>Have questions or want to learn more? <a href="contact_us.html">Get in touch</a> with our friendly support team. We're here to help!</p>
+				</aside>
+			</div>
+
+			<hr>
+
+			<h2>👥 Meet the Team</h2>
+			<p style="text-align: center; max-width: 700px; margin: 0 auto 2rem; color: #666; font-size: 1.1rem;">Behind every great product is an even greater team. Meet the talented individuals who bring Hub to life every day.</p>
+			<div class="team-grid">
+				<div class="team-card">
+					<div class="avatar">
+						<img src="images/team/imac_uy.jpg" alt="Imac Uy" onerror="this.onerror=null;this.src='https://source.unsplash.com/200x200/?portrait,person&sig=11'">
+					</div>
+					<h4>Imac Uy</h4>
+					<p><strong>Front End Developer</strong><br>Handles UI, design implementation, user interaction, responsive layout. Focuses on performance, accessibility, and delivering pixel-accurate interfaces across devices.</p>
+				</div>
+
+				<div class="team-card">
+					<div class="avatar">
+						<img src="images/team/briddon_dumlao.jpg" alt="Briddon Dumlao" onerror="this.onerror=null;this.src='https://source.unsplash.com/200x200/?portrait,man&sig=22'">
+					</div>
+					<h4>Briddon Dumlao</h4>
+					<p><strong>Back End Developer</strong><br>Creates APIs, handles server logic, authentication, and database communication. Specializes in scalable API design and securing user data.</p>
+				</div>
+
+				<div class="team-card">
+					<div class="avatar">
+						<img src="images/team/jim_paul_carmona.jpg" alt="Jim Paul Carmona" onerror="this.onerror=null;this.src='https://source.unsplash.com/200x200/?portrait,man&sig=33'">
+					</div>
+					<h4>Jim Paul Carmona</h4>
+					<p><strong>Database Developer</strong><br>Designs the database structure, manages tables/relations, and ensures efficient data handling. Focuses on migrations, indexing, and keeping queries performant at scale.</p>
+				</div>
+
+				<div class="team-card">
+					<div class="avatar">
+						<img src="images/team/rommel_gidoc.jpg" alt="Rommel Gidoc" onerror="this.onerror=null;this.src='https://source.unsplash.com/200x200/?portrait,man&sig=44'">
+					</div>
+					<h4>Rommel Gidoc</h4>
+					<p><strong>QA Tester & Documentation</strong><br>Tests system features, reports issues, and prepares project documentation. Leads test planning and maintains the project's user-facing guides.</p>
+				</div>
+			</div>
+
+			<hr>
+
+			<!-- FAQ -->
+			<section class="faq">
+				<h3>❓ Frequently Asked Questions</h3>
+				<details>
+					<summary>How do I become a vendor on Hub?</summary>
+					<p>We're always looking for quality partners! Visit our <a href="contact_us.html">Contact</a> page and select "Vendor Inquiry". Our partnerships team will review your application and reach out within 2-3 business days. We'll discuss product quality, pricing, delivery capabilities, and how we can help grow your business together.</p>
+				</details>
+				<details>
+					<summary>What areas do you deliver to?</summary>
+					<p>We currently serve multiple metropolitan regions with plans to expand rapidly. Enter your postal code on our homepage to check if we deliver to your area. Don't see your location? Sign up for our waitlist and we'll notify you when Hub arrives in your neighborhood!</p>
+				</details>
+				<details>
+					<summary>How do you ensure product quality?</summary>
+					<p>Quality is our top priority. All vendors undergo a rigorous vetting process that evaluates food safety standards, ingredient sourcing, preparation methods, and customer reviews. We conduct regular quality audits, mystery shopper programs, and maintain strict temperature controls during delivery to ensure every item arrives fresh and delicious.</p>
+				</details>
+				<details>
+					<summary>What makes Hub different from other food delivery services?</summary>
+					<p>Hub focuses on quality over quantity. We carefully curate vendors, prioritize local businesses, and provide transparent pricing with no hidden fees. Our average delivery time is 28 minutes, and we offer real-time tracking, exceptional customer support, and a commitment to sustainability that sets us apart.</p>
+				</details>
+				<details>
+					<summary>Do you offer subscription or loyalty programs?</summary>
+					<p>Yes! Our Hub Plus membership offers unlimited free delivery, exclusive discounts, early access to new vendors, and special promotions. Check your account page for membership options and pricing. We also have a rewards program where you earn points on every order that can be redeemed for discounts.</p>
+				</details>
+				<details>
+					<summary>How do you handle food allergies and dietary restrictions?</summary>
+					<p>Each product listing includes detailed ingredient information and allergen warnings. You can filter searches by dietary preferences (vegan, gluten-free, nut-free, etc.). We require vendors to maintain accurate allergen information and take food safety very seriously. Always review product details and reach out to vendors directly with specific questions.</p>
+				</details>
+			</section>
+
+			<div class="cta-row">
+				<h3 style="font-size: 2rem; margin: 0 0 1rem;">🚀 Ready to Get Started?</h3>
+				<p class="muted">Whether you're a vendor looking to expand your reach or a customer seeking quality food delivery, Hub is here for you.</p>
+				<p><a class="btn" href="our_services.html">Explore Our Services</a> <a class="btn secondary" href="contact_us.html">Partner With Us</a></p>
+			</div>
+		</section>
+	</main>
+
+	<footer class="site-footer" role="contentinfo">
+		<div class="footer-content">
+			<div class="footer-grid">
+				<div class="footer-brand">
+					<a href="index.html" class="footer-logo">Hub</a>
+					<p class="footer-tagline">Food & Gourmet delivered with care.</p>
+					<div class="footer-socials" aria-label="Social media">
+						<a href="#" aria-label="Facebook"><i class="fa-brands fa-facebook"></i></a>
+						<a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+						<a href="#" aria-label="Twitter"><i class="fa-brands fa-x-twitter"></i></a>
+					</div>
+				</div>
+
+				<div class="footer-column">
+					<h4>Quick Links</h4>
+					<nav class="footer-nav" aria-label="Quick Links">
+						<a href="about_us.html">About Us</a>
+						<a href="our_services.html">Our Services</a>
+						<a href="contact_us.html">Contact Us</a>
+						<a href="shop.html">Shop</a>
+					</nav>
+				</div>
+
+				<div class="footer-column">
+					<h4>Customer Care</h4>
+					<nav class="footer-nav" aria-label="Customer Care">
+						<a href="#products">Products</a>
+						<a href="#testimonials">Testimonials</a>
+						<a href="#newsletter">Newsletter</a>
+						<a href="#">Support</a>
+					</nav>
+				</div>
+
+				<div class="footer-column">
+					<h4>My Account</h4>
+					<nav class="footer-nav" aria-label="Account">
+						<a href="account.html">My Account</a>
+						<a href="cart.html">Shopping Cart</a>
+						<a href="wishlist.html">Wishlist</a>
+						<a href="#">Order History</a>
+					</nav>
+				</div>
+			</div>
+		</div>
+		<div class="footer-bottom">
+			<p>© <span id="year"></span> Hub. All rights reserved.</p>
+		</div>
+	</footer>
+
+	<script src="js/role-guard.js"></script>
+	<script src="js/session-validator.js"></script>
+	<script src="js/script.js"></script>
+	<script src="js/messenger-global.js"></script>
+	<script>
+		// Set footer year
+		const y = document.getElementById('year');
+		if (y) y.textContent = new Date().getFullYear();
+	</script>
+    
+</body>
+</html>
+

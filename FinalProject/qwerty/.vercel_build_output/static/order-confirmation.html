@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmation - Hub</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <script>
+        (function() {
+            const token = localStorage.getItem('hub_access_token');
+            if (!token) {
+                window.location.href = '/loginregister.html';
+            }
+        })();
+    </script>
+    <style>
+        .confirmation-container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        .confirmation-header {
+            text-align: center;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #2F5233 0%, #3d6b42 100%);
+            border-radius: 16px;
+            color: white;
+            margin-bottom: 30px;
+        }
+        .confirmation-header .success-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            color: #4ade80;
+        }
+        .confirmation-header h1 {
+            font-size: 32px;
+            margin: 0 0 10px;
+            font-weight: 700;
+        }
+        .confirmation-header p {
+            font-size: 18px;
+            margin: 0;
+            opacity: 0.9;
+        }
+        .order-details-card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .order-details-card h2 {
+            font-size: 20px;
+            margin: 0 0 20px;
+            color: var(--fg-primary);
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 10px;
+        }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #f5f5f5;
+        }
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+        .detail-label {
+            font-weight: 600;
+            color: #666;
+        }
+        .detail-value {
+            color: var(--fg-primary);
+            font-weight: 500;
+        }
+        .order-items {
+            margin-top: 20px;
+        }
+        .order-item {
+            display: flex;
+            gap: 16px;
+            padding: 16px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+        .order-item img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        .order-item-info {
+            flex: 1;
+        }
+        .order-item-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--fg-primary);
+        }
+        .order-item-details {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        .order-item-price {
+            font-weight: 600;
+            color: var(--fg-accent);
+        }
+        .order-summary {
+            background: #f9f9f9;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+        }
+        .summary-total {
+            border-top: 2px solid #ddd;
+            padding-top: 12px;
+            margin-top: 12px;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--fg-accent);
+        }
+        .action-buttons {
+            display: flex;
+            gap: 16px;
+            margin-top: 30px;
+            justify-content: center;
+        }
+        .btn-primary, .btn-secondary {
+            padding: 14px 32px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background: var(--fg-accent);
+            color: white;
+            border: none;
+        }
+        .btn-primary:hover {
+            background: #2a4530;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(47, 82, 51, 0.3);
+        }
+        .btn-secondary {
+            background: white;
+            color: var(--fg-primary);
+            border: 2px solid #e0e0e0;
+        }
+        .btn-secondary:hover {
+            background: #f8f9fa;
+            border-color: #d0d0d0;
+        }
+        .loading-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+        .loading-state .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--fg-accent);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .error-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+        .error-state .error-icon {
+            font-size: 64px;
+            color: #ef4444;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body class="cart-page">
+    <!-- Navbar -->
+    <div class="navbar" id="navbar">
+        <div class="logo">
+            <a href="index.html">Hub</a>
+        </div>
+        <div class="search-bar">
+            <input type="text" placeholder="Search food, drinks, etc...">
+            <button><i class="fa fa-search"></i></button>
+        </div>
+        <div class="nav-icons">
+            <a href="wishlist.html" id="wishlistBtn" title="Wishlist" class="icon-with-badge">
+                <i class="fa fa-heart"></i>
+                <span class="badge">0</span>
+            </a>
+            <a href="cart.html" id="cartBtn" title="Shopping Cart" class="icon-with-badge">
+                <i class="fa fa-shopping-cart"></i>
+                <span class="badge">0</span>
+            </a>
+            <a href="account.html" title="Account"><i class="fa fa-user"></i></a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main id="main" class="cart-main" role="main">
+        <div class="confirmation-container">
+            <!-- Loading State -->
+            <div id="loadingState" class="loading-state">
+                <div class="spinner"></div>
+                <p>Loading order details...</p>
+            </div>
+
+            <!-- Error State -->
+            <div id="errorState" class="error-state" hidden>
+                <div class="error-icon"><i class="fa fa-exclamation-circle"></i></div>
+                <h2>Order Not Found</h2>
+                <p>We couldn't find the order you're looking for.</p>
+                <div class="action-buttons">
+                    <a href="account.html" class="btn-primary">View My Orders</a>
+                    <a href="index.html" class="btn-secondary">Continue Shopping</a>
+                </div>
+            </div>
+
+            <!-- Success State -->
+            <div id="successState" hidden>
+                <div class="confirmation-header">
+                    <div class="success-icon"><i class="fa fa-check-circle"></i></div>
+                    <h1>Order Confirmed!</h1>
+                    <p>Thank you for your order. We've received it and will process it shortly.</p>
+                </div>
+
+                <div class="order-details-card">
+                    <h2><i class="fa fa-receipt"></i> Order Information</h2>
+                    <div class="detail-row">
+                        <span class="detail-label">Order ID</span>
+                        <span class="detail-value" id="orderId">—</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Order Date</span>
+                        <span class="detail-value" id="orderDate">—</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Status</span>
+                        <span class="detail-value" id="orderStatus">—</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Payment Method</span>
+                        <span class="detail-value" id="paymentMethod">—</span>
+                    </div>
+                </div>
+
+                <div class="order-details-card">
+                    <h2><i class="fa fa-shopping-bag"></i> Order Items</h2>
+                    <div id="orderItems" class="order-items">
+                        <!-- Items will be populated here -->
+                    </div>
+                    <div class="order-summary">
+                        <div class="summary-row">
+                            <span>Subtotal</span>
+                            <span id="subtotal">₱0.00</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Delivery Fee</span>
+                            <span id="deliveryFee">₱0.00</span>
+                        </div>
+                        <div class="summary-row summary-total">
+                            <span>Total</span>
+                            <span id="total">₱0.00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="order-details-card">
+                    <h2><i class="fa fa-truck"></i> Delivery Information</h2>
+                    <div class="detail-row">
+                        <span class="detail-label">Name</span>
+                        <span class="detail-value" id="customerName">—</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Phone</span>
+                        <span class="detail-value" id="customerPhone">—</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Address</span>
+                        <span class="detail-value" id="customerAddress">—</span>
+                    </div>
+                    <div class="detail-row" id="riderInfoRow" style="display: none;">
+                        <span class="detail-label">Rider</span>
+                        <span class="detail-value" id="riderName">—</span>
+                    </div>
+                    <div class="detail-row" id="riderPhoneRow" style="display: none;">
+                        <span class="detail-label">Rider Phone</span>
+                        <span class="detail-value" id="riderPhone">—</span>
+                    </div>
+                    <div class="detail-row" id="deliveredAtRow" style="display: none;">
+                        <span class="detail-label">Delivered On</span>
+                        <span class="detail-value" id="deliveredAt">—</span>
+                    </div>
+                </div>
+                
+                <div class="order-details-card" id="ratingCard" style="display: none;">
+                    <h2><i class="fa fa-star"></i> Rate Your Delivery</h2>
+                    <p style="color: #666; margin-bottom: 16px;">How was your delivery experience?</p>
+                    <button onclick="openRatingModal()" class="btn-primary" style="padding: 10px 18px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3); transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px;"
+                            onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(16, 185, 129, 0.4)'"
+                            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(16, 185, 129, 0.3)'">
+                        <i class="fa fa-star"></i> Rate Rider
+                    </button>
+                </div>
+                
+                <div class="order-details-card" id="reviewedCard" style="display: none;">
+                    <h2><i class="fa fa-check-circle"></i> Delivery Reviewed</h2>
+                    <p style="color: #666; margin-bottom: 16px;">Thank you for rating your delivery experience!</p>
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                        <div style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border-radius: 8px; font-size: 14px; font-weight: 600; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3); width: fit-content;">
+                            <i class="fas fa-check-circle" style="font-size: 16px;"></i>
+                            <span>Reviewed</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 6px; padding: 8px 16px; background: #fef3c7; border-radius: 8px; border: 1px solid #fbbf24; width: fit-content;">
+                            <div style="display: flex; gap: 2px;" id="reviewStars">
+                                <!-- Stars will be populated by JavaScript -->
+                            </div>
+                            <span style="font-size: 14px; font-weight: 700; color: #92400e; margin-left: 6px;" id="reviewRatingText">5/5</span>
+                        </div>
+                        <div id="reviewCommentBox" style="display: none; font-size: 14px; color: #475569; padding: 12px 16px; background: #f8fafc; border-radius: 8px; border-left: 3px solid #cbd5e1; font-style: italic;">
+                            <i class="fas fa-quote-left" style="font-size: 12px; opacity: 0.5; margin-right: 6px;"></i>
+                            <span id="reviewCommentText"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <a href="account.html" class="btn-primary">
+                        <i class="fa fa-list"></i> View My Orders
+                    </a>
+                    <a href="index.html" class="btn-secondary">
+                        <i class="fa fa-shopping-bag"></i> Continue Shopping
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/notifications.js"></script>
+    <script src="js/session-validator.js"></script>
+    <script src="js/cart-sync.js"></script>
+    <script src="js/script.js"></script>
+    <script>
+        const API_BASE = window.SUPABASE_COMMERCE_API || 'http://127.0.0.1:5000/api';
+
+        // Get order ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const orderId = urlParams.get('order_id');
+
+        async function loadOrderDetails() {
+            if (!orderId) {
+                showError();
+                return;
+            }
+
+            const token = localStorage.getItem('hub_access_token');
+            if (!token) {
+                window.location.href = '/loginregister.html';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/orders/${orderId}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!response.ok) {
+                    if (response.status === 404 || response.status === 403) {
+                        showError();
+                        return;
+                    }
+                    throw new Error('Failed to load order');
+                }
+
+                const order = await response.json();
+                displayOrder(order);
+            } catch (error) {
+                console.error('Error loading order:', error);
+                showError();
+            }
+        }
+
+        function displayOrder(order) {
+            // Hide loading, show success
+            document.getElementById('loadingState').hidden = true;
+            document.getElementById('successState').hidden = false;
+
+            // Order info
+            document.getElementById('orderId').textContent = `#${order.id}`;
+            if (order.created_at) {
+                const date = new Date(order.created_at);
+                document.getElementById('orderDate').textContent = date.toLocaleString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            }
+            
+            // Status badge
+            const statusEl = document.getElementById('orderStatus');
+            const status = order.status || 'placed';
+            statusEl.innerHTML = `<span style="padding: 4px 12px; border-radius: 12px; background: ${getStatusColor(status)}; color: white; font-size: 14px; font-weight: 600;">${status.charAt(0).toUpperCase() + status.slice(1)}</span>`;
+            
+            document.getElementById('paymentMethod').textContent = order.payment || 'Cash on Delivery';
+
+            // Order items
+            const itemsContainer = document.getElementById('orderItems');
+            if (order.items && order.items.length > 0) {
+                itemsContainer.innerHTML = order.items.map(item => {
+                    const imageUrl = item.img_url ? (window.resolveStorageUrl ? window.resolveStorageUrl(item.img_url) : item.img_url) : 'https://via.placeholder.com/80';
+                    return `
+                        <div class="order-item">
+                            <img src="${imageUrl}" alt="${item.title || 'Product'}" onerror="this.src='https://via.placeholder.com/80'">
+                            <div class="order-item-info">
+                                <div class="order-item-name">${item.title || 'Product'}</div>
+                                <div class="order-item-details">Quantity: ${item.quantity || 1}</div>
+                                <div class="order-item-price">₱${parseFloat(item.price || 0).toFixed(2)}</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                itemsContainer.innerHTML = '<p>No items found</p>';
+            }
+
+            // Totals
+            document.getElementById('subtotal').textContent = `₱${parseFloat(order.subtotal || 0).toFixed(2)}`;
+            document.getElementById('deliveryFee').textContent = `₱${parseFloat(order.delivery_fee || 0).toFixed(2)}`;
+            document.getElementById('total').textContent = `₱${parseFloat(order.total || 0).toFixed(2)}`;
+
+            // Customer info
+            document.getElementById('customerName').textContent = order.customer_name || '—';
+            document.getElementById('customerPhone').textContent = order.customer_phone || '—';
+            
+            // Parse customer address - it may contain plain text + JSON separated by |||
+            let displayAddress = order.customer_address || '—';
+            if (displayAddress && displayAddress.includes('|||')) {
+                // Split the address string and JSON
+                const parts = displayAddress.split('|||');
+                // Use the first part (plain text address) or try to parse JSON for formatted address
+                if (parts.length > 1) {
+                    try {
+                        const customerDetails = JSON.parse(parts[1]);
+                        // Use full_address from JSON if available, otherwise use the plain text part
+                        displayAddress = customerDetails.full_address || parts[0] || '—';
+                    } catch (e) {
+                        // If JSON parsing fails, just use the plain text part
+                        displayAddress = parts[0] || '—';
+                    }
+                } else {
+                    // No JSON part, use the plain text
+                    displayAddress = parts[0] || '—';
+                }
+            }
+            document.getElementById('customerAddress').textContent = displayAddress;
+            
+            // Rider info (if available)
+            if (order.rider) {
+                document.getElementById('riderInfoRow').style.display = 'flex';
+                document.getElementById('riderName').textContent = order.rider.name || '—';
+                if (order.rider.phone) {
+                    document.getElementById('riderPhoneRow').style.display = 'flex';
+                    document.getElementById('riderPhone').textContent = order.rider.phone;
+                }
+            }
+            
+            // Delivery date (if delivered)
+            if (order.delivered_at) {
+                const deliveredDate = new Date(order.delivered_at);
+                document.getElementById('deliveredAtRow').style.display = 'flex';
+                document.getElementById('deliveredAt').textContent = deliveredDate.toLocaleString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            }
+            
+            // Show rating card if order is delivered/completed
+            if (order.status === 'delivered' || order.status === 'completed') {
+                if (order.has_rider_review) {
+                    // Show reviewed state
+                    document.getElementById('reviewedCard').style.display = 'block';
+                    
+                    // Populate rating stars
+                    const starsContainer = document.getElementById('reviewStars');
+                    const rating = order.rider_rating || 5;
+                    starsContainer.innerHTML = Array.from({length: 5}, (_, i) => 
+                        i < rating 
+                        ? '<i class="fas fa-star" style="color: #f59e0b; font-size: 16px;"></i>'
+                        : '<i class="far fa-star" style="color: #d1d5db; font-size: 16px;"></i>'
+                    ).join('');
+                    
+                    // Update rating text
+                    document.getElementById('reviewRatingText').textContent = `${rating}/5`;
+                    
+                    // Show comment if available
+                    if (order.rider_comment) {
+                        document.getElementById('reviewCommentBox').style.display = 'block';
+                        document.getElementById('reviewCommentText').textContent = order.rider_comment;
+                    }
+                } else {
+                    // Show rating button
+                    document.getElementById('ratingCard').style.display = 'block';
+                    window.currentOrderId = order.id;
+                }
+            }
+        }
+        
+        function openRatingModal() {
+            if (!window.currentOrderId) return;
+            window.location.href = `account.html?rate_order=${window.currentOrderId}`;
+        }
+
+        function getStatusColor(status) {
+            const colors = {
+                'placed': '#3b82f6',
+                'processing': '#f59e0b',
+                'dispatched': '#8b5cf6',
+                'delivered': '#10b981',
+                'cancelled': '#ef4444'
+            };
+            return colors[status.toLowerCase()] || '#6b7280';
+        }
+
+        function showError() {
+            document.getElementById('loadingState').hidden = true;
+            document.getElementById('errorState').hidden = false;
+        }
+
+        // Load order on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadOrderDetails();
+        });
+    </script>
+</body>
+</html>
+

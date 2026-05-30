@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login & Register</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+    /* Minimal inline styles for password strength meter */
+    .pwd-wrap{ position:relative; display:inline-block; }
+    .pwd-popup{ position:absolute; right:calc(100% + 12px); top:50%; transform:translateY(-50%); width:320px; max-width: min(320px, calc(100vw - 32px)); background: #fff; border-radius:8px; box-shadow: 0 8px 30px rgba(0,0,0,0.12); padding:12px; z-index:4000; display:none; }
+    .pwd-popup::before{ content:''; position:absolute; right:-8px; top:50%; transform:translateY(-50%); width:0; height:0; border-top:8px solid transparent; border-bottom:8px solid transparent; border-left:8px solid #fff; filter:drop-shadow(0 2px 6px rgba(0,0,0,0.06)); }
+    .pwd-popup .popup-header{ font-weight:700; color:#222; margin-bottom:8px; display:flex; align-items:center; justify-content:space-between; }
+    .pwd-popup .popup-guidelines{ color:#666; font-size:0.92rem; margin-top:8px; }
+    .pwd-meter{ margin-top:6px; font-size:0.95rem; display:flex; align-items:center; gap:12px; }
+    .pwd-meter .label{ min-width:86px; color:#333; font-weight:500; }
+    .pwd-meter .bars{ display:flex; gap:6px; margin:0; flex:1; }
+    .pwd-meter .bar{ flex:1; height:8px; border-radius:6px; background:#e9ecef; }
+    .pwd-meter .bar.active.weak{ background:#ff6b6b; }
+    .pwd-meter .bar.active.fair{ background:#ffb86b; }
+    .pwd-meter .bar.active.good{ background:#7bd389; }
+    .pwd-meter .bar.active.strong{ background:#2ec4b6; }
+    .pwd-meter .label{ color:#666; }
+    .pwd-match{ margin-top:6px; font-size:0.9rem; }
+    .pwd-match.ok{ color:green; }
+    .pwd-match.bad{ color:#d6336c; }
+    </style>
+    <script>
+    // Clear invalid tokens that might block login access
+    (function() {
+        const token = localStorage.getItem('hub_access_token');
+        if (token) {
+            try {
+                const parts = token.split('.');
+                if (parts.length !== 3) {
+                    // Invalid token format - clear it
+                    console.log('🧹 Clearing invalid token format');
+                    localStorage.removeItem('hub_access_token');
+                    localStorage.removeItem('hub_refresh_token');
+                    return;
+                }
+                
+                const decoded = JSON.parse(atob(parts[1]));
+                
+                // Check if token is expired
+                if (decoded.exp) {
+                    const now = Math.floor(Date.now() / 1000);
+                    if (decoded.exp < now) {
+                        console.log('🧹 Clearing expired token');
+                        localStorage.removeItem('hub_access_token');
+                        localStorage.removeItem('hub_refresh_token');
+                        return;
+                    }
+                }
+                
+                // Valid token exists - check for return URL first
+                const returnUrl = localStorage.getItem('returnUrl');
+                if (returnUrl) {
+                    console.log('✅ Valid session found - redirecting to return URL');
+                    localStorage.removeItem('returnUrl');
+                    window.location.href = returnUrl;
+                    return;
+                }
+                
+                // Otherwise redirect to dashboard based on role
+                const role = decoded.role;
+                console.log('✅ Valid session found - redirecting to', role, 'dashboard');
+                
+                if (role === 'seller') {
+                    window.location.href = '/seller_dashboard.html';
+                } else if (role === 'rider') {
+                    window.location.href = '/rider_dashboard.html';
+                } else if (role === 'admin') {
+                    window.location.href = '/admin_dashboard.html';
+                } else {
+                    window.location.href = '/index.html';
+                }
+            } catch (e) {
+                // Invalid token - clear it
+                console.log('🧹 Clearing invalid token:', e.message);
+                localStorage.removeItem('hub_access_token');
+                localStorage.removeItem('hub_refresh_token');
+            }
+        } else {
+            console.log('✅ No token found - login page accessible');
+        }
+    })();
+    </script>
+</head>
+<body class="auth">
+    <div class="main-wrapper">
+        <!-- Login Form -->
+        <div id="loginContainer" class="form-container active">
+            <div class="form-header">
+                <h1>Login</h1>
+                <p>Welcome back! Please login to your account</p>
+            </div>
+
+            <form id="loginForm" class="form active-step" onsubmit="handleLogin(event)">
+                <div class="success" id="loginSuccess"></div>
+
+                <div class="form-group">
+                    <label for="loginEmail">Email</label>
+                    <input type="email" id="loginEmail" placeholder="Enter your email" required>
+                    <div class="error" id="loginEmailError"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <div class="pwd-wrap">
+                        <input type="password" id="loginPassword" placeholder="Enter your password" required>
+                        <button type="button" class="pwd-toggle" aria-label="Show password" data-target="loginPassword">
+                            <svg class="icon-eye" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M12 5C7 5 2.73 8.11 1 12c1.73 3.89 6 7 11 7s9.27-3.11 11-7c-1.73-3.89-6-7-11-7zm0 12a5 5 0 110-10 5 5 0 010 10z"/><circle cx="12" cy="12" r="2.5" fill="currentColor"/></svg>
+                            <svg class="icon-eye-slash" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M2 2l20 20-1.5 1.5L.5 3.5 2 2zM12 7a5 5 0 015 5c0 .9-.25 1.75-.68 2.48l1.46 1.46A8.96 8.96 0 0021 12c-1.73-3.89-6-7-9-7-1.9 0-3.66.6-5.12 1.62l1.68 1.68C9.08 8.33 10.49 7 12 7z"/></svg>
+                        </button>
+                    </div>
+                    <div class="error" id="loginPasswordError"></div>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Login</button>
+                <p class="form-footer">Don't have an account? <a href="#" onclick="switchForm('accountType'); return false;">Register here</a></p>
+            </form>
+        </div>
+
+        <!-- Account Type Selection -->
+        <div id="accountTypeContainer" class="form-container">
+            <div class="form-header">
+                <h1>Create Account</h1>
+                <p>Select your account type to get started</p>
+            </div>
+
+            <div class="account-type-selection">
+                <div class="account-type-card" onclick="selectAccountType('customer')">
+                    <div class="icon">👤</div>
+                    <h3>Customer</h3>
+                    <p>Shop and purchase items</p>
+                </div>
+
+                <div class="account-type-card" onclick="selectAccountType('seller')">
+                    <div class="icon">🏪</div>
+                    <h3>Seller</h3>
+                    <p>Start your own store</p>
+                </div>
+
+                <div class="account-type-card" onclick="selectAccountType('rider')">
+                    <div class="icon">🚗</div>
+                    <h3>Rider</h3>
+                    <p>Deliver items and earn</p>
+                </div>
+            </div>
+
+            <p class="form-footer">Already have an account? <a href="#" onclick="switchForm('login'); return false;">Login here</a></p>
+        </div>
+
+        <!-- Customer Registration Form -->
+        <div id="customerContainer" class="form-container">
+            <div class="form-header">
+                <h1>Customer Registration</h1>
+                <p>Create your customer account</p>
+                <div class="progress-bar">
+                    <div class="progress-step active" id="customerStep1">
+                        <span>1</span>
+                        <p>Info</p>
+                    </div>
+                    <div class="progress-step" id="customerStep2">
+                        <span>2</span>
+                        <p>Verify Email</p>
+                    </div>
+                </div>
+            </div>
+
+            <form id="customerForm" class="form active-step" onsubmit="handleCustomerRegistration(event)">
+                <div class="success" id="customerSuccess"></div>
+
+                <h3 class="section-title">Basic Information</h3>
+
+                <div class="form-group-row">
+                    <div class="form-group">
+                        <label for="custFirstName">First Name *</label>
+                        <input type="text" id="custFirstName" placeholder="First name" required>
+                        <div class="error" id="custFirstNameError"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="custMiddleName">Middle Name (Optional)</label>
+                        <input type="text" id="custMiddleName" placeholder="Middle name">
+                    </div>
+                </div>
+
+                <div class="form-group-row">
+                    <div class="form-group">
+                        <label for="custLastName">Last Name *</label>
+                        <input type="text" id="custLastName" placeholder="Last name" required>
+                        <div class="error" id="custLastNameError"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="custSuffix">Suffix (Optional)</label>
+                        <input type="text" id="custSuffix" placeholder="Jr., Sr., III, etc.">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="custEmail">Email *</label>
+                    <input type="email" id="custEmail" placeholder="Enter your email" required>
+                    <div class="error" id="custEmailError"></div>
+                </div>
+
+                <div class="form-group-row">
+                    <div class="form-group">
+                        <label for="custPassword">Password *</label>
+                        <div class="pwd-wrap">
+                            <input type="password" id="custPassword" placeholder="Min 6 characters" required>
+                            <button type="button" class="pwd-toggle" aria-label="Show password" data-target="custPassword">
+                                <svg class="icon-eye" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M12 5C7 5 2.73 8.11 1 12c1.73 3.89 6 7 11 7s9.27-3.11 11-7c-1.73-3.89-6-7-11-7zm0 12a5 5 0 110-10 5 5 0 010 10z"/><circle cx="12" cy="12" r="2.5" fill="currentColor"/></svg>
+                                <svg class="icon-eye-slash" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M2 2l20 20-1.5 1.5L.5 3.5 2 2zM12 7a5 5 0 015 5c0 .9-.25 1.75-.68 2.48l1.46 1.46A8.96 8.96 0 0021 12c-1.73-3.89-6-7-9-7-1.9 0-3.66.6-5.12 1.62l1.68 1.68C9.08 8.33 10.49 7 12 7z"/></svg>
+                            </button>
+                            <div class="pwd-popup" id="custPasswordPopup" role="dialog" aria-hidden="true">
+                                <div class="popup-header">Password strength: <span id="custPasswordLabel">&nbsp;</span></div>
+                                <div class="pwd-meter" id="custPasswordMeter" aria-hidden="true">
+                                    <div class="label">Strength</div>
+                                    <div class="bars">
+                                        <div class="bar" data-index="0"></div>
+                                        <div class="bar" data-index="1"></div>
+                                        <div class="bar" data-index="2"></div>
+                                        <div class="bar" data-index="3"></div>
+                                    </div>
+                                </div>
+                                <div class="popup-guidelines">
+                                    <ul style="margin:6px 0 0 18px;">
+                                        <li>Use at least 8 characters.</li>
+                                        <li>Include letters, plus a number or symbol.</li>
+                                        <li>Password is case sensitive.</li>
+                                        <li>Avoid reusing passwords across sites.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="error" id="custPasswordError"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="custConfirmPassword">Confirm Password *</label>
+                        <div class="pwd-wrap">
+                            <input type="password" id="custConfirmPassword" placeholder="Confirm password" required>
+                            <button type="button" class="pwd-toggle" aria-label="Show password" data-target="custConfirmPassword">
+                                <svg class="icon-eye" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M12 5C7 5 2.73 8.11 1 12c1.73 3.89 6 7 11 7s9.27-3.11 11-7c-1.73-3.89-6-7-11-7zm0 12a5 5 0 110-10 5 5 0 010 10z"/><circle cx="12" cy="12" r="2.5" fill="currentColor"/></svg>
+                                <svg class="icon-eye-slash" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M2 2l20 20-1.5 1.5L.5 3.5 2 2zM12 7a5 5 0 015 5c0 .9-.25 1.75-.68 2.48l1.46 1.46A8.96 8.96 0 0021 12c-1.73-3.89-6-7-9-7-1.9 0-3.66.6-5.12 1.62l1.68 1.68C9.08 8.33 10.49 7 12 7z"/></svg>
+                            </button>
+                        </div>
+                        <div class="pwd-match" id="custPasswordMatch" aria-live="polite"></div>
+                        <div class="error" id="custConfirmPasswordError"></div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="switchForm('accountType')">Back</button>
+                    <button type="submit" class="btn btn-primary">Register as Customer</button>
+                </div>
+            </form>
+
+            <!-- Customer OTP Step -->
+            <form id="customerFormOTP" class="form" onsubmit="handleCustomerOTP(event)">
+                <h3 class="section-title">Email Verification</h3>
+
+                <div class="form-group">
+                    <label for="custOTP">Verification Code</label>
+                    <input type="text" id="custOTP" placeholder="Enter the 6-digit code" required>
+                    <div class="error" id="custOTPError"></div>
+                    <p class="input-hint">A verification code was sent to the email you provided.</p>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="switchCustomerStep(1)">Back</button>
+                    <button type="button" class="btn btn-secondary" onclick="resendOTP('customer')">Resend</button>
+                    <button type="submit" class="btn btn-primary">Verify</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Seller Registration Form - Multi-step -->
+        <div id="sellerContainer" class="form-container">
+            <div class="form-header">
+                <h1>Seller Registration</h1>
+                <div class="progress-bar">
+                    <div class="progress-step active" id="sellerStep1">
+                        <span>1</span>
+                        <p>Basic Info</p>
+                    </div>
+                    <div class="progress-step" id="sellerStep2">
+                        <span>2</span>
+                        <p>Store Info</p>
+                    </div>
+                    <div class="progress-step" id="sellerStep3">
+                        <span>3</span>
+                        <p>Credentials</p>
+                    </div>
+                    <div class="progress-step" id="sellerStep4">
+                        <span>4</span>
+                        <p>Verify Email</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seller Step 1: Basic Information -->
+            <form id="sellerForm1" class="form active-step" onsubmit="handleSellerStep1(event)">
+                <h3 class="section-title">Basic Information</h3>
+
+                <div class="form-group-row">
+                    <div class="form-group">
+                        <label for="selFirstName">First Name *</label>
+                        <input type="text" id="selFirstName" placeholder="First name" required>
+                        <div class="error" id="selFirstNameError"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="selMiddleName">Middle Name (Optional)</label>
+                        <input type="text" id="selMiddleName" placeholder="Middle name">
+                    </div>
+                </div>
+
+                <div class="form-group-row">
+                    <div class="form-group">
+                        <label for="selLastName">Last Name *</label>
+                        <input type="text" id="selLastName" placeholder="Last name" required>
+                        <div class="error" id="selLastNameError"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="selSuffix">Suffix (Optional)</label>
+                        <input type="text" id="selSuffix" placeholder="Jr., Sr., III, etc.">
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="switchForm('accountType')">Back</button>
+                    <button type="submit" class="btn btn-primary">Next: Store Information</button>
+                </div>
+            </form>
+
+            <!-- Seller Step 2: Store Information -->
+            <form id="sellerForm2" class="form" onsubmit="handleSellerStep2(event)">
+                <h3 class="section-title">Store Information and Credentials</h3>
+
+                <div class="form-group">
+                    <label for="selBusinessName">Business/Store Name *</label>
+                    <input type="text" id="selBusinessName" placeholder="Enter your business name" required>
+                    <div class="error" id="selBusinessNameError"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="selBusinessDoc">Business Document *</label>
+                    <input type="file" id="selBusinessDoc" accept=".pdf,.doc,.docx,.jpg,.png" required>
+                    <p class="input-hint">Accepted formats: PDF, DOC, DOCX, JPG, PNG</p>
+                    <div class="error" id="selBusinessDocError"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="selBusinessCategory">Business Category *</label>
+                    <select id="selBusinessCategory" required>
+                        <option value="">Select a category</option>
+                        <option value="general_food">General Food Stores</option>
+                        <option value="prepared_food">Prepared Food / Ready-to-Eat Specialty Cuisine</option>
+                        <option value="fresh_ingredients">Fresh Ingredients / Specialty Food Sources</option>
+                        <option value="meal_subscription">Meal Subscription / Pre-made Services</option>
+                        <option value="bakery_pastry">Bakery & Pastry Shop</option>
+                        <option value="meat_seafood">Meat & Seafood Market</option>
+                        <option value="organic_health">Organic & Health Food Store</option>
+                        <option value="beverages">Beverages & Drinks</option>
+                        <option value="snacks_sweets">Snacks & Sweets</option>
+                        <option value="spices_condiments">Spices & Condiments</option>
+                        <option value="international_cuisine">International Cuisine Specialty</option>
+                        <option value="vegan_vegetarian">Vegan & Vegetarian Products</option>
+                        <option value="catering">Catering Services</option>
+                        <option value="farm_fresh">Farm Fresh Produce</option>
+                        <option value="other">Others</option>
+                    </select>
+                    <div class="error" id="selBusinessCategoryError"></div>
+                </div>
+
+                <div class="form-group full-width">
+                    <div>
+                        <label for="selRegion">Region *</label>
+                        <select id="selRegion" required onchange="loadSellerProvinces()">
+                            <option value="">Select Region</option>
+                        </select>
+                        <div class="loading" id="selRegionLoading">
+                            <span class="spinner"></span>Loading regions...
+                        </div>
+                        <div class="error" id="selRegionError"></div>
+                    </div>
+
+                    <div>
+                        <label for="selProvince">Province *</label>
+                        <select id="selProvince" disabled required onchange="loadSellerCities()">
+                            <option value="">Select Province</option>
+                        </select>
+                        <div class="loading" id="selProvinceLoading">
+                            <span class="spinner"></span>Loading provinces...
+                        </div>
+                        <div class="error" id="selProvinceError"></div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="selCity">City/Municipality *</label>
+                    <select id="selCity" disabled required>
+                        <option value="">Select City</option>
+                    </select>
+                    <div class="loading" id="selCityLoading">
+                        <span class="spinner"></span>Loading cities...
+                    </div>
+                    <div class="error" id="selCityError"></div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="switchSellerStep(1)">Back</button>
+                    <button type="submit" class="btn btn-primary">Next: Account Credentials</button>
+                </div>
+            </form>
+
+            <!-- Seller Step 3: Account Credentials -->
+            <form id="sellerForm3" class="form" onsubmit="handleSellerRegistration(event)">
+                <h3 class="section-title">Account Credentials</h3>
+
+                <div class="form-group">
+                    <label for="selEmail">Email *</label>
+                    <input type="email" id="selEmail" placeholder="Enter your email" required>
+                    <div class="error" id="selEmailError"></div>
+                </div>
+
+                <div class="form-group-row">
+                    <div class="form-group">
+                        <label for="selPassword">Password *</label>
+                        <div class="pwd-wrap">
+                            <input type="password" id="selPassword" placeholder="Min 6 characters" required>
+                            <button type="button" class="pwd-toggle" aria-label="Show password" data-target="selPassword">
+                                <svg class="icon-eye" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M12 5C7 5 2.73 8.11 1 12c1.73 3.89 6 7 11 7s9.27-3.11 11-7c-1.73-3.89-6-7-11-7zm0 12a5 5 0 110-10 5 5 0 010 10z"/><circle cx="12" cy="12" r="2.5" fill="currentColor"/></svg>
+                                <svg class="icon-eye-slash" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M2 2l20 20-1.5 1.5L.5 3.5 2 2zM12 7a5 5 0 015 5c0 .9-.25 1.75-.68 2.48l1.46 1.46A8.96 8.96 0 0021 12c-1.73-3.89-6-7-9-7-1.9 0-3.66.6-5.12 1.62l1.68 1.68C9.08 8.33 10.49 7 12 7z"/></svg>
+                            </button>
+                            <div class="pwd-popup" id="selPasswordPopup" role="dialog" aria-hidden="true">
+                                <div class="popup-header">Password strength: <span id="selPasswordLabel">&nbsp;</span></div>
+                                <div class="pwd-meter" id="selPasswordMeter" aria-hidden="true">
+                                    <div class="label">Strength</div>
+                                    <div class="bars">
+                                        <div class="bar" data-index="0"></div>
+                                        <div class="bar" data-index="1"></div>
+                                        <div class="bar" data-index="2"></div>
+                                        <div class="bar" data-index="3"></div>
+                                    </div>
+                                </div>
+                                <div class="popup-guidelines">
+                                    <ul style="margin:6px 0 0 18px;">
+                                        <li>Use at least 8 characters.</li>
+                                        <li>Include letters, plus a number or symbol.</li>
+                                        <li>Password is case sensitive.</li>
+                                        <li>Avoid reusing passwords across sites.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="error" id="selPasswordError"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="selConfirmPassword">Confirm Password *</label>
+                        <div class="pwd-wrap">
+                            <input type="password" id="selConfirmPassword" placeholder="Confirm password" required>
+                            <button type="button" class="pwd-toggle" aria-label="Show password" data-target="selConfirmPassword">
+                                <svg class="icon-eye" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M12 5C7 5 2.73 8.11 1 12c1.73 3.89 6 7 11 7s9.27-3.11 11-7c-1.73-3.89-6-7-11-7zm0 12a5 5 0 110-10 5 5 0 010 10z"/><circle cx="12" cy="12" r="2.5" fill="currentColor"/></svg>
+                                <svg class="icon-eye-slash" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M2 2l20 20-1.5 1.5L.5 3.5 2 2zM12 7a5 5 0 015 5c0 .9-.25 1.75-.68 2.48l1.46 1.46A8.96 8.96 0 0021 12c-1.73-3.89-6-7-9-7-1.9 0-3.66.6-5.12 1.62l1.68 1.68C9.08 8.33 10.49 7 12 7z"/></svg>
+                            </button>
+                        </div>
+                        <div class="pwd-match" id="selPasswordMatch" aria-live="polite"></div>
+                        <div class="error" id="selConfirmPasswordError"></div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="switchSellerStep(2)">Back</button>
+                    <button type="submit" class="btn btn-primary">Complete Registration</button>
+                </div>
+            </form>
+
+            <!-- Seller OTP Step -->
+            <form id="sellerForm4" class="form" onsubmit="handleSellerOTP(event)">
+                <h3 class="section-title">Email Verification</h3>
+
+                <div class="form-group">
+                    <label for="sellerOTP">Verification Code</label>
+                    <input type="text" id="sellerOTP" placeholder="Enter the 6-digit code" required>
+                    <div class="error" id="sellerOTPError"></div>
+                    <p class="input-hint">A verification code was sent to the email you provided.</p>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="switchSellerStep(3)">Back</button>
+                    <button type="button" class="btn btn-secondary" onclick="resendOTP('seller')">Resend</button>
+                    <button type="submit" class="btn btn-primary">Verify</button>
+                </div>
+            </form>
+
+            <div class="success" id="sellerSuccess"></div>
+        </div>
+
+        <!-- Rider Registration Form - Multi-step -->
+        <div id="riderContainer" class="form-container">
+            <div class="form-header">
+                <h1>Rider Registration</h1>
+                <div class="progress-bar">
+                    <div class="progress-step active" id="riderStep1">
+                        <span>1</span>
+                        <p>Basic Info</p>
+                    </div>
+                    <div class="progress-step" id="riderStep2">
+                        <span>2</span>
+                        <p>Vehicle Info</p>
+                    </div>
+                    <div class="progress-step" id="riderStep3">
+                        <span>3</span>
+                        <p>Credentials</p>
+                    </div>
+                    <div class="progress-step" id="riderStep4">
+                        <span>4</span>
+                        <p>Verify Email</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rider Step 1: Basic Information -->
+            <form id="riderForm1" class="form active-step" onsubmit="handleRiderStep1(event)">
+                <h3 class="section-title">Basic Information</h3>
+
+                <div class="form-group-row">
+                    <div class="form-group">
+                        <label for="ridFirstName">First Name *</label>
+                        <input type="text" id="ridFirstName" placeholder="First name" required>
+                        <div class="error" id="ridFirstNameError"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="ridMiddleName">Middle Name (Optional)</label>
+                        <input type="text" id="ridMiddleName" placeholder="Middle name">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="ridLastName">Last Name *</label>
+                    <input type="text" id="ridLastName" placeholder="Last name" required>
+                    <div class="error" id="ridLastNameError"></div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="switchForm('accountType')">Back</button>
+                    <button type="submit" class="btn btn-primary">Next: Vehicle Information</button>
+                </div>
+            </form>
+
+            <!-- Rider Step 2: Vehicle Information -->
+            <form id="riderForm2" class="form" onsubmit="handleRiderStep2(event)">
+                <h3 class="section-title">Vehicle Information</h3>
+
+                <div class="form-group">
+                    <label for="ridVehicleType">Vehicle Type *</label>
+                    <select id="ridVehicleType" required>
+                        <option value="">Select vehicle type</option>
+                        <option value="motorcycle">Motorcycle</option>
+                        <option value="bicycle">Bicycle</option>
+                        <option value="car">Car</option>
+                        <option value="van">Van</option>
+                        <option value="truck">Truck</option>
+                    </select>
+                    <div class="error" id="ridVehicleTypeError"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="ridDriverLicense">Driver's License *</label>
+                    <input type="file" id="ridDriverLicense" accept=".pdf,.jpg,.png" required>
+                    <p class="input-hint">Accepted formats: PDF, JPG, PNG</p>
+                    <div class="error" id="ridDriverLicenseError"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="ridPlateNumber">Vehicle Plate Number *</label>
+                    <input type="text" id="ridPlateNumber" placeholder="Enter plate number" required>
+                    <div class="error" id="ridPlateNumberError"></div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="switchRiderStep(1)">Back</button>
+                    <button type="submit" class="btn btn-primary">Next: Account Credentials</button>
+                </div>
+            </form>
+
+            <!-- Rider Step 3: Account Credentials -->
+            <form id="riderForm3" class="form" onsubmit="handleRiderRegistration(event)">
+                <h3 class="section-title">Account Credentials</h3>
+
+                <div class="form-group">
+                    <label for="ridEmail">Email *</label>
+                    <input type="email" id="ridEmail" placeholder="Enter your email" required>
+                    <div class="error" id="ridEmailError"></div>
+                </div>
+
+                <div class="form-group-row">
+                    <div class="form-group">
+                        <label for="ridPassword">Password *</label>
+                        <div class="pwd-wrap">
+                            <input type="password" id="ridPassword" placeholder="Min 6 characters" required>
+                            <button type="button" class="pwd-toggle" aria-label="Show password" data-target="ridPassword">
+                                <svg class="icon-eye" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M12 5C7 5 2.73 8.11 1 12c1.73 3.89 6 7 11 7s9.27-3.11 11-7c-1.73-3.89-6-7-11-7zm0 12a5 5 0 110-10 5 5 0 010 10z"/><circle cx="12" cy="12" r="2.5" fill="currentColor"/></svg>
+                                <svg class="icon-eye-slash" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M2 2l20 20-1.5 1.5L.5 3.5 2 2zM12 7a5 5 0 015 5c0 .9-.25 1.75-.68 2.48l1.46 1.46A8.96 8.96 0 0021 12c-1.73-3.89-6-7-9-7-1.9 0-3.66.6-5.12 1.62l1.68 1.68C9.08 8.33 10.49 7 12 7z"/></svg>
+                            </button>
+                            <div class="pwd-popup" id="ridPasswordPopup" role="dialog" aria-hidden="true">
+                                <div class="popup-header">Password strength: <span id="ridPasswordLabel">&nbsp;</span></div>
+                                <div class="pwd-meter" id="ridPasswordMeter" aria-hidden="true">
+                                    <div class="label">Strength</div>
+                                    <div class="bars">
+                                        <div class="bar" data-index="0"></div>
+                                        <div class="bar" data-index="1"></div>
+                                        <div class="bar" data-index="2"></div>
+                                        <div class="bar" data-index="3"></div>
+                                    </div>
+                                </div>
+                                <div class="popup-guidelines">
+                                    <ul style="margin:6px 0 0 18px;">
+                                        <li>Use at least 8 characters.</li>
+                                        <li>Include letters, plus a number or symbol.</li>
+                                        <li>Password is case sensitive.</li>
+                                        <li>Avoid reusing passwords across sites.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="error" id="ridPasswordError"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="ridConfirmPassword">Confirm Password *</label>
+                        <div class="pwd-wrap">
+                            <input type="password" id="ridConfirmPassword" placeholder="Confirm password" required>
+                            <button type="button" class="pwd-toggle" aria-label="Show password" data-target="ridConfirmPassword">
+                                <svg class="icon-eye" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M12 5C7 5 2.73 8.11 1 12c1.73 3.89 6 7 11 7s9.27-3.11 11-7c-1.73-3.89-6-7-11-7zm0 12a5 5 0 110-10 5 5 0 010 10z"/><circle cx="12" cy="12" r="2.5" fill="currentColor"/></svg>
+                                <svg class="icon-eye-slash" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M2 2l20 20-1.5 1.5L.5 3.5 2 2zM12 7a5 5 0 015 5c0 .9-.25 1.75-.68 2.48l1.46 1.46A8.96 8.96 0 0021 12c-1.73-3.89-6-7-9-7-1.9 0-3.66.6-5.12 1.62l1.68 1.68C9.08 8.33 10.49 7 12 7z"/></svg>
+                            </button>
+                        </div>
+                        <div class="pwd-match" id="ridPasswordMatch" aria-live="polite"></div>
+                        <div class="error" id="ridConfirmPasswordError"></div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="switchRiderStep(2)">Back</button>
+                    <button type="submit" class="btn btn-primary">Complete Registration</button>
+                </div>
+            </form>
+
+            <!-- Rider OTP Step -->
+            <form id="riderForm4" class="form" onsubmit="handleRiderOTP(event)">
+                <h3 class="section-title">Email Verification</h3>
+
+                <div class="form-group">
+                    <label for="riderOTP">Verification Code</label>
+                    <input type="text" id="riderOTP" placeholder="Enter the 6-digit code" required>
+                    <div class="error" id="riderOTPError"></div>
+                    <p class="input-hint">A verification code was sent to the email you provided.</p>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="switchRiderStep(3)">Back</button>
+                    <button type="button" class="btn btn-secondary" onclick="resendOTP('rider')">Resend</button>
+                    <button type="submit" class="btn btn-primary">Verify</button>
+                </div>
+            </form>
+
+            <div class="success" id="riderSuccess"></div>
+        </div>
+
+    </div>
+
+    <script src="js/notifications.js"></script>
+    <!-- Session validator not needed on auth pages -->
+    <script src="js/script.js"></script>
+</body>
+</html>
