@@ -5,10 +5,9 @@
     { "src": "package.json", "use": "@vercel/static-build", "config": { "distDir": ".vercel_build_output/static" } }
   ],
   "routes": [
-    { "src": "^/$", "dest": "/frontend/index.html" },
-    { "src": "^/favicon.ico$", "dest": "/frontend/favicon.ico" },
-    { "src": "^/(.*)$", "dest": "/frontend/$1" },
-    { "src": "^/(.*)$", "dest": "/frontend/index.html" }
+    { "src": "^/$", "dest": "/index.html" },
+    { "src": "^/favicon.ico$", "dest": "/favicon.ico" },
+    { "src": "^/(?!.*\\.).*$", "dest": "/index.html" }
   ],
   "cleanUrls": true
 }
