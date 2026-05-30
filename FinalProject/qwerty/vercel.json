@@ -6,7 +6,7 @@
   ],
   "routes": [
     { "src": "^/$", "dest": "/index.html" },
-    { "src": "^/favicon.ico$", "dest": "/favicon.ico" },
+    { "src": "^/favicon.ico$", "dest": "/favicon.svg" },
     { "src": "^/(?!.*\\.).*$", "dest": "/index.html" }
   ],
   "cleanUrls": true

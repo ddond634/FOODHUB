@@ -3257,9 +3257,9 @@
                             <strong>Evidence Images:</strong>
                             <div style="margin-top: 8px; display: flex; gap: 10px; flex-wrap: wrap;">
                                 ${request.evidence_images.map(img => `
-                                    <img src="${img.startsWith('http') ? img : 'http://127.0.0.1:5000' + img}" 
+                                    <img src="${img.startsWith('http') ? img : (window.SUPABASE_STORAGE_BASE ? window.SUPABASE_STORAGE_BASE + img : 'http://127.0.0.1:5000' + img)}" 
                                          style="width: 100px; height: 100px; object-fit: cover; border-radius: 4px; cursor: pointer;"
-                                         onclick="window.open('${img.startsWith('http') ? img : 'http://127.0.0.1:5000' + img}', '_blank')">
+                                         onclick="window.open('${img.startsWith('http') ? img : (window.SUPABASE_STORAGE_BASE ? window.SUPABASE_STORAGE_BASE + img : 'http://127.0.0.1:5000' + img)}', '_blank')">
                                 `).join('')}
                             </div>
                         </div>
@@ -3357,7 +3357,7 @@
                                      onmouseover="this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)'" 
                                      onmouseout="this.style.boxShadow='none'">
                                     <div style="flex: 1; display: flex; gap: 16px; align-items: center;">
-                                        <img src="${product.product_image ? `http://127.0.0.1:5000${product.product_image}` : 'https://via.placeholder.com/80'}" 
+                                        <img src="${product.product_image ? (window.SUPABASE_STORAGE_BASE ? window.SUPABASE_STORAGE_BASE + product.product_image : 'http://127.0.0.1:5000' + product.product_image) : 'https://via.placeholder.com/80'}" 
                                              alt="${product.product_name}" 
                                              style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px; flex-shrink: 0;"
                                              onerror="this.src='https://via.placeholder.com/80'">

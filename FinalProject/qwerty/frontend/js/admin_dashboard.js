@@ -2851,7 +2851,7 @@ function renderAdminReturnRequests(requests) {
                 <td>
                     <div style="display: flex; align-items: center; gap: 8px;">
                         ${req.product_image ? `
-                            <img src="${req.product_image.startsWith('http') ? req.product_image : 'http://127.0.0.1:5000' + req.product_image}" 
+                            <img src="${req.product_image.startsWith('http') ? req.product_image : (window.SUPABASE_STORAGE_BASE ? window.SUPABASE_STORAGE_BASE + req.product_image : 'http://127.0.0.1:5000' + req.product_image)}" 
                                  style="width: 40px; height: 40px; object-fit: cover; border-radius: 6px;" 
                                  onerror="this.src='https://via.placeholder.com/40'">
                         ` : ''}
@@ -3086,7 +3086,7 @@ function showAdminReturnRequestModal(request) {
                         </div>
                         <div style="display: flex; align-items: center; gap: 16px;">
                             ${request.product_image ? `
-                                <img src="${request.product_image.startsWith('http') ? request.product_image : 'http://127.0.0.1:5000' + request.product_image}" 
+                                  <img src="${request.product_image.startsWith('http') ? request.product_image : (window.SUPABASE_STORAGE_BASE ? window.SUPABASE_STORAGE_BASE + request.product_image : 'http://127.0.0.1:5000' + request.product_image)}" 
                                      style="width: 100px; height: 100px; object-fit: cover; border-radius: 12px; border: 2px solid #e0e0e0;" 
                                      onerror="this.src='https://via.placeholder.com/100'">
                             ` : `
@@ -3167,8 +3167,8 @@ function showAdminReturnRequestModal(request) {
                                     <div style="position: relative; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); cursor: pointer; transition: transform 0.3s;" 
                                          onmouseover="this.style.transform='scale(1.05)'" 
                                          onmouseout="this.style.transform='scale(1)'"
-                                         onclick="window.open('${img.startsWith('http') ? img : 'http://127.0.0.1:5000' + img}', '_blank')">
-                                        <img src="${img.startsWith('http') ? img : 'http://127.0.0.1:5000' + img}" 
+                                         onclick="window.open('${img.startsWith('http') ? img : (window.SUPABASE_STORAGE_BASE ? window.SUPABASE_STORAGE_BASE + img : 'http://127.0.0.1:5000' + img)}', '_blank')">
+                                        <img src="${img.startsWith('http') ? img : (window.SUPABASE_STORAGE_BASE ? window.SUPABASE_STORAGE_BASE + img : 'http://127.0.0.1:5000' + img)}" 
                                              style="width: 100%; height: 120px; object-fit: cover; display: block;"
                                              onerror="this.src='https://via.placeholder.com/120'">
                                         <div style="position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.6); color: white; border-radius: 6px; padding: 4px 8px; font-size: 11px;">
@@ -3338,7 +3338,7 @@ function downloadEvidenceImages(requestId) {
     // Open each image in a new tab for download
     request.evidence_images.forEach((img, idx) => {
         const link = document.createElement('a');
-        link.href = img.startsWith('http') ? img : 'http://127.0.0.1:5000' + img;
+        link.href = img.startsWith('http') ? img : (window.SUPABASE_STORAGE_BASE ? window.SUPABASE_STORAGE_BASE + img : 'http://127.0.0.1:5000' + img);
         link.download = `evidence_${requestId}_${idx + 1}.jpg`;
         link.target = '_blank';
         document.body.appendChild(link);

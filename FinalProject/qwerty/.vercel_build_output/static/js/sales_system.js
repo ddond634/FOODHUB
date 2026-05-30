@@ -310,7 +310,7 @@ function displayExistingSales(sales) {
         const statusText = status.charAt(0).toUpperCase() + status.slice(1);
         
         const productImage = sale.product_image 
-            ? (sale.product_image.startsWith('http') ? sale.product_image : `http://127.0.0.1:5000${sale.product_image}`)
+            ? (sale.product_image.startsWith('http') ? sale.product_image : (window.SUPABASE_STORAGE_BASE ? window.SUPABASE_STORAGE_BASE + sale.product_image : 'http://127.0.0.1:5000' + sale.product_image))
             : 'https://via.placeholder.com/100';
         
         const validUntil = sale.valid_until ? new Date(sale.valid_until).toLocaleDateString() : 'No expiry';

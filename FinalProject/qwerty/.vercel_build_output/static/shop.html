@@ -1022,10 +1022,10 @@
 		// Handle both absolute and relative URLs
 		let imgUrl = firstImage;
 		if (firstImage && !firstImage.startsWith('http')) {
-			// If it's a relative path, make it absolute
-			imgUrl = firstImage.startsWith('/') 
-				? `http://127.0.0.1:5000${firstImage}` 
-				: `http://127.0.0.1:5000/${firstImage}`;
+			// If it's a relative path, make it absolute using SUPABASE_STORAGE_BASE when available
+			imgUrl = firstImage.startsWith('/')
+				? (window.SUPABASE_STORAGE_BASE ? window.SUPABASE_STORAGE_BASE + firstImage : 'http://127.0.0.1:5000' + firstImage)
+				: (window.SUPABASE_STORAGE_BASE ? window.SUPABASE_STORAGE_BASE + '/' + firstImage : 'http://127.0.0.1:5000/' + firstImage);
 		}
 		
 		// Format price - add sale badge placeholder
@@ -1745,9 +1745,9 @@
 	// Handle both absolute and relative URLs
 	let imageUrl = images[0];
 	if (images[0] && !images[0].startsWith('http')) {
-		imageUrl = images[0].startsWith('/') 
-			? `http://127.0.0.1:5000${images[0]}` 
-			: `http://127.0.0.1:5000/${images[0]}`;
+		imageUrl = images[0].startsWith('/')
+			? (window.SUPABASE_STORAGE_BASE ? window.SUPABASE_STORAGE_BASE + images[0] : 'http://127.0.0.1:5000' + images[0])
+			: (window.SUPABASE_STORAGE_BASE ? window.SUPABASE_STORAGE_BASE + '/' + images[0] : 'http://127.0.0.1:5000/' + images[0]);
 	}
 	mainImage.src = imageUrl;
 	
@@ -1764,9 +1764,9 @@
 		// Handle both absolute and relative URLs
 		let thumbUrl = imgUrl;
 		if (imgUrl && !imgUrl.startsWith('http')) {
-			thumbUrl = imgUrl.startsWith('/') 
-				? `http://127.0.0.1:5000${imgUrl}` 
-				: `http://127.0.0.1:5000/${imgUrl}`;
+			thumbUrl = imgUrl.startsWith('/')
+				? (window.SUPABASE_STORAGE_BASE ? window.SUPABASE_STORAGE_BASE + imgUrl : 'http://127.0.0.1:5000' + imgUrl)
+				: (window.SUPABASE_STORAGE_BASE ? window.SUPABASE_STORAGE_BASE + '/' + imgUrl : 'http://127.0.0.1:5000/' + imgUrl);
 		}
 		thumbImg.src = thumbUrl;
 		thumbImg.alt = `Thumbnail ${index + 1}`;
@@ -1809,7 +1809,7 @@
 	
 	// Helper function to update gallery
 	function updateModalGallery(images, index) {
-		const imageUrl = images[index].startsWith('http') ? images[index] : `http://127.0.0.1:5000${images[index]}`;
+		const imageUrl = images[index].startsWith('http') ? images[index] : (images[index].startsWith('/') ? (window.SUPABASE_STORAGE_BASE ? window.SUPABASE_STORAGE_BASE + images[index] : 'http://127.0.0.1:5000' + images[index]) : (window.SUPABASE_STORAGE_BASE ? window.SUPABASE_STORAGE_BASE + '/' + images[index] : 'http://127.0.0.1:5000/' + images[index]));
 		mainImage.src = imageUrl;
 		
 		// Update active thumbnail
@@ -1904,9 +1904,9 @@
 			// Handle both absolute and relative URLs
 			let imgUrl = relatedImg;
 			if (relatedImg && !relatedImg.startsWith('http')) {
-				imgUrl = relatedImg.startsWith('/') 
-					? `http://127.0.0.1:5000${relatedImg}` 
-					: `http://127.0.0.1:5000/${relatedImg}`;
+				imgUrl = relatedImg.startsWith('/')
+					? (window.SUPABASE_STORAGE_BASE ? window.SUPABASE_STORAGE_BASE + relatedImg : 'http://127.0.0.1:5000' + relatedImg)
+					: (window.SUPABASE_STORAGE_BASE ? window.SUPABASE_STORAGE_BASE + '/' + relatedImg : 'http://127.0.0.1:5000/' + relatedImg);
 			}
 			const isOnSale = p.stock > 0 && p.stock < 10;
 			const avgRating = parseFloat(p.average_rating || 0) || 0;

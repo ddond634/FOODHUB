@@ -1075,11 +1075,11 @@
 			return;
 		}
 		
-		const imageUrl = images[index].startsWith('http') 
-			? images[index] 
-			: (images[index].startsWith('/') 
-				? `http://127.0.0.1:5000${images[index]}` 
-				: `http://127.0.0.1:5000/${images[index]}`);
+        const imageUrl = images[index].startsWith('http')
+            ? images[index]
+            : (images[index].startsWith('/')
+                ? (window.SUPABASE_STORAGE_BASE ? window.SUPABASE_STORAGE_BASE + images[index] : 'http://127.0.0.1:5000' + images[index])
+                : (window.SUPABASE_STORAGE_BASE ? window.SUPABASE_STORAGE_BASE + '/' + images[index] : 'http://127.0.0.1:5000/' + images[index]));
 		
 		if (mainImage) {
 			mainImage.src = imageUrl;
@@ -1097,11 +1097,11 @@
 	
 	// Handle both absolute and relative URLs
 	let imageUrl = images[0];
-	if (images[0] && !images[0].startsWith('http')) {
-		imageUrl = images[0].startsWith('/') 
-			? `http://127.0.0.1:5000${images[0]}` 
-			: `http://127.0.0.1:5000/${images[0]}`;
-	}
+    if (images[0] && !images[0].startsWith('http')) {
+        imageUrl = images[0].startsWith('/')
+            ? (window.SUPABASE_STORAGE_BASE ? window.SUPABASE_STORAGE_BASE + images[0] : 'http://127.0.0.1:5000' + images[0])
+            : (window.SUPABASE_STORAGE_BASE ? window.SUPABASE_STORAGE_BASE + '/' + images[0] : 'http://127.0.0.1:5000/' + images[0]);
+    }
 	mainImage.src = imageUrl;
 	
 	// Populate thumbnails dynamically
@@ -1115,11 +1115,11 @@
 		const thumbImg = document.createElement('img');
 		// Handle both absolute and relative URLs
 		let thumbUrl = imgUrl;
-		if (imgUrl && !imgUrl.startsWith('http')) {
-			thumbUrl = imgUrl.startsWith('/') 
-				? `http://127.0.0.1:5000${imgUrl}` 
-				: `http://127.0.0.1:5000/${imgUrl}`;
-		}
+        if (imgUrl && !imgUrl.startsWith('http')) {
+            thumbUrl = imgUrl.startsWith('/')
+                ? (window.SUPABASE_STORAGE_BASE ? window.SUPABASE_STORAGE_BASE + imgUrl : 'http://127.0.0.1:5000' + imgUrl)
+                : (window.SUPABASE_STORAGE_BASE ? window.SUPABASE_STORAGE_BASE + '/' + imgUrl : 'http://127.0.0.1:5000/' + imgUrl);
+        }
 		thumbImg.src = thumbUrl;
 		thumbImg.alt = `Thumbnail ${index + 1}`;
 		thumbImg.loading = 'lazy';
@@ -1271,11 +1271,11 @@
 			const relatedImg = productImages.length > 0 ? productImages[0] : 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=300&h=300&fit=crop';
 			// Handle both absolute and relative URLs
 			let imgUrl = relatedImg;
-			if (relatedImg && !relatedImg.startsWith('http')) {
-				imgUrl = relatedImg.startsWith('/') 
-					? `http://127.0.0.1:5000${relatedImg}` 
-					: `http://127.0.0.1:5000/${relatedImg}`;
-			}
+            if (relatedImg && !relatedImg.startsWith('http')) {
+                imgUrl = relatedImg.startsWith('/')
+                    ? (window.SUPABASE_STORAGE_BASE ? window.SUPABASE_STORAGE_BASE + relatedImg : 'http://127.0.0.1:5000' + relatedImg)
+                    : (window.SUPABASE_STORAGE_BASE ? window.SUPABASE_STORAGE_BASE + '/' + relatedImg : 'http://127.0.0.1:5000/' + relatedImg);
+            }
 			const isOnSale = p.stock > 0 && p.stock < 10;
 			const avgRating = parseFloat(p.average_rating || 0) || 0;
 			const reviewCount = parseInt(p.review_count || 0) || 0;
