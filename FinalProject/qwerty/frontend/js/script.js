@@ -1707,10 +1707,10 @@ function handleLogin(ev){
         // Redirect by role or returnUrl
         const returnUrl = localStorage.getItem('returnUrl');
         if (returnUrl) { localStorage.removeItem('returnUrl'); window.location.href = returnUrl; return; }
-        if (userRole === 'seller') window.location.href = '/seller_dashboard.html'; // save test
+        if (userRole === 'seller') window.location.href = '/seller_dashboard.html';
         else if (userRole === 'rider') window.location.href = '/rider_dashboard.html';
         else if (userRole === 'admin') window.location.href = '/admin_dashboard.html';
-        else window.location.href = '/index.html';
+        else window.location.href = '/account.html';
         return;
       }
 
@@ -1730,7 +1730,7 @@ function handleLogin(ev){
             if(userRole==='seller') window.location.href='/seller_dashboard.html';
             else if(userRole==='rider') window.location.href='/rider_dashboard.html';
             else if(userRole==='admin') window.location.href='/admin_dashboard.html';
-            else window.location.href='/index.html';
+            else window.location.href='/account.html';
           } else {
             showError('loginPasswordError', (resp && (resp.error || resp.message)) || 'Login failed');
             if(window.notify) window.notify.error((resp && (resp.error || resp.message)) || 'Login failed');
@@ -1740,7 +1740,7 @@ function handleLogin(ev){
       console.error('Supabase auth error', err);
       // Fallback to legacy backend
       fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})})
-        .then(r=>r.json()).then(resp=>{ if(resp && resp.success){ if(resp.token) localStorage.setItem('hub_access_token', resp.token); if(resp.refresh_token) localStorage.setItem('hub_refresh_token', resp.refresh_token); if(window.notify) window.notify.success('Login successful! Welcome back.'); document.getElementById('loginForm').reset(); window.location.href='/index.html'; } else { showError('loginPasswordError','Login failed'); } })
+        .then(r=>r.json()).then(resp=>{ if(resp && resp.success){ if(resp.token) localStorage.setItem('hub_access_token', resp.token); if(resp.refresh_token) localStorage.setItem('hub_refresh_token', resp.refresh_token); if(window.notify) window.notify.success('Login successful! Welcome back.'); document.getElementById('loginForm').reset(); window.location.href='/account.html'; } else { showError('loginPasswordError','Login failed'); } })
         .catch(e=>{ console.error('fallback error',e); showError('loginPasswordError','Server error'); });
     });
   }
