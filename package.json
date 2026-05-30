@@ -1,4 +1,9 @@
 {
+  "name": "foodhub-root",
+  "private": true,
+  "scripts": {
+    "build": "node FinalProject/qwerty/scripts/build-static.mjs"
+  },
   "dependencies": {
     "flask": "^0.2.10"
   }

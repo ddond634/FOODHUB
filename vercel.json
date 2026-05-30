@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "name": "foodhub-frontend",
+  "builds": [
+    { "src": "package.json", "use": "@vercel/static-build", "config": { "distDir": "FinalProject/qwerty/.vercel_build_output/static" } }
+  ],
+  "routes": [
+    { "src": "^/$", "dest": "/index.html" },
+    { "src": "^/favicon.ico$", "dest": "/favicon.svg" },
+    { "src": "^/(?!.*\\.).*$", "dest": "/index.html" }
+  ],
+  "cleanUrls": true
+}
