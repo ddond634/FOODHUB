@@ -70,6 +70,14 @@ def main():
         'seller5@example.com': [ { 'title':'Chocolate Chip Muffin','description':'Warm muffin','price':95.00,'stock':35,'img_url':'/uploads/products/bakers-corner-muffin.jpg','category':'Bakery'} ]
     }
 
+    sellers = {
+        'seller1@example.com': 'Fresh Greens Market',
+        'seller2@example.com': 'Metro Snacks Co.',
+        'seller3@example.com': 'Daily Bites Kitchen',
+        'seller4@example.com': 'Picnic Pantry',
+        'seller5@example.com': "Baker's Corner",
+    }
+
     for email in emails:
         print('\nProcessing', email)
         a = find_auth_user(email)
@@ -99,7 +107,12 @@ def main():
         print('created user id', created_user_id)
         # If seller, add seller row and products referencing integer id
         if email.startswith('seller'):
-            seller_payload = {'user_id': created_user_id, 'business_name': email.split('@')[0], 'verified': 1, 'shop_status': 'active'}
+            seller_payload = {
+                'user_id': created_user_id,
+                'business_name': sellers.get(email, email.split('@')[0]),
+                'verified': 1,
+                'shop_status': 'active',
+            }
             sresp = insert_row('sellers', seller_payload)
             for p in products_by_seller.get(email, []):
                 p_payload = { 'title': p['title'], 'description': p['description'], 'price': p['price'], 'stock': p['stock'], 'seller_id': created_user_id, 'category': p['category'], 'img_url': p['img_url'] }

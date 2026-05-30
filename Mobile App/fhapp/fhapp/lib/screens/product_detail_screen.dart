@@ -62,6 +62,17 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     }
   }
 
+  List<String> _imageUrls(Product product) {
+    if (product.imageUrls.isNotEmpty) {
+      return product.imageUrls
+          .map(SupabaseConfig.resolveImageUrl)
+          .where((url) => url.isNotEmpty)
+          .toList();
+    }
+    final single = SupabaseConfig.resolveImageUrl(product.imgUrl);
+    return single.isEmpty ? const [] : [single];
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_loading) {
@@ -79,7 +90,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     }
 
     final product = _product!;
-    final imageUrl = SupabaseConfig.resolveImageUrl(product.imgUrl);
+    final images = _imageUrls(product);
 
     return Scaffold(
       appBar: AppBar(title: Text(product.title)),
@@ -87,16 +98,16 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         children: [
           AspectRatio(
             aspectRatio: 1.2,
-            child: imageUrl.isEmpty
+            child: images.isEmpty
                 ? Container(color: Colors.grey.shade200)
-                : CachedNetworkImage(imageUrl: imageUrl, fit: BoxFit.cover),
+                : CachedNetworkImage(imageUrl: images.first, fit: BoxFit.cover),
           ),
           Padding(
             padding: const EdgeInsets.all(20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (product.category != null)
+                if (product.category != null && product.category!.isNotEmpty)
                   Text(product.category!, style: TextStyle(color: Colors.grey.shade600)),
                 const SizedBox(height: 8),
                 Text(
@@ -114,8 +125,28 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text('${product.stock} in stock'),
+                if (product.reviewCount > 0) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    '${product.averageRating.toStringAsFixed(1)} · ${product.reviewCount} review${product.reviewCount == 1 ? '' : 's'}',
+                    style: TextStyle(color: Colors.grey.shade700),
+                  ),
+                ],
                 const SizedBox(height: 16),
-                Text(product.description.isEmpty ? 'No description available.' : product.description),
+                Card(
+                  child: ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: const Color(0xFF28A745).withValues(alpha: 0.12),
+                      child: const Icon(Icons.storefront, color: Color(0xFF28A745)),
+                    ),
+                    title: Text(product.sellerDisplayName),
+                    subtitle: const Text('Sold by this store'),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  product.description.isEmpty ? 'No description available.' : product.description,
+                ),
               ],
             ),
           ),

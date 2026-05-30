@@ -1030,10 +1030,11 @@
 		// Handle both absolute and relative URLs
 		let imgUrl = firstImage;
 		if (firstImage && !firstImage.startsWith('http')) {
-			// If it's a relative path, make it absolute using SUPABASE_STORAGE_BASE when available
-			imgUrl = firstImage.startsWith('/')
-				? (window.SUPABASE_STORAGE_BASE ? window.SUPABASE_STORAGE_BASE + firstImage : 'http://127.0.0.1:5000' + firstImage)
-				: (window.SUPABASE_STORAGE_BASE ? window.SUPABASE_STORAGE_BASE + '/' + firstImage : 'http://127.0.0.1:5000/' + firstImage);
+			imgUrl = window.resolveStorageUrl
+				? window.resolveStorageUrl(firstImage)
+				: (firstImage.startsWith('/')
+					? (window.SUPABASE_STORAGE_BASE ? window.SUPABASE_STORAGE_BASE + firstImage : 'http://127.0.0.1:5000' + firstImage)
+					: (window.SUPABASE_STORAGE_BASE ? window.SUPABASE_STORAGE_BASE + '/' + firstImage : 'http://127.0.0.1:5000/' + firstImage));
 		}
 		
 		// Format price - add sale badge placeholder

@@ -89,7 +89,7 @@ class _ShopScreenState extends State<ShopScreen> {
                       padding: const EdgeInsets.all(16),
                       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
-                        childAspectRatio: 0.72,
+                        childAspectRatio: 0.68,
                         crossAxisSpacing: 12,
                         mainAxisSpacing: 12,
                       ),

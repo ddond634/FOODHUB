@@ -2,22 +2,26 @@ import 'package:flutter/foundation.dart';
 import '../models/cart_item.dart';
 import '../models/hub_user.dart';
 import '../models/product.dart';
+import '../models/seller.dart';
 import '../services/api_client.dart';
 import '../services/auth_service.dart';
 import '../services/cart_service.dart';
 import '../services/product_service.dart';
+import '../services/seller_service.dart';
 
 class AppState extends ChangeNotifier {
   AppState() {
     _apiClient = ApiClient();
     _productService = ProductService(_apiClient);
     _cartService = CartService(_apiClient);
+    _sellerService = SellerService(_apiClient);
   }
 
   final AuthService auth = AuthService();
   late final ApiClient _apiClient;
   late final ProductService _productService;
   late final CartService _cartService;
+  late final SellerService _sellerService;
 
   bool _loading = true;
   bool _busy = false;
@@ -25,6 +29,7 @@ class AppState extends ChangeNotifier {
 
   List<Product> _products = [];
   List<Product> _bestSellers = [];
+  List<SellerShop> _shops = [];
   List<CartItem> _cartItems = [];
   List<String> _categories = [];
   String? _selectedCategory;
@@ -37,6 +42,7 @@ class AppState extends ChangeNotifier {
   bool get isLoggedIn => auth.isLoggedIn;
   List<Product> get products => _products;
   List<Product> get bestSellers => _bestSellers;
+  List<SellerShop> get shops => _shops;
   List<CartItem> get cartItems => _cartItems;
   List<String> get categories => _categories;
   String? get selectedCategory => _selectedCategory;
@@ -54,6 +60,7 @@ class AppState extends ChangeNotifier {
       await Future.wait([
         refreshProducts(),
         refreshBestSellers(),
+        refreshShops(),
         if (auth.isLoggedIn) refreshCart(),
       ]);
       _categories = await _productService.fetchCategories();
@@ -112,6 +119,11 @@ class AppState extends ChangeNotifier {
 
   Future<void> refreshBestSellers() async {
     _bestSellers = await _productService.fetchBestSellers();
+    notifyListeners();
+  }
+
+  Future<void> refreshShops() async {
+    _shops = await _sellerService.fetchActiveShops();
     notifyListeners();
   }
 

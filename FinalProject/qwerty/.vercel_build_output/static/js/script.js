@@ -161,8 +161,8 @@
           if (resourcePath.startsWith('/products')) {
             return `${SUPABASE_PRODUCT_API}${resourcePath}${query}`;
           }
-          if (resourcePath.startsWith('/sellers/active')) {
-            return `${SUPABASE_PRODUCT_API}/sellers${query}`;
+          if (resourcePath.startsWith('/sellers')) {
+            return `${SUPABASE_PRODUCT_API}${resourcePath}${query}`;
           }
 
           return urlValue;
