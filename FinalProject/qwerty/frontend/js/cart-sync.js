@@ -4,11 +4,11 @@
 (function() {
     'use strict';
     
-    if (typeof window.API_BASE === 'undefined') {
-        window.API_BASE = window.location.origin;
+    if (typeof window.API_BASE === 'undefined' || window.API_BASE === window.location.origin) {
+        window.API_BASE = window.SUPABASE_COMMERCE_API || `${window.location.origin}/api`;
     }
     if (typeof API_BASE === 'undefined') {
-        var API_BASE = window.API_BASE + '/api';
+        var API_BASE = window.API_BASE;
     }
     
     // Helper to check if user is logged in
@@ -123,10 +123,16 @@
                 return;
             }
             
+            const imageBase = window.SUPABASE_COMMERCE_API || API_BASE.replace('/api', '');
             const cartItems = items.slice(0, 5);
-            itemsEl.innerHTML = cartItems.map(item => `
+            itemsEl.innerHTML = cartItems.map(item => {
+                const imageUrl = item.img_url && item.img_url.startsWith('http')
+                    ? item.img_url
+                    : `${imageBase}${item.img_url || '/uploads/placeholder.jpg'}`;
+
+                return `
                 <div class="dropdown-item">
-                    <img src="${API_BASE.replace('/api', '')}${item.img_url || '/uploads/placeholder.jpg'}" 
+                    <img src="${imageUrl}"
                          alt="${item.title}" loading="lazy"
                          onerror="this.src='https://via.placeholder.com/60'">
                     <div class="item-details">
@@ -134,7 +140,8 @@
                         <p class="item-price">₱${parseFloat(item.unit_price).toFixed(2)} × ${item.quantity}</p>
                     </div>
                 </div>
-            `).join('');
+            `;
+            }).join('');
             
             const totalQty = items.reduce((sum, item) => sum + item.quantity, 0);
             if (footerCount) footerCount.textContent = `${totalQty} items in cart`;
@@ -174,9 +181,10 @@
                         price = parseFloat(item.price_total) / quantity;
                     }
                     
+                    const wishlistImageBase = window.SUPABASE_COMMERCE_API || API_BASE.replace('/api', '');
                     return `
                     <div class="dropdown-item">
-                        <img src="${API_BASE.replace('/api', '')}/${item.image_url || 'uploads/placeholder.jpg'}" 
+                        <img src="${item.image_url && item.image_url.startsWith('http') ? item.image_url : `${wishlistImageBase}/${item.image_url || 'uploads/placeholder.jpg'}`}" 
                              alt="${item.name || 'Product'}" loading="lazy"
                              onerror="this.src='https://via.placeholder.com/60'">
                         <div class="item-details">

@@ -1740,60 +1740,6 @@ function handleLogin(ev){
         .then(r=>r.json()).then(resp=>{ if(resp && resp.success){ if(resp.token) localStorage.setItem('hub_access_token', resp.token); if(resp.refresh_token) localStorage.setItem('hub_refresh_token', resp.refresh_token); if(window.notify) window.notify.success('Login successful! Welcome back.'); document.getElementById('loginForm').reset(); window.location.href='/index.html'; } else { showError('loginPasswordError','Login failed'); } })
         .catch(e=>{ console.error('fallback error',e); showError('loginPasswordError','Server error'); });
     });
-          const returnUrl = localStorage.getItem('returnUrl');
-          let redirectUrl;
-          
-          if(returnUrl) {
-            // Clear return URL and redirect back
-            localStorage.removeItem('returnUrl');
-            redirectUrl = returnUrl;
-          } else {
-            // Redirect based on user role
-            if(userRole === 'admin') {
-              redirectUrl = 'admin_dashboard.html';
-            } else if(userRole === 'seller') {
-              redirectUrl = 'seller_dashboard.html';
-            } else if(userRole === 'rider') {
-              redirectUrl = 'rider_dashboard.html';
-            } else {
-              // Customer - set flag for welcome notification on index page
-              sessionStorage.setItem('just_logged_in', 'true');
-              redirectUrl = 'index.html';
-            }
-          }
-          
-          // Redirect to appropriate page
-          setTimeout(() => {
-            window.location.href = redirectUrl;
-          }, 800);
-        } else {
-          // Handle specific error cases with notifications
-          let errorMessage = 'Login failed. Please try again.';
-          
-          if(status === 403 && (resp.error === 'account_pending' || resp.error === 'account_declined' || resp.error === 'account_inactive')) {
-            errorMessage = resp.message || 'Your account is not active';
-          } else if(status === 401) {
-            errorMessage = 'Invalid email or password. Please try again.';
-          } else if(resp.message) {
-            errorMessage = resp.message;
-          } else if(resp.error) {
-            errorMessage = resp.error;
-          }
-          
-          // Show error notification
-          if(window.notify) {
-            window.notify.error(errorMessage);
-          }
-          showError('loginEmailError', errorMessage);
-        }
-      }).catch(err=>{ 
-        console.error('Login error',err); 
-        const errorMsg = 'Server error. Please try again.';
-        if(window.notify) {
-          window.notify.error(errorMsg);
-        }
-        showError('loginEmailError', errorMsg); 
-      });
   }
 }
 function handleCustomerRegistration(ev){ ev.preventDefault(); ['custFirstNameError','custLastNameError','custEmailError','custPasswordError','custConfirmPasswordError'].forEach(clearError); const firstName=document.getElementById('custFirstName').value.trim(); const lastName=document.getElementById('custLastName').value.trim(); const email=document.getElementById('custEmail').value.trim(); const password=document.getElementById('custPassword').value; const confirm=document.getElementById('custConfirmPassword').value; let ok=true; if(!firstName){ showError('custFirstNameError','First name is required'); ok=false;} if(!lastName){ showError('custLastNameError','Last name is required'); ok=false;} if(!validateEmail(email)){ showError('custEmailError','Please enter a valid email'); ok=false;} if(!validatePassword(password)){ showError('custPasswordError','Password must be at least 6 characters'); ok=false;} if(password!==confirm){ showError('custConfirmPasswordError','Passwords do not match'); ok=false;} if(ok){ const data={firstName,lastName,email}; console.log('Customer Registration (pending):',data); pendingRegistrations.customer={...data}; sendOTP(email,'customer'); switchCustomerStep(4); } }
