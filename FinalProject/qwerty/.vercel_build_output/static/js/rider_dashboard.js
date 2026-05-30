@@ -186,8 +186,31 @@ async function loadRiderDashboard() {
 // Global variable to track available orders count
 let availableOrdersCount = 0;
 let hasShownInitialNotification = false;
+let _ordersLoading = false;
+let _lastOrdersRefresh = 0;
 
-async function loadRiderOrders() {
+async function refreshRiderData(options = {}) {
+    const { dashboard = true, orders = true, force = false } = options;
+    const now = Date.now();
+    if (!force && now - _lastOrdersRefresh < 1500) return;
+    _lastOrdersRefresh = now;
+
+    if (dashboard) {
+        try {
+            await loadRiderDashboard();
+        } catch (err) {
+            console.warn('Dashboard refresh failed:', err);
+        }
+    }
+    if (orders) {
+        await loadRiderOrders({ silent: true });
+    }
+}
+
+async function loadRiderOrders(options = {}) {
+    const { silent = false } = options;
+    if (_ordersLoading) return;
+    _ordersLoading = true;
     try {
         let assignedOrders = [];
         const assignedResponse = await authFetch('/api/rider/orders');
@@ -245,7 +268,11 @@ async function loadRiderOrders() {
         }
     } catch (err) {
         console.error('Orders error:', err);
-        showNotification('Failed to load orders. Please refresh the page.', 'error');
+        if (!silent) {
+            showNotification('Failed to load orders. Please refresh the page.', 'error');
+        }
+    } finally {
+        _ordersLoading = false;
     }
 }
 
@@ -382,46 +409,19 @@ function formatStatus(status) {
 // =====================================================================
 
 document.addEventListener('DOMContentLoaded', function() {
-    loadRiderDashboard();
-    loadRiderOrders();
+    refreshRiderData({ force: true });
     console.log('Rider Dashboard Initialized');
 
-    // Set up periodic refresh for dashboard data (every 60 seconds)
-    setInterval(async () => {
-        try {
-            // Refresh dashboard metrics
-            await loadRiderDashboard();
-            // Refresh orders
-            await loadRiderOrders();
-        } catch (err) {
-            console.warn('Failed to refresh dashboard:', err);
-        }
-    }, 60000); // Refresh every 60 seconds
-    
-    // Set up periodic check for new available orders (every 30 seconds)
-    setInterval(async () => {
-        try {
-            const response = await authFetch('/api/riders/available-orders');
-            if (response.ok) {
-                const data = await response.json();
-                const newCount = data.success ? (data.data || []).length : 0;
-                
-                // If new orders appeared, update and notify
-                if (newCount > availableOrdersCount && availableOrdersCount >= 0) {
-                    // Reload orders to get fresh data
-                    await loadRiderOrders();
-                } else if (newCount !== availableOrdersCount) {
-                    // Update count if it changed
-                    availableOrdersCount = newCount;
-                    updateAvailableOrdersBadge(newCount);
-                }
-            }
-        } catch (err) {
-            console.warn('Failed to check for new orders:', err);
-        }
-    }, 30000); // Check every 30 seconds
+    // Webhook-driven updates via Supabase Realtime (replaces polling)
+    if (window.hubLiveUpdates) {
+        window.hubLiveUpdates.onOrdersChanged(() => {
+            refreshRiderData({ dashboard: true, orders: true });
+        });
+        window.hubLiveUpdates.start().then((ok) => {
+            if (ok) console.log('Rider dashboard: live order updates connected');
+        });
+    }
 
-    // Load profile data from API
     loadRiderProfile();
 });
 

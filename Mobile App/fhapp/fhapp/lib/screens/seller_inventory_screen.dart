@@ -15,9 +15,7 @@ class _SellerInventoryScreenState extends State<SellerInventoryScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final state = context.read<AppState>();
-      state.refreshSellerProducts();
-      state.refreshSellerEarnings();
+      context.read<AppState>().refreshSellerProducts();
     });
   }
 
@@ -83,155 +81,64 @@ class _SellerInventoryScreenState extends State<SellerInventoryScreen> {
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
     final products = state.sellerProducts;
-    final dashboard = state.sellerDashboard;
-    final earnings = state.sellerEarnings;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Products'),
+        title: const Text('Manage Products'),
         actions: [
-          IconButton(
-            onPressed: () async {
-              await state.refreshSellerProducts();
-              await state.refreshSellerEarnings();
-            },
-            icon: const Icon(Icons.refresh),
-          ),
+          IconButton(onPressed: state.refreshSellerProducts, icon: const Icon(Icons.refresh)),
         ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showProductDialog(),
         child: const Icon(Icons.add),
       ),
-      body: Column(
-        children: [
-          if (dashboard != null)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-              child: Card(
-                color: Theme.of(context).colorScheme.primaryContainer,
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Sales & Profit', style: Theme.of(context).textTheme.titleMedium),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Expanded(child: _statTile('Sales (Month)', '₱${dashboard.salesMonth.toStringAsFixed(2)}')),
-                          Expanded(child: _statTile('Profit (Month)', '₱${dashboard.netProfitMonth.toStringAsFixed(2)}')),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Expanded(child: _statTile('Sales (Today)', '₱${dashboard.salesToday.toStringAsFixed(2)}')),
-                          Expanded(child: _statTile('Orders', '${dashboard.totalOrders}')),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          if (earnings != null && earnings.transactions.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text('Profit per delivery', style: Theme.of(context).textTheme.titleSmall),
-              ),
-            ),
-          if (earnings != null && earnings.transactions.isNotEmpty)
-            SizedBox(
-              height: 120,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.all(16),
-                itemCount: earnings.transactions.take(10).length,
-                separatorBuilder: (_, __) => const SizedBox(width: 12),
-                itemBuilder: (context, index) {
-                  final txn = earnings.transactions[index];
-                  return SizedBox(
-                    width: 180,
-                    child: Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Order #${txn.orderId}', style: const TextStyle(fontWeight: FontWeight.bold)),
-                            Text('Sales: ₱${txn.grossSales.toStringAsFixed(2)}', style: const TextStyle(fontSize: 12)),
-                            Text('Profit: ₱${txn.netProfit.toStringAsFixed(2)}', style: const TextStyle(fontSize: 12, color: Colors.green)),
-                          ],
-                        ),
-                      ),
+      body: products.isEmpty
+          ? const Center(child: Text('No products yet. Tap + to add one.'))
+          : ListView.separated(
+              padding: const EdgeInsets.all(16),
+              itemCount: products.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 12),
+              itemBuilder: (context, index) {
+                final product = products[index];
+                return Card(
+                  child: ListTile(
+                    title: Text(product.title),
+                    subtitle: Text('₱${product.price.toStringAsFixed(2)} · ${product.stock} in stock'),
+                    trailing: PopupMenuButton<String>(
+                      onSelected: (value) async {
+                        if (value == 'edit') {
+                          await _showProductDialog(product: product);
+                        } else if (value == 'restock') {
+                          final ctrl = TextEditingController(text: '${product.stock}');
+                          final ok = await showDialog<bool>(
+                            context: context,
+                            builder: (ctx) => AlertDialog(
+                              title: const Text('Restock'),
+                              content: TextField(controller: ctrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'New stock')),
+                              actions: [
+                                TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+                                ElevatedButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Save')),
+                              ],
+                            ),
+                          );
+                          if (ok == true) {
+                            await state.restockSellerProduct(product.id, int.tryParse(ctrl.text) ?? product.stock);
+                          }
+                        } else if (value == 'delete') {
+                          await state.deleteSellerProduct(product.id);
+                        }
+                      },
+                      itemBuilder: (_) => const [
+                        PopupMenuItem(value: 'edit', child: Text('Edit')),
+                        PopupMenuItem(value: 'restock', child: Text('Restock')),
+                        PopupMenuItem(value: 'delete', child: Text('Delete')),
+                      ],
                     ),
-                  );
-                },
-              ),
-            ),
-          Expanded(
-            child: products.isEmpty
-                ? const Center(child: Text('No products yet. Tap + to add one.'))
-                : ListView.separated(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: products.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 12),
-                    itemBuilder: (context, index) {
-                      final product = products[index];
-                      return Card(
-                        child: ListTile(
-                          title: Text(product.title),
-                          subtitle: Text('₱${product.price.toStringAsFixed(2)} · ${product.stock} in stock'),
-                          trailing: PopupMenuButton<String>(
-                            onSelected: (value) async {
-                              if (value == 'edit') {
-                                await _showProductDialog(product: product);
-                              } else if (value == 'restock') {
-                                final ctrl = TextEditingController(text: '${product.stock}');
-                                final ok = await showDialog<bool>(
-                                  context: context,
-                                  builder: (ctx) => AlertDialog(
-                                    title: const Text('Restock'),
-                                    content: TextField(controller: ctrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'New stock')),
-                                    actions: [
-                                      TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-                                      ElevatedButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Save')),
-                                    ],
-                                  ),
-                                );
-                                if (ok == true) {
-                                  await state.restockSellerProduct(product.id, int.tryParse(ctrl.text) ?? product.stock);
-                                }
-                              } else if (value == 'delete') {
-                                await state.deleteSellerProduct(product.id);
-                              }
-                            },
-                            itemBuilder: (_) => const [
-                              PopupMenuItem(value: 'edit', child: Text('Edit')),
-                              PopupMenuItem(value: 'restock', child: Text('Restock')),
-                              PopupMenuItem(value: 'delete', child: Text('Delete')),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
                   ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _statTile(String label, String value) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: const TextStyle(fontSize: 12, color: Colors.black54)),
-        Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
-      ],
+                );
+              },
+            ),
     );
   }
 }

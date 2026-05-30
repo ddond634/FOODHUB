@@ -181,15 +181,15 @@
      * Initialize role guard
      */
     function initRoleGuard() {
-        // Check access on page load
         const hasAccess = checkAccess();
         
         if (hasAccess) {
-            // Set up back button prevention
             preventBackButtonBypass();
             
-            // Re-check periodically (in case token changes)
-            setInterval(checkAccess, 30000); // Check every 30 seconds
+            // Skip periodic re-checks on dashboards — avoids unnecessary work / flicker
+            if (!isDashboardPage()) {
+                setInterval(checkAccess, 30000);
+            }
         }
     }
     

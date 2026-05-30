@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../config/supabase_config.dart';
 import '../providers/app_state.dart';
+import '../widgets/checkout_form_dialog.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -138,6 +139,15 @@ class _CartScreenState extends State<CartScreen> {
                             onPressed: state.busy
                                 ? null
                                 : () async {
+                                    final user = state.user;
+                                    final buyerInfo = await showCheckoutFormDialog(
+                                      context,
+                                      defaultFirstName: user?.firstName,
+                                      defaultLastName: user?.lastName,
+                                      defaultEmail: user?.email,
+                                    );
+                                    if (buyerInfo == null || !context.mounted) return;
+
                                     final payment = await showDialog<String>(
                                       context: context,
                                       builder: (ctx) => SimpleDialog(
@@ -156,7 +166,10 @@ class _CartScreenState extends State<CartScreen> {
                                     );
                                     if (payment == null || !context.mounted) return;
                                     try {
-                                      final orderId = await state.checkout(payment: payment);
+                                      final orderId = await state.checkout(
+                                        payment: payment,
+                                        buyerInfo: buyerInfo,
+                                      );
                                       if (!context.mounted) return;
                                       ScaffoldMessenger.of(context).showSnackBar(
                                         SnackBar(content: Text('Order #$orderId placed — rider can pick it up')),

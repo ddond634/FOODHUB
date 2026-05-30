@@ -4,7 +4,9 @@ import '../providers/app_state.dart';
 import 'cart_screen.dart';
 import 'home_screen.dart';
 import 'profile_screen.dart';
+import 'rider_dashboard_screen.dart';
 import 'rider_deliveries_screen.dart';
+import 'seller_dashboard_screen.dart';
 import 'seller_inventory_screen.dart';
 import 'shop_screen.dart';
 
@@ -67,13 +69,14 @@ class _SellerShellState extends State<_SellerShell> {
 
   @override
   Widget build(BuildContext context) {
-    final screens = [const SellerInventoryScreen(), const ProfileScreen()];
+    const screens = [SellerDashboardScreen(), SellerInventoryScreen(), ProfileScreen()];
     return Scaffold(
       body: IndexedStack(index: _index, children: screens),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _index,
         onDestinationSelected: (i) => setState(() => _index = i),
         destinations: const [
+          NavigationDestination(icon: Icon(Icons.analytics_outlined), selectedIcon: Icon(Icons.analytics), label: 'Analytics'),
           NavigationDestination(icon: Icon(Icons.inventory_2_outlined), selectedIcon: Icon(Icons.inventory_2), label: 'Products'),
           NavigationDestination(icon: Icon(Icons.person_outline), selectedIcon: Icon(Icons.person), label: 'Profile'),
         ],
@@ -94,13 +97,14 @@ class _RiderShellState extends State<_RiderShell> {
 
   @override
   Widget build(BuildContext context) {
-    final screens = [const RiderDeliveriesScreen(), const ProfileScreen()];
+    const screens = [RiderDashboardScreen(), RiderDeliveriesScreen(), ProfileScreen()];
     return Scaffold(
       body: IndexedStack(index: _index, children: screens),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _index,
         onDestinationSelected: (i) => setState(() => _index = i),
         destinations: const [
+          NavigationDestination(icon: Icon(Icons.analytics_outlined), selectedIcon: Icon(Icons.analytics), label: 'Analytics'),
           NavigationDestination(icon: Icon(Icons.delivery_dining_outlined), selectedIcon: Icon(Icons.delivery_dining), label: 'Deliveries'),
           NavigationDestination(icon: Icon(Icons.person_outline), selectedIcon: Icon(Icons.person), label: 'Profile'),
         ],

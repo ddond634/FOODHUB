@@ -5,6 +5,7 @@ import '../models/hub_user.dart';
 import '../models/order.dart';
 import '../models/product.dart';
 import '../models/seller.dart';
+import '../widgets/checkout_form_dialog.dart';
 import '../services/api_client.dart';
 import '../services/auth_service.dart';
 import '../services/cart_service.dart';
@@ -69,6 +70,9 @@ class AppState extends ChangeNotifier {
   RiderDashboardStats? get riderDashboard => _riderDashboard;
   List<String> get categories => _categories;
   String get userRole => user?.role ?? 'customer';
+  bool get isBuyer => userRole == 'customer' || userRole == 'buyer';
+  bool get isSeller => userRole == 'seller';
+  bool get isRider => userRole == 'rider';
   String? get selectedCategory => _selectedCategory;
   String get searchQuery => _searchQuery;
 
@@ -81,13 +85,22 @@ class AppState extends ChangeNotifier {
     try {
       await auth.loadSession();
       _syncToken();
-      await Future.wait([
-        refreshProducts(),
-        refreshBestSellers(),
-        refreshShops(),
-        if (auth.isLoggedIn) refreshCart(),
-      ]);
-      _categories = await _productService.fetchCategories();
+      if (isBuyer) {
+        await Future.wait([
+          refreshProducts(),
+          refreshBestSellers(),
+          refreshShops(),
+          if (auth.isLoggedIn) refreshCart(),
+        ]);
+        _categories = await _productService.fetchCategories();
+      } else if (isSeller) {
+        await Future.wait([
+          refreshSellerProducts(),
+          refreshSellerEarnings(),
+        ]);
+      } else if (isRider) {
+        await refreshRiderOrders();
+      }
     } catch (e) {
       _error = e.toString();
     } finally {
@@ -104,7 +117,14 @@ class AppState extends ChangeNotifier {
     await _runBusy(() async {
       await auth.login(email, password);
       _syncToken();
-      await refreshCart();
+      if (isBuyer) {
+        await refreshCart();
+      } else if (isSeller) {
+        await refreshSellerProducts();
+        await refreshSellerEarnings();
+      } else if (isRider) {
+        await refreshRiderOrders();
+      }
     });
   }
 
@@ -122,7 +142,9 @@ class AppState extends ChangeNotifier {
         lastName: lastName,
       );
       _syncToken();
-      await refreshCart();
+      if (isBuyer) {
+        await refreshCart();
+      }
     });
   }
 
@@ -172,6 +194,9 @@ class AppState extends ChangeNotifier {
   }
 
   Future<void> addToCart(int productId) async {
+    if (!isBuyer) {
+      throw Exception('Only buyers can add items to cart');
+    }
     if (!auth.isLoggedIn) {
       throw Exception('Please sign in to add items to your cart');
     }
@@ -199,11 +224,16 @@ class AppState extends ChangeNotifier {
     });
   }
 
-  Future<int> checkout({required String payment}) async {
+  Future<int> checkout({
+    required String payment,
+    required CheckoutFormData buyerInfo,
+  }) async {
+    if (!isBuyer) {
+      throw Exception('Only buyers can checkout');
+    }
     if (!auth.isLoggedIn || _cartItems.isEmpty) {
       throw Exception('Cart is empty');
     }
-    final user = auth.user!;
     final delivery = 50.0;
     final subtotal = cartTotal;
     final total = subtotal + delivery;
@@ -220,17 +250,7 @@ class AppState extends ChangeNotifier {
     try {
       final orderId = await _orderService.checkout(
         items: items,
-        customer: {
-          'first_name': user.firstName ?? '',
-          'last_name': user.lastName ?? '',
-          'email': user.email,
-          'phone': '09000000000',
-          'address': 'Mobile checkout address, Taguig City, Metro Manila',
-          'address_line1': 'Mobile checkout',
-          'city': 'Taguig City',
-          'province': 'Metro Manila',
-          'region': 'NCR',
-        },
+        customer: buyerInfo.toCustomerPayload(),
         delivery: delivery,
         subtotal: subtotal,
         total: total,
