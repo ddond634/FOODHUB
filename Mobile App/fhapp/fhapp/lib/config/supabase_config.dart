@@ -10,6 +10,8 @@ class SupabaseConfig {
   static const authApi = '$functionsBase/auth_api';
   static const productApi = '$functionsBase/product_api';
   static const commerceApi = '$functionsBase/commerce_api';
+  static const sellerApi = '$functionsBase/seller_api';
+  static const riderApi = '$functionsBase/rider_api';
   static const storageBase =
       '$url/storage/v1/object/public/hub_uploads';
 

@@ -1872,14 +1872,12 @@
             try {
                 // Always fetch latest data from backend with cache-busting
                 const timestamp = forceRefresh ? `?t=${Date.now()}` : '';
-                const response = await fetch(`${API_BASE}/me${timestamp}`, {
+                const response = await authFetch('/api/account/me', {
                     method: 'GET',
-                    headers: { 
-                        'Authorization': `Bearer ${token}`,
+                    headers: {
                         'Cache-Control': 'no-cache',
                         'Pragma': 'no-cache'
-                    },
-                    cache: 'no-store' // Ensure we get fresh data
+                    }
                 });
 
                 if (response.ok) {
@@ -2309,12 +2307,9 @@
                 }
 
                 // Create order
-                const response = await fetch(`${API_BASE}/orders`, {
+                const response = await authFetch('/api/orders', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(orderData)
                 });
 

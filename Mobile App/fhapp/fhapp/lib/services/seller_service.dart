@@ -1,4 +1,5 @@
 import '../config/supabase_config.dart';
+import '../models/earnings.dart';
 import '../models/seller.dart';
 import 'api_client.dart';
 
@@ -23,5 +24,21 @@ class SellerService {
       throw Exception(data['error']?.toString() ?? 'Seller not found');
     }
     return SellerProfile.fromJson(data['data'] as Map<String, dynamic>);
+  }
+
+  Future<SellerDashboardStats> fetchDashboard() async {
+    final data = await _client.getJson('${SupabaseConfig.sellerApi}/dashboard');
+    if (data['success'] != true || data['data'] == null) {
+      throw Exception(data['error']?.toString() ?? 'Failed to load seller dashboard');
+    }
+    return SellerDashboardStats.fromJson(data['data'] as Map<String, dynamic>);
+  }
+
+  Future<SellerEarningsSummary> fetchEarningsSummary({String period = 'all'}) async {
+    final data = await _client.getJson('${SupabaseConfig.sellerApi}/earnings/summary?period=$period');
+    if (data['success'] != true || data['data'] == null) {
+      throw Exception(data['error']?.toString() ?? 'Failed to load earnings');
+    }
+    return SellerEarningsSummary.fromJson(data['data'] as Map<String, dynamic>);
   }
 }

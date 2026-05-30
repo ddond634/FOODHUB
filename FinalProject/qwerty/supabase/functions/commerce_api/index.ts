@@ -338,6 +338,68 @@ async function deleteWishlistById(userId: number, wishlistId: number) {
   return success({ message: 'Product removed from wishlist' }, 200);
 }
 
+async function createOrder(userId: number, body: Record<string, unknown>) {
+  const items = (body.items as Array<Record<string, unknown>>) || [];
+  const customer = (body.customer as Record<string, unknown>) || {};
+  if (!items.length) return failure('No items in order', 400);
+
+  const customerName = String(customer.name ?? [
+    customer.first_name, customer.middle_name, customer.last_name, customer.suffix,
+  ].filter(Boolean).join(' ')).trim();
+  const phone = String(customer.phone ?? '');
+  const addressParts = [
+    customer.address_line1, customer.address_line2, customer.city, customer.province, customer.region, customer.postal_code,
+  ].filter(Boolean).map(String);
+  const fullAddress = String(customer.address ?? addressParts.join(', '));
+  if (!customerName || !phone || !fullAddress) {
+    return failure('Missing customer information (name, phone, or address)', 400);
+  }
+
+  const delivery = Number(body.delivery ?? 50);
+  const payment = String(body.payment ?? 'Cash on Delivery');
+  const subtotal = items.reduce((sum, item) => sum + Number(item.price ?? 0) * Number(item.quantity ?? 1), 0);
+  const total = Number(body.total ?? subtotal + delivery);
+  const addressWithDetails = `${fullAddress}|||${JSON.stringify({ ...customer, full_address: fullAddress })}`;
+
+  const { data: order, error: orderError } = await admin.from('orders').insert([{
+    customer_id: userId,
+    customer_name: customerName,
+    customer_phone: phone,
+    customer_address: addressWithDetails,
+    subtotal,
+    delivery_fee: delivery,
+    total,
+    payment,
+    status: 'ready',
+    created_at: new Date().toISOString(),
+  }]).select('id').single();
+
+  if (orderError || !order) return failure(orderError?.message || 'Failed to create order', 400);
+
+  for (const item of items) {
+    const productId = Number(item.product_id ?? item.productId ?? 0);
+    const quantity = Number(item.quantity ?? 1);
+    const price = Number(item.price ?? 0);
+    if (!productId) continue;
+
+    await admin.from('order_items').insert([{
+      order_id: order.id,
+      product_id: productId,
+      quantity,
+      price,
+    }]);
+
+    const { data: product } = await admin.from('products').select('stock').eq('id', productId).maybeSingle();
+    if (product) {
+      await admin.from('products').update({ stock: Math.max(0, Number(product.stock ?? 0) - quantity) }).eq('id', productId);
+    }
+
+    await admin.from('cart_items').delete().eq('user_id', userId).eq('product_id', productId);
+  }
+
+  return success({ order_id: order.id, message: 'Order placed successfully' }, 201);
+}
+
 serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
     return withCors(json({ success: true }));
@@ -391,6 +453,11 @@ serve(async (req: Request) => {
         return withCors(await deleteWishlistByProduct(userId, Number(identifier)));
       }
       return withCors(failure('Method Not Allowed', 405));
+    }
+
+    if (resource === 'orders' && req.method === 'POST') {
+      const body = await req.json().catch(() => ({}));
+      return withCors(await createOrder(userId, body));
     }
 
     return withCors(failure(`Unsupported endpoint: ${resource || 'root'}`, 404));

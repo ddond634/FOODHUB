@@ -135,11 +135,39 @@ class _CartScreenState extends State<CartScreen> {
                           _summaryRow('Total', total, bold: true),
                           const SizedBox(height: 12),
                           ElevatedButton(
-                            onPressed: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Checkout coming soon — cart is synced with the website')),
-                              );
-                            },
+                            onPressed: state.busy
+                                ? null
+                                : () async {
+                                    final payment = await showDialog<String>(
+                                      context: context,
+                                      builder: (ctx) => SimpleDialog(
+                                        title: const Text('Payment method'),
+                                        children: [
+                                          SimpleDialogOption(
+                                            onPressed: () => Navigator.pop(ctx, 'Cash on Delivery'),
+                                            child: const Text('Cash on Delivery'),
+                                          ),
+                                          SimpleDialogOption(
+                                            onPressed: () => Navigator.pop(ctx, 'GCash'),
+                                            child: const Text('GCash (demo)'),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                    if (payment == null || !context.mounted) return;
+                                    try {
+                                      final orderId = await state.checkout(payment: payment);
+                                      if (!context.mounted) return;
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(content: Text('Order #$orderId placed — rider can pick it up')),
+                                      );
+                                    } catch (e) {
+                                      if (!context.mounted) return;
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(content: Text(state.error ?? 'Checkout failed')),
+                                      );
+                                    }
+                                  },
                             child: const Text('Proceed to Checkout'),
                           ),
                         ],

@@ -65,18 +65,21 @@ function formatAddress(address) {
  * Update rider service fee display in HTML
  */
 function updateRiderFeeDisplay() {
-    const feePercentage = window.riderServiceFeePercentage || 5;
+    const feePercentage = window.riderServiceFeePercentage || 2.5;
     
-    // Update platform fee heading
+    const productSalesHeading = document.getElementById('productSalesHeading');
+    if (productSalesHeading) {
+        productSalesHeading.textContent = 'Total Product Sales';
+    }
+
     const platformFeeHeading = document.getElementById('platformFeeHeading');
     if (platformFeeHeading) {
-        platformFeeHeading.textContent = `Platform Fee (${feePercentage}%)`;
+        platformFeeHeading.textContent = `Delivery Fee (${feePercentage}%)`;
     }
     
-    // Update table header
     const feeHeader = document.getElementById('feeHeader');
     if (feeHeader) {
-        feeHeader.textContent = `Fee (${feePercentage}%)`;
+        feeHeader.textContent = `Delivery Fee (${feePercentage}%)`;
     }
 }
 
@@ -87,7 +90,10 @@ function updateRiderFeeDisplay() {
 async function loadRiderDashboard() {
     try {
         const response = await authFetch('/api/rider/dashboard');
-        if (!response.ok) throw new Error('Failed to load dashboard');
+        if (!response.ok) {
+            console.warn('Dashboard API unavailable, using defaults');
+            return;
+        }
         
         const data = await response.json();
         if (data.success) {
@@ -139,9 +145,9 @@ async function loadRiderDashboard() {
             const earningsToday = dash.earnings_today || 0;
             safeSetText('earningsToday', '₱' + earningsToday.toLocaleString('en-PH', { minimumFractionDigits: 2 }));
             
-            // Store rider service fee rate from dashboard (or default to 5%)
-            window.riderServiceFeeRate = dash.rider_service_fee_rate || 0.05;
-            window.riderServiceFeePercentage = dash.rider_service_fee_percentage || 5;
+            // Store rider delivery fee rate from dashboard (2.5% of product sales)
+            window.riderServiceFeeRate = dash.rider_service_fee_rate || 0.025;
+            window.riderServiceFeePercentage = dash.rider_service_fee_percentage || 2.5;
             
             // Update platform fee label in HTML
             updateRiderFeeDisplay();
@@ -183,19 +189,23 @@ let hasShownInitialNotification = false;
 
 async function loadRiderOrders() {
     try {
-        // Load assigned orders
+        let assignedOrders = [];
         const assignedResponse = await authFetch('/api/rider/orders');
-        if (!assignedResponse.ok) throw new Error('Failed to load assigned orders');
+        if (assignedResponse.ok) {
+            const assignedData = await assignedResponse.json();
+            assignedOrders = assignedData.success ? (assignedData.orders || []) : [];
+        } else {
+            console.warn('Assigned orders API unavailable');
+        }
         
-        const assignedData = await assignedResponse.json();
-        const assignedOrders = assignedData.success ? (assignedData.orders || []) : [];
-        
-        // Load available orders
+        let availableOrders = [];
         const availableResponse = await authFetch('/api/riders/available-orders');
-        if (!availableResponse.ok) throw new Error('Failed to load available orders');
-        
-        const availableData = await availableResponse.json();
-        const availableOrders = availableData.success ? (availableData.data || []) : [];
+        if (availableResponse.ok) {
+            const availableData = await availableResponse.json();
+            availableOrders = availableData.success ? (availableData.data || []) : [];
+        } else {
+            console.warn('Available orders API unavailable');
+        }
         
         // Update available orders count
         const previousCount = availableOrdersCount;
@@ -329,7 +339,7 @@ function renderDeliveriesTable() {
             <td>#${d.id}</td>
             <td>${d.customer_name || 'N/A'}</td>
             <td>${formatAddress(d.customer_address) || 'N/A'}</td>
-            <td>₱${(d.delivery_fee || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
+            <td>₱${(d.rider_earnings ?? d.delivery_fee ?? 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
             <td><span class="status-badge ${getStatusClass(d.status)}">${d.status || 'pending'}</span></td>
             <td>${new Date(d.created_at).toLocaleDateString()}</td>
         </tr>
@@ -1309,24 +1319,30 @@ function updateEarningsReport() {
         return deliveryDate >= start && deliveryDate <= end;
     });
 
-    // Get service fee rate from stored dashboard data or default to 5%
-    const serviceFeeRate = window.riderServiceFeePercentage || 5;
+    const serviceFeeRate = window.riderServiceFeePercentage || 2.5;
     
-    // Calculate totals using delivery_fee (not amount)
-    const grossTotal = filtered.reduce((sum, d) => {
-        const fee = parseFloat(d.delivery_fee) || 0;
-        return sum + fee;
+    const productSalesTotal = filtered.reduce((sum, d) => {
+        const subtotal = parseFloat(d.product_subtotal ?? d.product_sales ?? d.total ?? 0);
+        return sum + subtotal;
     }, 0);
-    
-    const platformFee = grossTotal * (serviceFeeRate / 100);
-    const netTotal = grossTotal - platformFee;
+
+    const deliveryFeeTotal = filtered.reduce((sum, d) => {
+        const earnings = parseFloat(d.rider_earnings ?? d.delivery_fee ?? 0);
+        if (earnings > 0) return sum + earnings;
+        const subtotal = parseFloat(d.product_subtotal ?? d.product_sales ?? d.total ?? 0);
+        return sum + (subtotal * (serviceFeeRate / 100));
+    }, 0);
+
+    const grossTotal = productSalesTotal;
+    const platformFee = deliveryFeeTotal;
+    const netTotal = deliveryFeeTotal;
     const count = filtered.length;
 
     // Update earnings display elements
     safeSetText('grossEarnings', formatCurrency(grossTotal));
     safeSetText('platformFee', formatCurrency(platformFee));
     safeSetText('totalEarnings', formatCurrency(netTotal));
-    safeSetText('pendingPayout', formatCurrency(netTotal * 0.9)); // 90% of net available for payout
+    safeSetText('pendingPayout', formatCurrency(netTotal * 0.9));
     safeSetText('earningDeliveries', count);
     
     // Update fee display labels
@@ -1342,9 +1358,11 @@ function updateEarningsReport() {
     }
 
     tbody.innerHTML = filtered.map(d => {
-        const gross = parseFloat(d.delivery_fee) || 0;
-        const fee = gross * (serviceFeeRate / 100);
-        const net = gross - fee;
+        const subtotal = parseFloat(d.product_subtotal ?? d.product_sales ?? d.total ?? 0);
+        const earnings = parseFloat(d.rider_earnings ?? d.delivery_fee ?? 0) || (subtotal * (serviceFeeRate / 100));
+        const gross = subtotal;
+        const fee = earnings;
+        const net = earnings;
         
         // Use delivered_at if available, otherwise created_at
         const deliveryDateStr = d.delivered_at || d.created_at;
@@ -2315,7 +2333,7 @@ function closeDeliveryModal() {
 
 async function loadRiderProfile() {
     try {
-        const response = await authFetch('/api/me');
+        const response = await authFetch('/api/account/me');
         if (!response.ok) throw new Error('Failed to load profile');
         
         const data = await response.json();
@@ -2540,7 +2558,7 @@ async function editProfile() {
     
     // Load current profile picture
     try {
-        const response = await authFetch('/api/me');
+        const response = await authFetch('/api/account/me');
         if (response.ok) {
             const data = await response.json();
             if (data.success && data.data) {

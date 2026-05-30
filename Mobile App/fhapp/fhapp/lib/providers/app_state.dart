@@ -1,12 +1,17 @@
 import 'package:flutter/foundation.dart';
 import '../models/cart_item.dart';
+import '../models/earnings.dart';
 import '../models/hub_user.dart';
+import '../models/order.dart';
 import '../models/product.dart';
 import '../models/seller.dart';
 import '../services/api_client.dart';
 import '../services/auth_service.dart';
 import '../services/cart_service.dart';
+import '../services/order_service.dart';
 import '../services/product_service.dart';
+import '../services/rider_service.dart';
+import '../services/seller_product_service.dart';
 import '../services/seller_service.dart';
 
 class AppState extends ChangeNotifier {
@@ -15,6 +20,9 @@ class AppState extends ChangeNotifier {
     _productService = ProductService(_apiClient);
     _cartService = CartService(_apiClient);
     _sellerService = SellerService(_apiClient);
+    _orderService = OrderService(_apiClient);
+    _sellerProductService = SellerProductService(_apiClient);
+    _riderService = RiderService(_apiClient);
   }
 
   final AuthService auth = AuthService();
@@ -22,6 +30,9 @@ class AppState extends ChangeNotifier {
   late final ProductService _productService;
   late final CartService _cartService;
   late final SellerService _sellerService;
+  late final OrderService _orderService;
+  late final SellerProductService _sellerProductService;
+  late final RiderService _riderService;
 
   bool _loading = true;
   bool _busy = false;
@@ -31,6 +42,12 @@ class AppState extends ChangeNotifier {
   List<Product> _bestSellers = [];
   List<SellerShop> _shops = [];
   List<CartItem> _cartItems = [];
+  List<Product> _sellerProducts = [];
+  List<HubOrder> _availableRiderOrders = [];
+  List<HubOrder> _assignedRiderOrders = [];
+  SellerDashboardStats? _sellerDashboard;
+  SellerEarningsSummary? _sellerEarnings;
+  RiderDashboardStats? _riderDashboard;
   List<String> _categories = [];
   String? _selectedCategory;
   String _searchQuery = '';
@@ -44,7 +61,14 @@ class AppState extends ChangeNotifier {
   List<Product> get bestSellers => _bestSellers;
   List<SellerShop> get shops => _shops;
   List<CartItem> get cartItems => _cartItems;
+  List<Product> get sellerProducts => _sellerProducts;
+  List<HubOrder> get availableRiderOrders => _availableRiderOrders;
+  List<HubOrder> get assignedRiderOrders => _assignedRiderOrders;
+  SellerDashboardStats? get sellerDashboard => _sellerDashboard;
+  SellerEarningsSummary? get sellerEarnings => _sellerEarnings;
+  RiderDashboardStats? get riderDashboard => _riderDashboard;
   List<String> get categories => _categories;
+  String get userRole => user?.role ?? 'customer';
   String? get selectedCategory => _selectedCategory;
   String get searchQuery => _searchQuery;
 
@@ -172,6 +196,125 @@ class AppState extends ChangeNotifier {
     await _runBusy(() async {
       await _cartService.removeItem(cartId);
       await refreshCart();
+    });
+  }
+
+  Future<int> checkout({required String payment}) async {
+    if (!auth.isLoggedIn || _cartItems.isEmpty) {
+      throw Exception('Cart is empty');
+    }
+    final user = auth.user!;
+    final delivery = 50.0;
+    final subtotal = cartTotal;
+    final total = subtotal + delivery;
+    final items = _cartItems.map((item) => {
+      'product_id': item.productId,
+      'quantity': item.quantity,
+      'price': item.unitPrice,
+      'title': item.title,
+    }).toList();
+
+    _busy = true;
+    _error = null;
+    notifyListeners();
+    try {
+      final orderId = await _orderService.checkout(
+        items: items,
+        customer: {
+          'first_name': user.firstName ?? '',
+          'last_name': user.lastName ?? '',
+          'email': user.email,
+          'phone': '09000000000',
+          'address': 'Mobile checkout address, Taguig City, Metro Manila',
+          'address_line1': 'Mobile checkout',
+          'city': 'Taguig City',
+          'province': 'Metro Manila',
+          'region': 'NCR',
+        },
+        delivery: delivery,
+        subtotal: subtotal,
+        total: total,
+        payment: payment,
+      );
+      await refreshCart();
+      return orderId;
+    } catch (e) {
+      _error = e.toString().replaceFirst('Exception: ', '');
+      rethrow;
+    } finally {
+      _busy = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> refreshSellerProducts() async {
+    _sellerProducts = await _sellerProductService.fetchMyProducts();
+    notifyListeners();
+  }
+
+  Future<void> refreshSellerEarnings() async {
+    _sellerDashboard = await _sellerService.fetchDashboard();
+    _sellerEarnings = await _sellerService.fetchEarningsSummary();
+    notifyListeners();
+  }
+
+  Future<void> createSellerProduct({
+    required String title,
+    required String description,
+    required double price,
+    required int stock,
+    String category = 'General',
+  }) async {
+    await _runBusy(() async {
+      await _sellerProductService.createProduct(
+        title: title,
+        description: description,
+        price: price,
+        stock: stock,
+        category: category,
+      );
+      await refreshSellerProducts();
+    });
+  }
+
+  Future<void> updateSellerProduct(int id, Map<String, dynamic> updates) async {
+    await _runBusy(() async {
+      await _sellerProductService.updateProduct(id, updates);
+      await refreshSellerProducts();
+    });
+  }
+
+  Future<void> restockSellerProduct(int id, int stock) async {
+    await updateSellerProduct(id, {'stock': stock});
+  }
+
+  Future<void> deleteSellerProduct(int id) async {
+    await _runBusy(() async {
+      await _sellerProductService.deleteProduct(id);
+      await refreshSellerProducts();
+    });
+  }
+
+  Future<void> refreshRiderOrders() async {
+    _availableRiderOrders = await _riderService.fetchAvailableOrders();
+    _assignedRiderOrders = await _riderService.fetchMyOrders();
+    try {
+      _riderDashboard = await _riderService.fetchDashboard();
+    } catch (_) {}
+    notifyListeners();
+  }
+
+  Future<void> acceptRiderOrder(int orderId) async {
+    await _runBusy(() async {
+      await _riderService.acceptOrder(orderId);
+      await refreshRiderOrders();
+    });
+  }
+
+  Future<void> updateRiderDelivery(int orderId, String status) async {
+    await _runBusy(() async {
+      await _riderService.updateDeliveryStatus(orderId, status);
+      await refreshRiderOrders();
     });
   }
 

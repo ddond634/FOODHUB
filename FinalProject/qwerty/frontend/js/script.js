@@ -94,6 +94,8 @@
     const SUPABASE_PRODUCT_API = `${SUPABASE_FUNCTIONS_BASE}/product_api`;
     const SUPABASE_COMMERCE_API = `${SUPABASE_FUNCTIONS_BASE}/commerce_api`;
     const SUPABASE_AUTH_API = `${SUPABASE_FUNCTIONS_BASE}/auth_api`;
+    const SUPABASE_SELLER_API = `${SUPABASE_FUNCTIONS_BASE}/seller_api`;
+    const SUPABASE_RIDER_API = `${SUPABASE_FUNCTIONS_BASE}/rider_api`;
     const SUPABASE_ORDER_API = `${SUPABASE_FUNCTIONS_BASE}/create_order`;
     const SUPABASE_STORAGE_BASE = `https://${SUPABASE_PROJECT_REF}.supabase.co/storage/v1/object/public/hub_uploads`;
     const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNmZWNjZmJkbWJ3b2JsaXh5b3RpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwODAwNTksImV4cCI6MjA5NTY1NjA1OX0.uM7DX7T-PQqPsMIwh-Fna1BUtVkkOhR4PiT2YqYlhIE';
@@ -102,6 +104,8 @@
     window.SUPABASE_PRODUCT_API = SUPABASE_PRODUCT_API;
     window.SUPABASE_COMMERCE_API = SUPABASE_COMMERCE_API;
     window.SUPABASE_AUTH_API = SUPABASE_AUTH_API;
+    window.SUPABASE_SELLER_API = SUPABASE_SELLER_API;
+    window.SUPABASE_RIDER_API = SUPABASE_RIDER_API;
     window.SUPABASE_ORDER_API = SUPABASE_ORDER_API;
     window.SUPABASE_STORAGE_BASE = SUPABASE_STORAGE_BASE;
     window.SUPABASE_ANON = SUPABASE_ANON;
@@ -152,8 +156,23 @@
           if (resourcePath.startsWith('/auth/register')) {
             return `${SUPABASE_AUTH_API}/register${query}`;
           }
-          if (resourcePath.startsWith('/account/me')) {
+          if (resourcePath.startsWith('/account/me') || resourcePath === '/me') {
             return `${SUPABASE_AUTH_API}/me${query}`;
+          }
+          if (resourcePath.match(/^\/orders\/\d+\/delivery-update/)) {
+            return `${SUPABASE_RIDER_API}${resourcePath}${query}`;
+          }
+          if (resourcePath === '/orders' || resourcePath.startsWith('/orders')) {
+            return `${SUPABASE_COMMERCE_API}${resourcePath}${query}`;
+          }
+          if (resourcePath.startsWith('/sellers/products')) {
+            return `${SUPABASE_SELLER_API}${resourcePath.replace('/sellers', '')}${query}`;
+          }
+          if (resourcePath.startsWith('/rider/')) {
+            return `${SUPABASE_RIDER_API}${resourcePath.replace(/^\/rider/, '')}${query}`;
+          }
+          if (resourcePath.startsWith('/riders/')) {
+            return `${SUPABASE_RIDER_API}${resourcePath.replace(/^\/riders/, '')}${query}`;
           }
           if (resourcePath.startsWith('/products/best-sellers')) {
             return `${SUPABASE_PRODUCT_API}/products/best-sellers${query}`;

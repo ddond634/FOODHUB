@@ -885,6 +885,13 @@ async function loadDashboardData() {
             document.getElementById('pendingOrders').textContent = dash.pending_orders || 0;
             document.getElementById('avgRating').textContent = (dash.avg_rating || 0).toFixed(1);
             
+            if (document.getElementById('netProfit')) {
+                document.getElementById('netProfit').textContent = '₱' + (dash.net_profit_month ?? dash.net_profit ?? 0).toLocaleString('en-PH', { minimumFractionDigits: 2 });
+            }
+            if (document.getElementById('grossSalesMonth')) {
+                document.getElementById('grossSalesMonth').textContent = '₱' + (dash.sales_month || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 });
+            }
+            
             // Update additional metrics if elements exist
             if (document.getElementById('salesToday')) {
                 document.getElementById('salesToday').textContent = '₱' + (dash.sales_today || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 });
@@ -3675,11 +3682,17 @@ async function updateCommissionBreakdown() {
         // Update display elements
         const grossSales = earnings.gross_revenue || 0;
         const platformCommission = earnings.platform_commission || 0;
-        const netEarnings = earnings.total_earnings || 0;
+        const riderFees = earnings.rider_fees || 0;
+        const netEarnings = earnings.total_earnings || earnings.net_profit || 0;
         
         document.getElementById('grossSales').textContent = '₱' + grossSales.toLocaleString('en-PH', { minimumFractionDigits: 2 });
         document.getElementById('platformCommission').textContent = '₱' + platformCommission.toLocaleString('en-PH', { minimumFractionDigits: 2 });
         document.getElementById('netEarnings').textContent = '₱' + netEarnings.toLocaleString('en-PH', { minimumFractionDigits: 2 });
+
+        const riderFeesEl = document.getElementById('riderFees');
+        if (riderFeesEl) {
+            riderFeesEl.textContent = '₱' + riderFees.toLocaleString('en-PH', { minimumFractionDigits: 2 });
+        }
         
         // Update rate display and examples
         document.getElementById('commissionRateDisplay').textContent = commissionRate + '%';
@@ -4148,12 +4161,8 @@ async function loadEarnings() {
 
 async function loadEarningsSummary(period = 'monthly') {
     try {
-        const token = localStorage.getItem('hub_access_token');
-        const response = await fetch(`/api/sellers/earnings/summary?period=${period}`, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
+        const apiPeriod = period === 'monthly' ? 'month' : period;
+        const response = await authFetch(`/api/sellers/earnings/summary?period=${apiPeriod}`);
         
         const data = await response.json();
         
@@ -4214,24 +4223,11 @@ async function loadEarningsSummary(period = 'monthly') {
 
 async function loadTransactionHistory(page = 1, filters = {}) {
     try {
-        const token = localStorage.getItem('hub_access_token');
-        
-        // Build query parameters
-        const params = new URLSearchParams({
-            page: page,
-            per_page: 50
-        });
-        
-        if (filters.status) params.append('status', filters.status);
-        if (filters.start_date) params.append('start_date', filters.start_date);
-        if (filters.end_date) params.append('end_date', filters.end_date);
-        if (filters.order_id) params.append('order_id', filters.order_id);
-        
-        const response = await fetch(`/api/sellers/earnings/transactions?${params}`, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
+        const params = new URLSearchParams();
+        if (filters.start_date) params.append('start', filters.start_date);
+        if (filters.end_date) params.append('end', filters.end_date);
+
+        const response = await authFetch(`/api/sellers/earnings/transactions?${params}`);
         
         const data = await response.json();
         
@@ -4241,8 +4237,9 @@ async function loadTransactionHistory(page = 1, filters = {}) {
             throw new Error(data.message || 'Failed to load transactions');
         }
         
-        const transactions = data.data.transactions;
+        const transactions = Array.isArray(data.data) ? data.data : (data.data?.transactions || []);
         const tbody = document.getElementById('earningsTableBody');
+        if (!tbody) return;
         
         if (transactions.length === 0) {
             tbody.innerHTML = `
@@ -4257,12 +4254,12 @@ async function loadTransactionHistory(page = 1, filters = {}) {
         }
         
         tbody.innerHTML = transactions.map(txn => {
-            const statusClass = txn.status === 'paid' ? 'status-completed' : 
-                              txn.status === 'pending' ? 'status-pending' : 'status-cancelled';
-            const statusText = txn.status === 'paid' ? 'Paid' : 
-                             txn.status === 'pending' ? 'Pending' : 'Refunded';
+            const statusClass = ['delivered', 'completed', 'paid'].includes(String(txn.status).toLowerCase())
+                ? 'status-completed'
+                : 'status-pending';
+            const statusText = txn.status || 'Pending';
             
-            const date = new Date(txn.date).toLocaleDateString('en-US', {
+            const date = new Date(txn.order_date || txn.date).toLocaleDateString('en-US', {
                 year: 'numeric',
                 month: 'short',
                 day: 'numeric'
@@ -4271,12 +4268,12 @@ async function loadTransactionHistory(page = 1, filters = {}) {
             return `
                 <tr>
                     <td>${date}</td>
-                    <td>${txn.transaction_id}</td>
+                    <td>TXN-${txn.order_id}</td>
                     <td>#ORD-${txn.order_id}</td>
-                    <td>${txn.product_name}${txn.quantity > 1 ? ` (x${txn.quantity})` : ''}</td>
-                    <td>₱${formatNumber(txn.gross_amount)}</td>
-                    <td class="commission-amount">₱${formatNumber(txn.commission)}</td>
-                    <td class="earning-amount-cell">₱${formatNumber(txn.net_earnings)}</td>
+                    <td>${txn.items_count || 1} item(s)</td>
+                    <td>₱${formatNumber(txn.gross_sales ?? txn.gross_amount ?? 0)}</td>
+                    <td class="commission-amount">₱${formatNumber((txn.platform_commission ?? txn.commission ?? 0) + (txn.rider_fee ?? 0))}</td>
+                    <td class="earning-amount-cell">₱${formatNumber(txn.net_profit ?? txn.net_earnings ?? 0)}</td>
                     <td><span class="status-badge ${statusClass}">${statusText}</span></td>
                 </tr>
             `;
