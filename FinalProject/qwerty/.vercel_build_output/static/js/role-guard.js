@@ -12,7 +12,8 @@
         'admin': '/admin_dashboard.html',
         'seller': '/seller_dashboard.html',
         'rider': '/rider_dashboard.html',
-        'customer': null // Customers can access public pages
+        'customer': '/account.html',
+        'buyer': '/account.html'
     };
     
     // Pages that should be restricted for system users (admin, seller, rider)

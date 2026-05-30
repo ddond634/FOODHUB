@@ -1,0 +1,11 @@
+function handleCustomerRegistration(ev){ ev.preventDefault(); ['custFirstNameError','custLastNameError','custEmailError','custPasswordError','custConfirmPasswordError'].forEach(clearError); const firstName=document.getElementById('custFirstName').value.trim(); const lastName=document.getElementById('custLastName').value.trim(); const email=document.getElementById('custEmail').value.trim(); const password=document.getElementById('custPassword').value; const confirm=document.getElementById('custConfirmPassword').value; let ok=true; if(!firstName){ showError('custFirstNameError','First name is required'); ok=false;} if(!lastName){ showError('custLastNameError','Last name is required'); ok=false;} if(!validateEmail(email)){ showError('custEmailError','Please enter a valid email'); ok=false;} if(!validatePassword(password)){ showError('custPasswordError','Password must be at least 6 characters'); ok=false;} if(password!==confirm){ showError('custConfirmPasswordError','Passwords do not match'); ok=false;} if(ok){ const payload={ email, password, role:'customer', first_name:firstName, last_name:lastName };
+    fetch('/api/auth/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
+      .then(r=>r.json()).then(resp=>{
+        if(resp && resp.success){
+          if(resp.token) localStorage.setItem('hub_access_token', resp.token);
+          if(resp.refresh_token) localStorage.setItem('hub_refresh_token', resp.refresh_token);
+          pendingRegistrations.customer={firstName,lastName,email}; sendOTP(email,'customer'); switchCustomerStep(4);
+        } else { showError('custEmailError', resp.error || 'Registration failed'); }
+      }).catch(err=>{ console.error(err); showError('custEmailError','Server error'); });
+  }
+}

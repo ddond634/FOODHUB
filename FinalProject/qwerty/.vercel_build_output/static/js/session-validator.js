@@ -49,6 +49,10 @@
      * Check if server has restarted
      */
     async function checkServerInstance() {
+        // Static/Vercel deploy has no Flask server — skip instance checks
+        if (window.SUPABASE_AUTH_API && !window.location.hostname.match(/^(localhost|127\.0\.0\.1)$/)) {
+            return true;
+        }
         try {
             const response = await fetch('/api/server/instance');
             if (!response.ok) {

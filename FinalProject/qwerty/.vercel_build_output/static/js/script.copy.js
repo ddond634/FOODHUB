@@ -93,7 +93,6 @@
     const SUPABASE_FUNCTIONS_BASE = `https://${SUPABASE_PROJECT_REF}.functions.supabase.co`;
     const SUPABASE_PRODUCT_API = `${SUPABASE_FUNCTIONS_BASE}/product_api`;
     const SUPABASE_COMMERCE_API = `${SUPABASE_FUNCTIONS_BASE}/commerce_api`;
-    const SUPABASE_AUTH_API = `${SUPABASE_FUNCTIONS_BASE}/auth_api`;
     const SUPABASE_ORDER_API = `${SUPABASE_FUNCTIONS_BASE}/create_order`;
     const SUPABASE_STORAGE_BASE = `https://${SUPABASE_PROJECT_REF}.supabase.co/storage/v1/object/public/hub_uploads`;
     const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNmZWNjZmJkbWJ3b2JsaXh5b3RpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwODAwNTksImV4cCI6MjA5NTY1NjA1OX0.uM7DX7T-PQqPsMIwh-Fna1BUtVkkOhR4PiT2YqYlhIE';
@@ -101,7 +100,6 @@
     window.SUPABASE_FUNCTIONS_BASE = SUPABASE_FUNCTIONS_BASE;
     window.SUPABASE_PRODUCT_API = SUPABASE_PRODUCT_API;
     window.SUPABASE_COMMERCE_API = SUPABASE_COMMERCE_API;
-    window.SUPABASE_AUTH_API = SUPABASE_AUTH_API;
     window.SUPABASE_ORDER_API = SUPABASE_ORDER_API;
     window.SUPABASE_STORAGE_BASE = SUPABASE_STORAGE_BASE;
     window.SUPABASE_ANON = SUPABASE_ANON;
@@ -137,23 +135,14 @@
           const legacyHost = url.hostname === 'localhost' || url.hostname === '127.0.0.1' || url.origin === window.location.origin;
           if (!legacyHost) return urlValue;
 
-          let resourcePath = path.replace(/^(?:\/api)+/, '');
-          if (!resourcePath.startsWith('/')) {
-            resourcePath = '/' + resourcePath;
-          }
+          const resourcePath = path.replace(/^\/api/, '');
           const query = url.search || '';
 
           if (resourcePath.startsWith('/cart') || resourcePath.startsWith('/wishlist')) {
             return `${SUPABASE_COMMERCE_API}${resourcePath}${query}`;
           }
-          if (resourcePath.startsWith('/auth/login')) {
-            return `${SUPABASE_AUTH_API}/login${query}`;
-          }
-          if (resourcePath.startsWith('/auth/register')) {
-            return `${SUPABASE_AUTH_API}/register${query}`;
-          }
           if (resourcePath.startsWith('/products/best-sellers')) {
-            return `${SUPABASE_PRODUCT_API}/products/best-sellers${query}`;
+            return `${SUPABASE_PRODUCT_API}/products${query}`;
           }
           if (resourcePath.startsWith('/products')) {
             return `${SUPABASE_PRODUCT_API}${resourcePath}${query}`;
@@ -168,41 +157,25 @@
         }
       };
 
-      const applySupabaseGatewayHeaders = (headers) => {
-        const anonAuth = `Bearer ${SUPABASE_ANON}`;
-        const existingAuth = headers.get('Authorization') || '';
-        const hubToken = headers.get('X-Hub-Token') || '';
-
-        if (existingAuth && existingAuth !== anonAuth && !existingAuth.includes(SUPABASE_ANON)) {
-          if (!hubToken) {
-            headers.set('X-Hub-Token', existingAuth.replace(/^Bearer\s+/i, ''));
-          }
-        } else if (!hubToken && existingAuth && existingAuth !== anonAuth) {
-          headers.set('X-Hub-Token', existingAuth.replace(/^Bearer\s+/i, ''));
-        }
-
-        headers.set('Authorization', anonAuth);
-        headers.set('apikey', SUPABASE_ANON);
-        return headers;
-      };
-
-      window.getSupabaseFunctionHeaders = function(extraHeaders) {
-        const headers = new Headers(extraHeaders || {});
-        const token = localStorage.getItem('hub_access_token');
-        if (token && !headers.has('X-Hub-Token')) {
-          headers.set('X-Hub-Token', token);
-        }
-        return applySupabaseGatewayHeaders(headers);
-      };
-
       const addSupabaseFunctionHeaders = (input, init) => {
+        const authHeaders = {
+          Authorization: `Bearer ${SUPABASE_ANON}`,
+          apikey: SUPABASE_ANON,
+        };
+
         if (input instanceof Request) {
-          const headers = applySupabaseGatewayHeaders(new Headers(input.headers || {}));
+          const headers = new Headers(input.headers || {});
+          Object.entries(authHeaders).forEach(([key, value]) => {
+            if (!headers.has(key)) headers.set(key, value);
+          });
           return [new Request(input, { headers }), init];
         }
 
         init = init || {};
-        init.headers = applySupabaseGatewayHeaders(new Headers(init.headers || {}));
+        init.headers = new Headers(init.headers || {});
+        Object.entries(authHeaders).forEach(([key, value]) => {
+          if (!init.headers.has(key)) init.headers.set(key, value);
+        });
         return [input, init];
       };
 
@@ -334,8 +307,9 @@
     }
     
     try {
+      const token = localStorage.getItem('hub_access_token');
       const response = await fetch(`${window.SUPABASE_COMMERCE_API}/cart`, {
-        headers: window.getSupabaseFunctionHeaders ? window.getSupabaseFunctionHeaders() : {}
+        headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
       
@@ -372,8 +346,9 @@
     }
     
     try {
+      const token = localStorage.getItem('hub_access_token');
       const response = await fetch(`${window.SUPABASE_COMMERCE_API}/wishlist`, {
-        headers: window.getSupabaseFunctionHeaders ? window.getSupabaseFunctionHeaders() : {}
+        headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
       
@@ -420,8 +395,9 @@
     }
     
     try {
+      const token = localStorage.getItem('hub_access_token');
       const response = await fetch(`${window.SUPABASE_COMMERCE_API}/cart`, {
-        headers: window.getSupabaseFunctionHeaders ? window.getSupabaseFunctionHeaders() : {}
+        headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
       
@@ -471,8 +447,9 @@
     }
     
     try {
+      const token = localStorage.getItem('hub_access_token');
       const response = await fetch(`${window.SUPABASE_COMMERCE_API}/wishlist`, {
-        headers: window.getSupabaseFunctionHeaders ? window.getSupabaseFunctionHeaders() : {}
+        headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
       
@@ -515,7 +492,7 @@
     }
   }
 
-  async function addToCartFromButton(btn){
+  function addToCartFromButton(btn){
     // Check authentication first
     if (!isUserLoggedIn()) {
       if (window.notify) {
@@ -527,54 +504,24 @@
       return;
     }
     
-    if(!btn) return;
-    let title=btn.getAttribute('data-product')||'';
-    const card=btn.closest('.product-card,.product-shop-card,.arrival-product-card,.card-back')||document.createElement('div');
-    if(!title){ const h=card.querySelector('h4, h3, .product-shop-title'); title=h?h.textContent.trim():'Unknown product'; }
-    let priceRaw=btn.getAttribute('data-price')||'';
-    let price=normalizePrice(priceRaw);
-    if(!price){ const pt=card.querySelector('.price-tag,.product-price,.price,.price-current'); if(pt) price=normalizePrice(pt.textContent); }
+    if(!btn) return; let title=btn.getAttribute('data-product')||''; const card=btn.closest('.product-card,.product-shop-card,.arrival-product-card,.card-back')||document.createElement('div'); if(!title){ const h=card.querySelector('h4, h3, .product-shop-title'); title=h?h.textContent.trim():'Unknown product'; }
+    let priceRaw=btn.getAttribute('data-price')||''; let price=normalizePrice(priceRaw); if(!price){ const pt=card.querySelector('.price-tag,.product-price,.price,.price-current'); if(pt) price=normalizePrice(pt.textContent); }
+    const imgEl=card.querySelector('img'); const img=imgEl?imgEl.src:''; const descEl=card.querySelector('.product-info p, p'); const desc=descEl?descEl.textContent.trim():''; const seller=btn.getAttribute('data-seller')||'Unknown Seller';
+    // Try to get product_id from button or card data attributes
     const productId=btn.getAttribute('data-product-id')||card.getAttribute('data-product-id')||btn.getAttribute('data-id')||card.getAttribute('data-id')||null;
-
-    if (!productId) {
-      showToast('Unable to add item — missing product ID');
-      return;
-    }
-
+    // Show loader while processing add-to-cart
     const originalAria = btn.getAttribute('aria-busy');
     try { btn.setAttribute('aria-busy','true'); showGlobalLoader(); } catch(e){}
-
-    try {
-      const token = localStorage.getItem('hub_access_token');
-      const response = await fetch('/api/cart', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          product_id: parseInt(productId, 10),
-          quantity: 1,
-          variation_id: null
-        })
-      });
-      const data = await response.json();
-
-      if (data.success) {
-        updateBadges();
-        renderCartDropdown();
-        try { btn.classList.add('added'); setTimeout(()=>btn.classList.remove('added'),500); } catch(e){}
-        showToast(`${title} added to cart`);
-      } else {
-        showToast(data.error || data.message || 'Failed to add to cart');
-      }
-    } catch (error) {
-      console.error('Add to cart failed:', error);
-      showToast('Failed to add to cart. Please try again.');
-    } finally {
+    const cart=getCart(); // perform add after a small simulated delay to show loader
+    setTimeout(()=>{
+      const existing=findItem(cart,title);
+      if(existing){ existing.quantity=(existing.quantity||1)+1; if(productId && !existing.product_id) existing.product_id=productId; }
+      else { cart.push({title,price,img,desc,quantity:1,seller,product_id:productId||null}); }
+      saveCart(cart); updateBadges(); renderCartDropdown(); try{btn.classList.add('added'); setTimeout(()=>btn.classList.remove('added'),500);}catch(e){}
+      showToast(`${title} added to cart`);
       try { btn.setAttribute('aria-busy', originalAria===null ? 'false' : originalAria); } catch(e){}
       hideGlobalLoader();
-    }
+    }, 350);
   }
 
   function showToast(text,timeout=2500){ let c=document.querySelector('.toast-container'); if(!c){ c=document.createElement('div'); c.className='toast-container'; document.body.appendChild(c);} const t=document.createElement('div'); t.className='toast'; t.textContent=text; c.appendChild(t); requestAnimationFrame(()=>t.classList.add('show')); setTimeout(()=>{ t.classList.remove('show'); setTimeout(()=>t.remove(),260); }, timeout); }
@@ -850,7 +797,9 @@
     if (token && productId) {
       fetch(`${window.SUPABASE_COMMERCE_API}/wishlist/${productId}`, {
         method: 'POST',
-        headers: window.getSupabaseFunctionHeaders ? window.getSupabaseFunctionHeaders() : {}
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       })
       .then(response => response.json())
       .then(data => {
@@ -1661,7 +1610,7 @@ function switchRiderStep(step){ ['riderForm1','riderForm2','riderForm3','riderFo
 function switchCustomerStep(step){
   ['customerForm','customerFormOTP'].forEach(id=>document.getElementById(id)?.classList.remove('active-step'));
   ['customerStep1','customerStep2'].forEach(id=>document.getElementById(id)?.classList.remove('active'));
-  if(step===1){
+  if(step===2){
     document.getElementById('customerForm')?.classList.add('active-step');
     document.getElementById('customerStep1')?.classList.add('active');
   } else if(step===2){
@@ -1676,23 +1625,10 @@ function sendOTP(email,type){
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body: JSON.stringify({ email: email, type: type })
-  }).then(async r => {
-    const text = await r.text().catch(() => '');
-    try { return { status: r.status, resp: JSON.parse(text), text }; }
-    catch (e) { return { status: r.status, resp: null, text }; }
-  }).then(({status, resp, text})=>{
-    if(resp && resp.success){ 
-      showSuccess((type||'')+'Success', `OTP sent to ${email}`); 
-      if(type==='customer') switchCustomerStep(2); 
-    } else { 
-      console.warn('sendOTP failed:', {status, resp, text});
-      showError(type==='customer'?'custEmailError':`${type}EmailError`, (resp && (resp.error || resp.message)) || 'Failed to send OTP'); 
-      switchCustomerStep(2); 
-    }
-  }).catch(err=>{ 
-    console.error('sendOTP error',err); 
-    showError(type==='customer'?'custEmailError':`${type}EmailError`,'Server error'); 
-  });
+  }).then(r=>r.json()).then(j=>{
+    if(j && j.success){ showSuccess((type||'')+'Success', `OTP sent to ${email}`); if(type==='customer') switchCustomerStep(2); }
+    else { showError(type==='customer'?'custEmailError':`${type}EmailError`, j && j.error ? j.error : 'Failed to send OTP'); switchCustomerStep(2); }
+  }).catch(err=>{ console.error('sendOTP error',err); showError(type==='customer'?'custEmailError':`${type}EmailError`,'Server error'); });
 }
 function resendOTP(type){ const p=pendingRegistrations[type]; if(!p?.email){ showError(type==='customer'?'custOTPError':`${type}OTPError`,'No pending registration to resend OTP for.'); return;} sendOTP(p.email,type); }
 const PSGC_API='https://psgc.gitlab.io/api'; let regionsCache={}, provincesCache={}, citiesCache={};
@@ -1738,132 +1674,171 @@ function handleLogin(ev){
     ok=false;
   } 
   if(ok){
-    // Simplified login flow: try backend first (works for local + deployed), fallback to Supabase
-    // Always prefer backend JWT for API consistency
-    fetch('/api/auth/login', {
+    // Try Supabase Auth first (client-side) so deployed frontend can authenticate without local backend
+    const SUPABASE_REF = 'sfeccfbdmbwoblixyoti';
+    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNmZWNjZmJkbWJ3b2JsaXh5b3RpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwODAwNTksImV4cCI6MjA5NTY1NjA1OX0.uM7DX7T-PQqPsMIwh-Fna1BUtVkkOhR4PiT2YqYlhIE';
+    const supaUrl = `https://${SUPABASE_REF}.supabase.co/auth/v1/token?grant_type=password`;
+
+    fetch(supaUrl, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_ANON,
+        'Authorization': `Bearer ${SUPABASE_ANON}`
+      },
       body: JSON.stringify({ email, password })
     })
-    .then(async r => {
-      const text = await r.text().catch(() => '');
-      try { return { status: r.status, resp: JSON.parse(text), text }; }
-      catch (e) { return { status: r.status, resp: null, text }; }
-    })
-    .then(({ status, resp, text }) => {
-      // Backend login succeeded
-      if (resp && resp.success && resp.token) {
-        localStorage.setItem('hub_access_token', resp.token);
+    .then(r => r.json().then(resp => ({ status: r.status, resp })))
+    .then(({ status, resp }) => {
+      if (resp && resp.access_token) {
+        // Supabase successful login
+        localStorage.setItem('hub_access_token', resp.access_token);
         if (resp.refresh_token) localStorage.setItem('hub_refresh_token', resp.refresh_token);
-        if (window.notify) window.notify.success('Login successful! Welcome back.');
+        if(window.notify) window.notify.success('Login successful! Welcome back.');
         document.getElementById('loginForm').reset();
-        
-        // Extract role from token
+
+        // Decode role if present in user metadata
         let userRole = null;
-        try {
-          const parts = resp.token.split('.');
-          const decoded = JSON.parse(atob(parts[1]));
-          userRole = decoded.role;
-        } catch (e) { }
-        
-        // Redirect based on role
+        try { if (resp.user && resp.user.role) userRole = resp.user.role; } catch(e){}
+
+        // Redirect by role or returnUrl
         const returnUrl = localStorage.getItem('returnUrl');
-        if (returnUrl) {
-          localStorage.removeItem('returnUrl');
-          window.location.href = returnUrl;
-          return;
-        }
+        if (returnUrl) { localStorage.removeItem('returnUrl'); window.location.href = returnUrl; return; }
         if (userRole === 'seller') window.location.href = '/seller_dashboard.html';
         else if (userRole === 'rider') window.location.href = '/rider_dashboard.html';
         else if (userRole === 'admin') window.location.href = '/admin_dashboard.html';
-        else window.location.href = '/account.html';
+        else window.location.href = '/index.html';
         return;
       }
-      
-      // Backend login failed, show error
-      console.warn('Backend login failed:', { status, resp, text });
-      const errorMsg = (resp && (resp.error || resp.message)) || 'Login failed';
-      showError('loginPasswordError', errorMsg);
-      if (window.notify) window.notify.error(errorMsg);
-    })
-    .catch(err => {
-      console.error('Login error:', err);
-      showError('loginPasswordError', 'Server error');
-      if (window.notify) window.notify.error('Server error');
+
+      // Fallback: try legacy backend endpoint if Supabase auth fails
+      return fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})})
+        .then(r=>{ const status = r.status; return r.json().then(resp => ({status, resp})); })
+        .then(({status, resp})=>{
+          if(resp && resp.success){
+            if(resp.token) localStorage.setItem('hub_access_token', resp.token);
+            if(resp.refresh_token) localStorage.setItem('hub_refresh_token', resp.refresh_token);
+            if(window.notify) window.notify.success('Login successful! Welcome back.');
+            document.getElementById('loginForm').reset();
+            let userRole = null;
+            if(resp.token){ try{ const parts = resp.token.split('.'); const decoded = JSON.parse(atob(parts[1])); userRole = decoded.role; }catch(e){}}
+            const returnUrl = localStorage.getItem('returnUrl');
+            if(returnUrl){ localStorage.removeItem('returnUrl'); window.location.href = returnUrl; return; }
+            if(userRole==='seller') window.location.href='/seller_dashboard.html';
+            else if(userRole==='rider') window.location.href='/rider_dashboard.html';
+            else if(userRole==='admin') window.location.href='/admin_dashboard.html';
+            else window.location.href='/index.html';
+          } else {
+            showError('loginPasswordError', (resp && (resp.error || resp.message)) || 'Login failed');
+            if(window.notify) window.notify.error((resp && (resp.error || resp.message)) || 'Login failed');
+          }
+        }).catch(err=>{ console.error('fallback login error', err); showError('loginPasswordError','Server error'); if(window.notify) window.notify.error('Server error'); });
+    }).catch(err => {
+      console.error('Supabase auth error', err);
+      // Fallback to legacy backend
+      fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})})
+        .then(r=>r.json()).then(resp=>{ if(resp && resp.success){ if(resp.token) localStorage.setItem('hub_access_token', resp.token); if(resp.refresh_token) localStorage.setItem('hub_refresh_token', resp.refresh_token); if(window.notify) window.notify.success('Login successful! Welcome back.'); document.getElementById('loginForm').reset(); window.location.href='/index.html'; } else { showError('loginPasswordError','Login failed'); } })
+        .catch(e=>{ console.error('fallback error',e); showError('loginPasswordError','Server error'); });
     });
+          const returnUrl = localStorage.getItem('returnUrl');
+          let redirectUrl;
+          
+          if(returnUrl) {
+            // Clear return URL and redirect back
+            localStorage.removeItem('returnUrl');
+            redirectUrl = returnUrl;
+          } else {
+            // Redirect based on user role
+            if(userRole === 'admin') {
+              redirectUrl = 'admin_dashboard.html';
+            } else if(userRole === 'seller') {
+              redirectUrl = 'seller_dashboard.html';
+            } else if(userRole === 'rider') {
+              redirectUrl = 'rider_dashboard.html';
+            } else {
+              // Customer - set flag for welcome notification on index page
+              sessionStorage.setItem('just_logged_in', 'true');
+              redirectUrl = 'index.html';
+            }
+          }
+          
+          // Redirect to appropriate page
+          setTimeout(() => {
+            window.location.href = redirectUrl;
+          }, 800);
+        } else {
+          // Handle specific error cases with notifications
+          let errorMessage = 'Login failed. Please try again.';
+          
+          if(status === 403 && (resp.error === 'account_pending' || resp.error === 'account_declined' || resp.error === 'account_inactive')) {
+            errorMessage = resp.message || 'Your account is not active';
+          } else if(status === 401) {
+            errorMessage = 'Invalid email or password. Please try again.';
+          } else if(resp.message) {
+            errorMessage = resp.message;
+          } else if(resp.error) {
+            errorMessage = resp.error;
+          }
+          
+          // Show error notification
+          if(window.notify) {
+            window.notify.error(errorMessage);
+          }
+          showError('loginEmailError', errorMessage);
+        }
+      }).catch(err=>{ 
+        console.error('Login error',err); 
+        const errorMsg = 'Server error. Please try again.';
+        if(window.notify) {
+          window.notify.error(errorMsg);
+        }
+        showError('loginEmailError', errorMsg); 
+      });
   }
 }
+function handleCustomerRegistration(ev){ ev.preventDefault(); ['custFirstNameError','custLastNameError','custEmailError','custPasswordError','custConfirmPasswordError'].forEach(clearError); const firstName=document.getElementById('custFirstName').value.trim(); const lastName=document.getElementById('custLastName').value.trim(); const email=document.getElementById('custEmail').value.trim(); const password=document.getElementById('custPassword').value; const confirm=document.getElementById('custConfirmPassword').value; let ok=true; if(!firstName){ showError('custFirstNameError','First name is required'); ok=false;} if(!lastName){ showError('custLastNameError','Last name is required'); ok=false;} if(!validateEmail(email)){ showError('custEmailError','Please enter a valid email'); ok=false;} if(!validatePassword(password)){ showError('custPasswordError','Password must be at least 6 characters'); ok=false;} if(password!==confirm){ showError('custConfirmPasswordError','Passwords do not match'); ok=false;} if(ok){ const data={firstName,lastName,email}; console.log('Customer Registration (pending):',data); pendingRegistrations.customer={...data}; sendOTP(email,'customer'); switchCustomerStep(4); } }
 function handleCustomerRegistration(ev){ ev.preventDefault(); ['custFirstNameError','custLastNameError','custEmailError','custPasswordError','custConfirmPasswordError'].forEach(clearError); const firstName=document.getElementById('custFirstName').value.trim(); const lastName=document.getElementById('custLastName').value.trim(); const email=document.getElementById('custEmail').value.trim(); const password=document.getElementById('custPassword').value; const confirm=document.getElementById('custConfirmPassword').value; let ok=true; if(!firstName){ showError('custFirstNameError','First name is required'); ok=false;} if(!lastName){ showError('custLastNameError','Last name is required'); ok=false;} if(!validateEmail(email)){ showError('custEmailError','Please enter a valid email'); ok=false;} if(!validatePassword(password)){ showError('custPasswordError','Password must be at least 6 characters'); ok=false;} if(password!==confirm){ showError('custConfirmPasswordError','Passwords do not match'); ok=false;} if(ok){ const payload={ email, password, role:'customer', first_name:firstName, last_name:lastName };
     fetch('/api/auth/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
-      .then(async r => {
-        const text = await r.text().catch(() => '');
-        try { return { status: r.status, resp: JSON.parse(text), text }; }
-        catch (e) { return { status: r.status, resp: null, text }; }
-      })
-      .then(({status, resp, text})=>{
+      .then(r=>r.json()).then(resp=>{
         if(resp && resp.success){
           if(resp.token) localStorage.setItem('hub_access_token', resp.token);
           if(resp.refresh_token) localStorage.setItem('hub_refresh_token', resp.refresh_token);
-          pendingRegistrations.customer={firstName,lastName,email};
-          // Supabase auth_api auto-verifies accounts — skip OTP on static/Vercel deploy
-          if (resp.user && window.SUPABASE_AUTH_API) {
-            if (window.notify) window.notify.success('Account created successfully!');
-            window.location.href = '/account.html';
-            return;
-          }
-          sendOTP(email,'customer'); switchCustomerStep(2);
-        } else { 
-          console.warn('Customer registration failed:', {status, resp, text});
-          showError('custEmailError', (resp && (resp.error || resp.message)) || 'Registration failed'); 
-        }
-      }).catch(err=>{ console.error('customer registration error',err); showError('custEmailError','Server error'); });
+          pendingRegistrations.customer={firstName,lastName,email}; sendOTP(email,'customer'); switchCustomerStep(4);
+        } else { showError('custEmailError', resp.error || 'Registration failed'); }
+      }).catch(err=>{ console.error(err); showError('custEmailError','Server error'); });
   }
 }
 function handleSellerStep1(ev){ ev.preventDefault(); ['selFirstNameError','selLastNameError'].forEach(clearError); const first=document.getElementById('selFirstName').value.trim(); const last=document.getElementById('selLastName').value.trim(); let ok=true; if(!first){ showError('selFirstNameError','First name is required'); ok=false;} if(!last){ showError('selLastNameError','Last name is required'); ok=false;} if(ok) switchSellerStep(2); }
 function handleSellerStep2(ev){ ev.preventDefault(); ['selBusinessNameError','selBusinessDocError','selBusinessCategoryError','selRegionError','selProvinceError','selCityError'].forEach(clearError); const business=document.getElementById('selBusinessName').value.trim(); const doc=document.getElementById('selBusinessDoc').value; const cat=document.getElementById('selBusinessCategory').value; const region=document.getElementById('selRegion').value; const province=document.getElementById('selProvince').value; const city=document.getElementById('selCity').value; let ok=true; if(!business){ showError('selBusinessNameError','Business name is required'); ok=false;} if(!doc){ showError('selBusinessDocError','Business document is required'); ok=false;} if(!cat){ showError('selBusinessCategoryError','Please select a business category'); ok=false;} if(!region){ showError('selRegionError','Please select a region'); ok=false;} if(!province){ showError('selProvinceError','Please select a province'); ok=false;} if(!city){ showError('selCityError','Please select a city'); ok=false;} if(ok) switchSellerStep(3); }
+function handleSellerRegistration(ev){ ev.preventDefault(); ['selEmailError','selPasswordError','selConfirmPasswordError'].forEach(clearError); const first=document.getElementById('selFirstName').value.trim(); const email=document.getElementById('selEmail').value.trim(); const password=document.getElementById('selPassword').value; const confirm=document.getElementById('selConfirmPassword').value; let ok=true; if(!validateEmail(email)){ showError('selEmailError','Please enter a valid email'); ok=false;} if(!validatePassword(password)){ showError('selPasswordError','Password must be at least 6 characters'); ok=false;} if(password!==confirm){ showError('selConfirmPasswordError','Passwords do not match'); ok=false;} if(ok){ const data={ firstName:first, businessName:document.getElementById('selBusinessName').value, category:document.getElementById('selBusinessCategory').value, email }; console.log('Seller Registration (pending):',data); pendingRegistrations.seller={...data}; sendOTP(email,'seller'); switchSellerStep(4); } }
 function handleSellerRegistration(ev){ ev.preventDefault(); ['selEmailError','selPasswordError','selConfirmPasswordError'].forEach(clearError); const first=document.getElementById('selFirstName').value.trim(); const email=document.getElementById('selEmail').value.trim(); const password=document.getElementById('selPassword').value; const confirm=document.getElementById('selConfirmPassword').value; let ok=true; if(!validateEmail(email)){ showError('selEmailError','Please enter a valid email'); ok=false;} if(!validatePassword(password)){ showError('selPasswordError','Password must be at least 6 characters'); ok=false;} if(password!==confirm){ showError('selConfirmPasswordError','Passwords do not match'); ok=false;} if(ok){ const payload={ email, password, role:'seller', first_name:first, business_name:document.getElementById('selBusinessName').value, category:document.getElementById('selBusinessCategory').value };
     fetch('/api/auth/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
-      .then(async r => {
-        const text = await r.text().catch(() => '');
-        try { return { status: r.status, resp: JSON.parse(text), text }; }
-        catch (e) { return { status: r.status, resp: null, text }; }
-      })
-      .then(({status, resp, text})=>{
+      .then(r=>r.json()).then(resp=>{
         if(resp && resp.success){
           if(resp.token) localStorage.setItem('hub_access_token', resp.token);
           if(resp.refresh_token) localStorage.setItem('hub_refresh_token', resp.refresh_token);
           pendingRegistrations.seller={...payload}; sendOTP(email,'seller'); switchSellerStep(4);
-        } else { 
-          console.warn('Seller registration failed:', {status, resp, text});
-          showError('selEmailError', (resp && (resp.error || resp.message)) || 'Registration failed'); 
-        }
-      }).catch(err=>{ console.error('seller registration error',err); showError('selEmailError','Server error'); });
+        } else { showError('selEmailError', resp.error || 'Registration failed'); }
+      }).catch(err=>{ console.error(err); showError('selEmailError','Server error'); });
   }
 }
 function handleRiderStep1(ev){ ev.preventDefault(); ['ridFirstNameError','ridLastNameError'].forEach(clearError); const first=document.getElementById('ridFirstName').value.trim(); const last=document.getElementById('ridLastName').value.trim(); let ok=true; if(!first){ showError('ridFirstNameError','First name is required'); ok=false;} if(!last){ showError('ridLastNameError','Last name is required'); ok=false;} if(ok) switchRiderStep(2); }
 function handleRiderStep2(ev){ ev.preventDefault(); ['ridVehicleTypeError','ridDriverLicenseError','ridPlateNumberError'].forEach(clearError); const vehicle=document.getElementById('ridVehicleType').value; const license=document.getElementById('ridDriverLicense').value; const plate=document.getElementById('ridPlateNumber').value.trim(); let ok=true; if(!vehicle){ showError('ridVehicleTypeError','Please select a vehicle type'); ok=false;} if(!license){ showError('ridDriverLicenseError','Driver license is required'); ok=false;} if(!plate){ showError('ridPlateNumberError','Plate number is required'); ok=false;} if(ok) switchRiderStep(3); }
+function handleRiderRegistration(ev){ ev.preventDefault(); ['ridEmailError','ridPasswordError','ridConfirmPasswordError'].forEach(clearError); const first=document.getElementById('ridFirstName').value.trim(); const email=document.getElementById('ridEmail').value.trim(); const password=document.getElementById('ridPassword').value; const confirm=document.getElementById('ridConfirmPassword').value; let ok=true; if(!validateEmail(email)){ showError('ridEmailError','Please enter a valid email'); ok=false;} if(!validatePassword(password)){ showError('ridPasswordError','Password must be at least 6 characters'); ok=false;} if(password!==confirm){ showError('ridConfirmPasswordError','Passwords do not match'); ok=false;} if(ok){ const data={ firstName:first, vehicleType:document.getElementById('ridVehicleType').value, email }; console.log('Rider Registration (pending):',data); pendingRegistrations.rider={...data}; sendOTP(email,'rider'); switchRiderStep(4); } }
 function handleRiderRegistration(ev){ ev.preventDefault(); ['ridEmailError','ridPasswordError','ridConfirmPasswordError'].forEach(clearError); const first=document.getElementById('ridFirstName').value.trim(); const email=document.getElementById('ridEmail').value.trim(); const password=document.getElementById('ridPassword').value; const confirm=document.getElementById('ridConfirmPassword').value; let ok=true; if(!validateEmail(email)){ showError('ridEmailError','Please enter a valid email'); ok=false;} if(!validatePassword(password)){ showError('ridPasswordError','Password must be at least 6 characters'); ok=false;} if(password!==confirm){ showError('ridConfirmPasswordError','Passwords do not match'); ok=false;} if(ok){ const payload={ email, password, role:'rider', first_name:first, vehicle_type:document.getElementById('ridVehicleType').value, driver_license:document.getElementById('ridDriverLicense').value };
     fetch('/api/auth/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
-      .then(async r => {
-        const text = await r.text().catch(() => '');
-        try { return { status: r.status, resp: JSON.parse(text), text }; }
-        catch (e) { return { status: r.status, resp: null, text }; }
-      })
-      .then(({status, resp, text})=>{
+      .then(r=>r.json()).then(resp=>{
         if(resp && resp.success){
           if(resp.token) localStorage.setItem('hub_access_token', resp.token);
           if(resp.refresh_token) localStorage.setItem('hub_refresh_token', resp.refresh_token);
           pendingRegistrations.rider={...payload}; sendOTP(email,'rider'); switchRiderStep(4);
-        } else { 
-          console.warn('Rider registration failed:', {status, resp, text});
-          showError('ridEmailError', (resp && (resp.error || resp.message)) || 'Registration failed'); 
-        }
-      }).catch(err=>{ console.error('rider registration error',err); showError('ridEmailError','Server error'); });
+        } else { showError('ridEmailError', resp.error || 'Registration failed'); }
+      }).catch(err=>{ console.error(err); showError('ridEmailError','Server error'); });
   }
 }
-function handleCustomerOTP(ev){ ev.preventDefault(); clearError('custOTPError'); const code=document.getElementById('custOTP').value.trim(); const email = pendingRegistrations.customer?.email || document.getElementById('custEmail')?.value; if(!email){ showError('custOTPError','Missing email'); return;} if(code.length<4){ showError('custOTPError','Enter the verification code'); return;} fetch('/api/auth/verify-otp',{ method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email: email, code: code }) }).then(async r => { const text = await r.text().catch(() => ''); try { return { status: r.status, resp: JSON.parse(text), text }; } catch (e) { return { status: r.status, resp: null, text }; } }).then(({status, resp, text})=>{ if(resp && resp.success){ showSuccess('customerSuccess',`Account verified for ${pendingRegistrations.customer?.firstName||''}`); pendingRegistrations.customer=null; document.getElementById('customerForm')?.reset(); document.getElementById('customerFormOTP')?.reset?.(); setTimeout(()=>switchForm('login'),1500); } else { console.warn('OTP verification failed:', {status, resp, text}); showError('custOTPError', (resp && (resp.error || resp.message)) || 'Verification failed'); } }).catch(err=>{ console.error('verify-otp error',err); showError('custOTPError','Server error'); }); }
-function handleSellerOTP(ev){ ev.preventDefault(); clearError('sellerOTPError'); const code=document.getElementById('sellerOTP').value.trim(); const email = pendingRegistrations.seller?.email || document.getElementById('selEmail')?.value; if(!email){ showError('sellerOTPError','Missing email'); return;} if(code.length<4){ showError('sellerOTPError','Enter the verification code'); return;} fetch('/api/auth/verify-otp',{ method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email: email, code: code }) }).then(async r => { const text = await r.text().catch(() => ''); try { return { status: r.status, resp: JSON.parse(text), text }; } catch (e) { return { status: r.status, resp: null, text }; } }).then(({status, resp, text})=>{ if(resp && resp.success){ showSuccess('sellerSuccess','Seller account verified.'); pendingRegistrations.seller=null; ['sellerForm1','sellerForm2','sellerForm3'].forEach(id=>document.getElementById(id).reset?.()); setTimeout(()=>switchForm('login'),1500); } else { console.warn('Seller OTP verification failed:', {status, resp, text}); showError('sellerOTPError', (resp && (resp.error || resp.message)) || 'Verification failed'); } }).catch(err=>{ console.error('verify-otp error',err); showError('sellerOTPError','Server error'); }); }
-function handleRiderOTP(ev){ ev.preventDefault(); clearError('riderOTPError'); const code=document.getElementById('riderOTP').value.trim(); const email = pendingRegistrations.rider?.email || document.getElementById('ridEmail')?.value; if(!email){ showError('riderOTPError','Missing email'); return;} if(code.length<4){ showError('riderOTPError','Enter the verification code'); return;} fetch('/api/auth/verify-otp',{ method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email: email, code: code }) }).then(async r => { const text = await r.text().catch(() => ''); try { return { status: r.status, resp: JSON.parse(text), text }; } catch (e) { return { status: r.status, resp: null, text }; } }).then(({status, resp, text})=>{ if(resp && resp.success){ showSuccess('riderSuccess','Rider account verified.'); pendingRegistrations.rider=null; ['riderForm1','riderForm2','riderForm3'].forEach(id=>document.getElementById(id).reset?.()); setTimeout(()=>switchForm('login'),1500); } else { console.warn('Rider OTP verification failed:', {status, resp, text}); showError('riderOTPError', (resp && (resp.error || resp.message)) || 'Verification failed'); } }).catch(err=>{ console.error('verify-otp error',err); showError('riderOTPError','Server error'); }); }
+function handleCustomerOTP(ev){ ev.preventDefault(); clearError('custOTPError'); const code=document.getElementById('custOTP').value.trim(); const email = pendingRegistrations.customer?.email || document.getElementById('custEmail')?.value; if(!email){ showError('custOTPError','Missing email'); return;} if(code.length<4){ showError('custOTPError','Enter the verification code'); return;} fetch('/api/auth/verify-otp',{ method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email: email, code: code }) }).then(r=>r.json()).then(j=>{ if(j && j.success){ showSuccess('customerSuccess',`Account verified for ${pendingRegistrations.customer?.firstName||''}`); pendingRegistrations.customer=null; document.getElementById('customerForm')?.reset(); document.getElementById('customerFormOTP')?.reset?.(); setTimeout(()=>switchForm('login'),1500); } else { showError('custOTPError', j && j.error ? j.error : 'Verification failed'); } }).catch(err=>{ console.error('verify-otp error',err); showError('custOTPError','Server error'); }); }
+function handleSellerOTP(ev){ ev.preventDefault(); clearError('sellerOTPError'); const code=document.getElementById('sellerOTP').value.trim(); const email = pendingRegistrations.seller?.email || document.getElementById('selEmail')?.value; if(!email){ showError('sellerOTPError','Missing email'); return;} if(code.length<4){ showError('sellerOTPError','Enter the verification code'); return;} fetch('/api/auth/verify-otp',{ method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email: email, code: code }) }).then(r=>r.json()).then(j=>{ if(j && j.success){ showSuccess('sellerSuccess','Seller account verified.'); pendingRegistrations.seller=null; ['sellerForm1','sellerForm2','sellerForm3'].forEach(id=>document.getElementById(id).reset?.()); setTimeout(()=>switchForm('login'),1500); } else { showError('sellerOTPError', j && j.error ? j.error : 'Verification failed'); } }).catch(err=>{ console.error('verify-otp error',err); showError('sellerOTPError','Server error'); }); }
+function handleRiderOTP(ev){ ev.preventDefault(); clearError('riderOTPError'); const code=document.getElementById('riderOTP').value.trim(); const email = pendingRegistrations.rider?.email || document.getElementById('ridEmail')?.value; if(!email){ showError('riderOTPError','Missing email'); return;} if(code.length<4){ showError('riderOTPError','Enter the verification code'); return;} fetch('/api/auth/verify-otp',{ method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email: email, code: code }) }).then(r=>r.json()).then(j=>{ if(j && j.success){ showSuccess('riderSuccess','Rider account verified.'); pendingRegistrations.rider=null; ['riderForm1','riderForm2','riderForm3'].forEach(id=>document.getElementById(id).reset?.()); setTimeout(()=>switchForm('login'),1500); } else { showError('riderOTPError', j && j.error ? j.error : 'Verification failed'); } }).catch(err=>{ console.error('verify-otp error',err); showError('riderOTPError','Server error'); }); }
 
 // Initialize auth only when on auth page
 window.addEventListener('DOMContentLoaded',()=>{ if(document.body.classList.contains('auth')){ switchForm('login'); } });

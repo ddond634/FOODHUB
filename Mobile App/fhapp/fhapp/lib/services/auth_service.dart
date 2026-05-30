@@ -35,9 +35,15 @@ class AuthService {
       body: jsonEncode({'email': email.trim(), 'password': password}),
     );
 
-    final data = jsonDecode(response.body) as Map<String, dynamic>;
-    if (data['success'] != true || data['token'] == null) {
-      throw Exception(data['error']?.toString() ?? 'Login failed');
+    Map<String, dynamic> data;
+    try {
+      data = jsonDecode(response.body) as Map<String, dynamic>;
+    } catch (_) {
+      throw Exception('Login failed (${response.statusCode}). Check your connection.');
+    }
+
+    if (response.statusCode >= 400 || data['success'] != true || data['token'] == null) {
+      throw Exception(data['error']?.toString() ?? 'Invalid email or password');
     }
 
     _token = data['token'] as String;
@@ -70,8 +76,14 @@ class AuthService {
       }),
     );
 
-    final data = jsonDecode(response.body) as Map<String, dynamic>;
-    if (data['success'] != true || data['token'] == null) {
+    Map<String, dynamic> data;
+    try {
+      data = jsonDecode(response.body) as Map<String, dynamic>;
+    } catch (_) {
+      throw Exception('Registration failed (${response.statusCode}). Check your connection.');
+    }
+
+    if (response.statusCode >= 400 || data['success'] != true || data['token'] == null) {
       throw Exception(data['error']?.toString() ?? 'Registration failed');
     }
 
