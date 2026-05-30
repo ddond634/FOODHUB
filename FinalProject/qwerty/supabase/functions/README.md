@@ -6,6 +6,7 @@ Included functions:
 - `get_users` - GET - returns up to 100 users from the `users` table.
 - `create_order` - POST - creates an order in the `orders` table and inserts related `order_items`.
 - `product_api` - GET - public product routes for listing, search, suggestions, and fetching product details.
+- `auth_api` - POST - login/register against Supabase `users` table (mobile + shared auth).
 
 Deploying functions
 1. Ensure you are linked to your project (`supabase link --project-ref <ref>`).
@@ -22,6 +23,7 @@ supabase functions deploy get_users --project-ref sfeccfbdmbwoblixyoti
 supabase functions deploy create_order --project-ref sfeccfbdmbwoblixyoti
 supabase functions deploy product_api --project-ref sfeccfbdmbwoblixyoti
 supabase functions deploy commerce_api --project-ref sfeccfbdmbwoblixyoti
+supabase functions deploy auth_api --project-ref sfeccfbdmbwoblixyoti
 supabase secrets set JWT_SECRET=your-secret-key-change-in-production --project-ref sfeccfbdmbwoblixyoti
 ```
 

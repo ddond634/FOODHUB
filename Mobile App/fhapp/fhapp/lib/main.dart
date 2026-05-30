@@ -1,19 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'providers/app_state.dart';
+import 'screens/auth_gate.dart';
+import 'theme/app_theme.dart';
 
 void main() {
-  runApp(const MainApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(const FoodHubApp());
 }
 
-class MainApp extends StatelessWidget {
-  const MainApp({super.key});
+class FoodHubApp extends StatelessWidget {
+  const FoodHubApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: Text('Hello World!'),
-        ),
+    return ChangeNotifierProvider(
+      create: (_) => AppState()..bootstrap(),
+      child: MaterialApp(
+        title: 'FOODHUB',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.light(),
+        home: const AuthGate(),
       ),
     );
   }
