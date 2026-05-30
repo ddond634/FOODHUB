@@ -89,7 +89,7 @@ function updateRiderFeeDisplay() {
 
 async function loadRiderDashboard() {
     try {
-        const response = await authFetch('/api/rider/dashboard');
+        const response = await authFetch('/api/rider/dashboard', { headers: { 'X-Silent-Fetch': '1' } });
         if (!response.ok) {
             console.warn('Dashboard API unavailable, using defaults');
             return;
@@ -213,7 +213,7 @@ async function loadRiderOrders(options = {}) {
     _ordersLoading = true;
     try {
         let assignedOrders = [];
-        const assignedResponse = await authFetch('/api/rider/orders');
+        const assignedResponse = await authFetch('/api/rider/orders', { headers: { 'X-Silent-Fetch': '1' } });
         if (assignedResponse.ok) {
             const assignedData = await assignedResponse.json();
             assignedOrders = assignedData.success ? (assignedData.orders || []) : [];
@@ -222,7 +222,7 @@ async function loadRiderOrders(options = {}) {
         }
         
         let availableOrders = [];
-        const availableResponse = await authFetch('/api/riders/available-orders');
+        const availableResponse = await authFetch('/api/riders/available-orders', { headers: { 'X-Silent-Fetch': '1' } });
         if (availableResponse.ok) {
             const availableData = await availableResponse.json();
             availableOrders = availableData.success ? (availableData.data || []) : [];

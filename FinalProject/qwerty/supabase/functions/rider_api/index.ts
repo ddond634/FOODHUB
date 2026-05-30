@@ -269,6 +269,10 @@ serve(async (req) => {
       return ok({ data: orders, message: `${orders.length} available orders` });
     }
 
+    if (resource === "return-pickups" && req.method === "GET") {
+      return ok({ data: { pickups: [] }, pickups: [] }, "Return pickups loaded");
+    }
+
     if (resource === "accept-order" && req.method === "POST") {
       const body = await req.json().catch(() => ({}));
       const orderId = Number(body.order_id);

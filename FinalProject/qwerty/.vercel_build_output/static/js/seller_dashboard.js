@@ -18,43 +18,46 @@ let sellerData = {};
 let products = [];
 let orders = [];
 
-// Auth fetch helper for authenticated API requests
+// Auth fetch helper — uses global fetch rewrite + Supabase headers (do not redirect on static deploy 401)
 async function authFetch(url, options = {}) {
     const token = localStorage.getItem('hub_access_token');
-    
+    const isStaticDeploy = window.SUPABASE_AUTH_API && !window.location.hostname.match(/^(localhost|127\.0\.0\.1)$/);
+
     if (!token) {
-        console.warn('No authentication token found. Redirecting to login...');
-        window.location.href = '/loginregister.html';
+        console.warn('No authentication token found.');
+        if (!isStaticDeploy) {
+            window.location.href = '/loginregister.html';
+        }
         throw new Error('Not authenticated');
     }
-    
-    // Get current store ID (check both local variable and window property)
-    // No store_id handling - single store per seller
-    let finalUrl = url;
-    
+
     const headers = {
         'Authorization': `Bearer ${token}`,
-        ...options.headers
+        ...(options.headers || {}),
     };
-    
-    // Don't set Content-Type for FormData (browser will set it with boundary)
-    if (!(options.body instanceof FormData)) {
+
+    if (options.silent) {
+        headers['X-Silent-Fetch'] = '1';
+    }
+
+    if (!(options.body instanceof FormData) && !headers['Content-Type']) {
         headers['Content-Type'] = 'application/json';
     }
-    
-    const response = await fetch(API_BASE + finalUrl, {
-        ...options,
-        headers
-    });
-    
-    // Handle 401 Unauthorized - token expired or invalid
+
+    const fetchOptions = { ...options, headers };
+    delete fetchOptions.silent;
+
+    const response = await fetch(url, fetchOptions);
+
     if (response.status === 401) {
-        console.warn('Authentication failed. Token may be expired. Redirecting to login...');
-        localStorage.removeItem('hub_access_token');
-        window.location.href = '/loginregister.html';
+        console.warn('Authentication failed (401) for', url);
+        if (!isStaticDeploy) {
+            localStorage.removeItem('hub_access_token');
+            window.location.href = '/loginregister.html';
+        }
         throw new Error('Unauthorized');
     }
-    
+
     return response;
 }
 
@@ -3072,7 +3075,7 @@ function createEditProfileModal() {
 
 async function loadProfileDataIntoEditModal() {
     try {
-        const userResponse = await authFetch('/api/me');
+        const userResponse = await authFetch('/api/account/me');
         const userData = await userResponse.json();
         const sellerResponse = await authFetch('/api/seller/me');
         const sellerData = await sellerResponse.json();
@@ -3706,15 +3709,24 @@ async function updateCommissionBreakdown() {
 
 // Initialize charts when page loads
 window.addEventListener('DOMContentLoaded', function() {
-    // Multi-store functionality removed
-    
-    // Load initial dashboard data (this will initialize all charts with real data)
     loadDashboardData();
-    
-    // Calculate and display commission breakdown
     updateCommissionBreakdown();
+    syncProfileStats();
 
-    // Set default date range
+    // Webhook-driven refresh instead of badge polling spam
+    if (window.hubLiveUpdates) {
+        window.hubLiveUpdates.onOrdersChanged(() => {
+            loadDashboardData();
+            updateAllBadges();
+        });
+        window.hubLiveUpdates.onProductsChanged(() => {
+            if (typeof loadProducts === 'function') loadProducts();
+        });
+        window.hubLiveUpdates.start();
+    } else {
+        updateAllBadges();
+    }
+
     const today = new Date();
     const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
 
@@ -3727,8 +3739,6 @@ window.addEventListener('DOMContentLoaded', function() {
     if (endDateInput) {
         endDateInput.value = today.toISOString().split('T')[0];
     }
-    // Sync duplicate profile detail fields with main stat badges
-    syncProfileStats();
 
     // Enable keyboard toggle for settings accordions (Enter/Space)
     document.querySelectorAll('.settings-heading').forEach(function(h) {
@@ -5686,7 +5696,7 @@ let badgeUpdateInterval = null;
  */
 async function updateOrdersBadge() {
     try {
-        const response = await authFetch('/api/sellers/orders/new-count');
+        const response = await authFetch('/api/sellers/orders/new-count', { silent: true });
         if (!response.ok) {
             console.warn('Failed to fetch new orders count');
             return;
@@ -5714,7 +5724,7 @@ async function updateOrdersBadge() {
  */
 async function updateReviewsBadge() {
     try {
-        const response = await authFetch('/api/sellers/reviews/new-count');
+        const response = await authFetch('/api/sellers/reviews/new-count', { silent: true });
         if (!response.ok) {
             console.warn('Failed to fetch new reviews count');
             return;
@@ -5829,18 +5839,8 @@ async function showLoginNotification() {
  * Start badge polling
  */
 function startBadgePolling() {
-    // Clear existing interval if any
-    if (badgeUpdateInterval) {
-        clearInterval(badgeUpdateInterval);
-    }
-    
-    // Update badges immediately
+    // Deprecated: use hubLiveUpdates.onOrdersChanged instead
     updateAllBadges();
-    
-    // Then update every 30 seconds
-    badgeUpdateInterval = setInterval(() => {
-        updateAllBadges();
-    }, 30000); // 30 seconds
 }
 
 /**

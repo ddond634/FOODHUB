@@ -165,6 +165,27 @@
           if (resourcePath === '/orders' || resourcePath.startsWith('/orders')) {
             return `${SUPABASE_COMMERCE_API}${resourcePath}${query}`;
           }
+          // Seller dashboard / management → seller_api (must come before generic /sellers → product_api)
+          const SELLER_API_PREFIXES = [
+            '/sellers/dashboard',
+            '/sellers/earnings',
+            '/sellers/products',
+            '/sellers/top-products',
+            '/sellers/recent-activities',
+            '/sellers/revenue-trend',
+            '/sellers/order-growth',
+            '/sellers/orders',
+            '/sellers/notifications',
+            '/sellers/reviews',
+            '/sellers/settings',
+            '/sellers/return-refund-requests',
+          ];
+          if (SELLER_API_PREFIXES.some((p) => resourcePath.startsWith(p))) {
+            return `${SUPABASE_SELLER_API}${resourcePath.replace('/sellers', '')}${query}`;
+          }
+          if (resourcePath.startsWith('/seller/')) {
+            return `${SUPABASE_SELLER_API}${resourcePath.replace('/seller', '')}${query}`;
+          }
           if (resourcePath.startsWith('/sellers/products')) {
             return `${SUPABASE_SELLER_API}${resourcePath.replace('/sellers', '')}${query}`;
           }
@@ -229,6 +250,7 @@
       };
 
       window.fetch = function(...args){
+        let skipLoader = false;
         try {
           if (args.length > 0) {
             let [input, init] = args;
@@ -241,6 +263,12 @@
               }
             }
 
+            init = init || {};
+            const hdrs = new Headers(init.headers || (input instanceof Request ? input.headers : undefined));
+            if (hdrs.get('X-Silent-Fetch') === '1') {
+              skipLoader = true;
+            }
+
             if (isSupabaseFunctionUrl(input) || (input instanceof Request && isSupabaseFunctionUrl(input.url))) {
               [input, init] = addSupabaseFunctionHeaders(input, init);
             }
@@ -250,10 +278,10 @@
         } catch (err) {
           console.error('Supabase fetch wrapper failed', err);
         }
-        showGlobalLoader();
+        if (!skipLoader) showGlobalLoader();
         return origFetch(...args)
-          .then(res => { hideGlobalLoader(); return res; })
-          .catch(err => { hideGlobalLoader(); throw err; });
+          .then(res => { if (!skipLoader) hideGlobalLoader(); return res; })
+          .catch(err => { if (!skipLoader) hideGlobalLoader(); throw err; });
       };
     }
   })();
@@ -1897,6 +1925,10 @@ function clearAuthTokens(){ localStorage.removeItem('hub_access_token'); localSt
 async function authFetch(input, init){
   init = init || {};
   init.headers = init.headers || {};
+  if (init.silent) {
+    init.headers['X-Silent-Fetch'] = '1';
+    delete init.silent;
+  }
   const token = localStorage.getItem('hub_access_token');
   if(token) init.headers['Authorization'] = 'Bearer ' + token;
   // Only set Content-Type to JSON if body is not FormData (FormData needs browser to set multipart boundary)
