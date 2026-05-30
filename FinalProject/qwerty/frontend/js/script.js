@@ -142,7 +142,7 @@
             return `${SUPABASE_COMMERCE_API}${resourcePath}${query}`;
           }
           if (resourcePath.startsWith('/products/best-sellers')) {
-            return `${SUPABASE_PRODUCT_API}/products${query}`;
+            return `${SUPABASE_PRODUCT_API}/products/best-sellers${query}`;
           }
           if (resourcePath.startsWith('/products')) {
             return `${SUPABASE_PRODUCT_API}${resourcePath}${query}`;
@@ -1704,7 +1704,7 @@ function handleLogin(ev){
         // Redirect by role or returnUrl
         const returnUrl = localStorage.getItem('returnUrl');
         if (returnUrl) { localStorage.removeItem('returnUrl'); window.location.href = returnUrl; return; }
-        if (userRole === 'seller') window.location.href = '/seller_dashboard.html';
+        if (userRole === 'seller') window.location.href = '/seller_dashboard.html'; // save test
         else if (userRole === 'rider') window.location.href = '/rider_dashboard.html';
         else if (userRole === 'admin') window.location.href = '/admin_dashboard.html';
         else window.location.href = '/index.html';
@@ -1740,63 +1740,8 @@ function handleLogin(ev){
         .then(r=>r.json()).then(resp=>{ if(resp && resp.success){ if(resp.token) localStorage.setItem('hub_access_token', resp.token); if(resp.refresh_token) localStorage.setItem('hub_refresh_token', resp.refresh_token); if(window.notify) window.notify.success('Login successful! Welcome back.'); document.getElementById('loginForm').reset(); window.location.href='/index.html'; } else { showError('loginPasswordError','Login failed'); } })
         .catch(e=>{ console.error('fallback error',e); showError('loginPasswordError','Server error'); });
     });
-          const returnUrl = localStorage.getItem('returnUrl');
-          let redirectUrl;
-          
-          if(returnUrl) {
-            // Clear return URL and redirect back
-            localStorage.removeItem('returnUrl');
-            redirectUrl = returnUrl;
-          } else {
-            // Redirect based on user role
-            if(userRole === 'admin') {
-              redirectUrl = 'admin_dashboard.html';
-            } else if(userRole === 'seller') {
-              redirectUrl = 'seller_dashboard.html';
-            } else if(userRole === 'rider') {
-              redirectUrl = 'rider_dashboard.html';
-            } else {
-              // Customer - set flag for welcome notification on index page
-              sessionStorage.setItem('just_logged_in', 'true');
-              redirectUrl = 'index.html';
-            }
-          }
-          
-          // Redirect to appropriate page
-          setTimeout(() => {
-            window.location.href = redirectUrl;
-          }, 800);
-        } else {
-          // Handle specific error cases with notifications
-          let errorMessage = 'Login failed. Please try again.';
-          
-          if(status === 403 && (resp.error === 'account_pending' || resp.error === 'account_declined' || resp.error === 'account_inactive')) {
-            errorMessage = resp.message || 'Your account is not active';
-          } else if(status === 401) {
-            errorMessage = 'Invalid email or password. Please try again.';
-          } else if(resp.message) {
-            errorMessage = resp.message;
-          } else if(resp.error) {
-            errorMessage = resp.error;
-          }
-          
-          // Show error notification
-          if(window.notify) {
-            window.notify.error(errorMessage);
-          }
-          showError('loginEmailError', errorMessage);
-        }
-      }).catch(err=>{ 
-        console.error('Login error',err); 
-        const errorMsg = 'Server error. Please try again.';
-        if(window.notify) {
-          window.notify.error(errorMsg);
-        }
-        showError('loginEmailError', errorMsg); 
-      });
   }
 }
-function handleCustomerRegistration(ev){ ev.preventDefault(); ['custFirstNameError','custLastNameError','custEmailError','custPasswordError','custConfirmPasswordError'].forEach(clearError); const firstName=document.getElementById('custFirstName').value.trim(); const lastName=document.getElementById('custLastName').value.trim(); const email=document.getElementById('custEmail').value.trim(); const password=document.getElementById('custPassword').value; const confirm=document.getElementById('custConfirmPassword').value; let ok=true; if(!firstName){ showError('custFirstNameError','First name is required'); ok=false;} if(!lastName){ showError('custLastNameError','Last name is required'); ok=false;} if(!validateEmail(email)){ showError('custEmailError','Please enter a valid email'); ok=false;} if(!validatePassword(password)){ showError('custPasswordError','Password must be at least 6 characters'); ok=false;} if(password!==confirm){ showError('custConfirmPasswordError','Passwords do not match'); ok=false;} if(ok){ const data={firstName,lastName,email}; console.log('Customer Registration (pending):',data); pendingRegistrations.customer={...data}; sendOTP(email,'customer'); switchCustomerStep(4); } }
 function handleCustomerRegistration(ev){ ev.preventDefault(); ['custFirstNameError','custLastNameError','custEmailError','custPasswordError','custConfirmPasswordError'].forEach(clearError); const firstName=document.getElementById('custFirstName').value.trim(); const lastName=document.getElementById('custLastName').value.trim(); const email=document.getElementById('custEmail').value.trim(); const password=document.getElementById('custPassword').value; const confirm=document.getElementById('custConfirmPassword').value; let ok=true; if(!firstName){ showError('custFirstNameError','First name is required'); ok=false;} if(!lastName){ showError('custLastNameError','Last name is required'); ok=false;} if(!validateEmail(email)){ showError('custEmailError','Please enter a valid email'); ok=false;} if(!validatePassword(password)){ showError('custPasswordError','Password must be at least 6 characters'); ok=false;} if(password!==confirm){ showError('custConfirmPasswordError','Passwords do not match'); ok=false;} if(ok){ const payload={ email, password, role:'customer', first_name:firstName, last_name:lastName };
     fetch('/api/auth/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
       .then(r=>r.json()).then(resp=>{
@@ -1810,7 +1755,6 @@ function handleCustomerRegistration(ev){ ev.preventDefault(); ['custFirstNameErr
 }
 function handleSellerStep1(ev){ ev.preventDefault(); ['selFirstNameError','selLastNameError'].forEach(clearError); const first=document.getElementById('selFirstName').value.trim(); const last=document.getElementById('selLastName').value.trim(); let ok=true; if(!first){ showError('selFirstNameError','First name is required'); ok=false;} if(!last){ showError('selLastNameError','Last name is required'); ok=false;} if(ok) switchSellerStep(2); }
 function handleSellerStep2(ev){ ev.preventDefault(); ['selBusinessNameError','selBusinessDocError','selBusinessCategoryError','selRegionError','selProvinceError','selCityError'].forEach(clearError); const business=document.getElementById('selBusinessName').value.trim(); const doc=document.getElementById('selBusinessDoc').value; const cat=document.getElementById('selBusinessCategory').value; const region=document.getElementById('selRegion').value; const province=document.getElementById('selProvince').value; const city=document.getElementById('selCity').value; let ok=true; if(!business){ showError('selBusinessNameError','Business name is required'); ok=false;} if(!doc){ showError('selBusinessDocError','Business document is required'); ok=false;} if(!cat){ showError('selBusinessCategoryError','Please select a business category'); ok=false;} if(!region){ showError('selRegionError','Please select a region'); ok=false;} if(!province){ showError('selProvinceError','Please select a province'); ok=false;} if(!city){ showError('selCityError','Please select a city'); ok=false;} if(ok) switchSellerStep(3); }
-function handleSellerRegistration(ev){ ev.preventDefault(); ['selEmailError','selPasswordError','selConfirmPasswordError'].forEach(clearError); const first=document.getElementById('selFirstName').value.trim(); const email=document.getElementById('selEmail').value.trim(); const password=document.getElementById('selPassword').value; const confirm=document.getElementById('selConfirmPassword').value; let ok=true; if(!validateEmail(email)){ showError('selEmailError','Please enter a valid email'); ok=false;} if(!validatePassword(password)){ showError('selPasswordError','Password must be at least 6 characters'); ok=false;} if(password!==confirm){ showError('selConfirmPasswordError','Passwords do not match'); ok=false;} if(ok){ const data={ firstName:first, businessName:document.getElementById('selBusinessName').value, category:document.getElementById('selBusinessCategory').value, email }; console.log('Seller Registration (pending):',data); pendingRegistrations.seller={...data}; sendOTP(email,'seller'); switchSellerStep(4); } }
 function handleSellerRegistration(ev){ ev.preventDefault(); ['selEmailError','selPasswordError','selConfirmPasswordError'].forEach(clearError); const first=document.getElementById('selFirstName').value.trim(); const email=document.getElementById('selEmail').value.trim(); const password=document.getElementById('selPassword').value; const confirm=document.getElementById('selConfirmPassword').value; let ok=true; if(!validateEmail(email)){ showError('selEmailError','Please enter a valid email'); ok=false;} if(!validatePassword(password)){ showError('selPasswordError','Password must be at least 6 characters'); ok=false;} if(password!==confirm){ showError('selConfirmPasswordError','Passwords do not match'); ok=false;} if(ok){ const payload={ email, password, role:'seller', first_name:first, business_name:document.getElementById('selBusinessName').value, category:document.getElementById('selBusinessCategory').value };
     fetch('/api/auth/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
       .then(r=>r.json()).then(resp=>{
@@ -1824,7 +1768,6 @@ function handleSellerRegistration(ev){ ev.preventDefault(); ['selEmailError','se
 }
 function handleRiderStep1(ev){ ev.preventDefault(); ['ridFirstNameError','ridLastNameError'].forEach(clearError); const first=document.getElementById('ridFirstName').value.trim(); const last=document.getElementById('ridLastName').value.trim(); let ok=true; if(!first){ showError('ridFirstNameError','First name is required'); ok=false;} if(!last){ showError('ridLastNameError','Last name is required'); ok=false;} if(ok) switchRiderStep(2); }
 function handleRiderStep2(ev){ ev.preventDefault(); ['ridVehicleTypeError','ridDriverLicenseError','ridPlateNumberError'].forEach(clearError); const vehicle=document.getElementById('ridVehicleType').value; const license=document.getElementById('ridDriverLicense').value; const plate=document.getElementById('ridPlateNumber').value.trim(); let ok=true; if(!vehicle){ showError('ridVehicleTypeError','Please select a vehicle type'); ok=false;} if(!license){ showError('ridDriverLicenseError','Driver license is required'); ok=false;} if(!plate){ showError('ridPlateNumberError','Plate number is required'); ok=false;} if(ok) switchRiderStep(3); }
-function handleRiderRegistration(ev){ ev.preventDefault(); ['ridEmailError','ridPasswordError','ridConfirmPasswordError'].forEach(clearError); const first=document.getElementById('ridFirstName').value.trim(); const email=document.getElementById('ridEmail').value.trim(); const password=document.getElementById('ridPassword').value; const confirm=document.getElementById('ridConfirmPassword').value; let ok=true; if(!validateEmail(email)){ showError('ridEmailError','Please enter a valid email'); ok=false;} if(!validatePassword(password)){ showError('ridPasswordError','Password must be at least 6 characters'); ok=false;} if(password!==confirm){ showError('ridConfirmPasswordError','Passwords do not match'); ok=false;} if(ok){ const data={ firstName:first, vehicleType:document.getElementById('ridVehicleType').value, email }; console.log('Rider Registration (pending):',data); pendingRegistrations.rider={...data}; sendOTP(email,'rider'); switchRiderStep(4); } }
 function handleRiderRegistration(ev){ ev.preventDefault(); ['ridEmailError','ridPasswordError','ridConfirmPasswordError'].forEach(clearError); const first=document.getElementById('ridFirstName').value.trim(); const email=document.getElementById('ridEmail').value.trim(); const password=document.getElementById('ridPassword').value; const confirm=document.getElementById('ridConfirmPassword').value; let ok=true; if(!validateEmail(email)){ showError('ridEmailError','Please enter a valid email'); ok=false;} if(!validatePassword(password)){ showError('ridPasswordError','Password must be at least 6 characters'); ok=false;} if(password!==confirm){ showError('ridConfirmPasswordError','Passwords do not match'); ok=false;} if(ok){ const payload={ email, password, role:'rider', first_name:first, vehicle_type:document.getElementById('ridVehicleType').value, driver_license:document.getElementById('ridDriverLicense').value };
     fetch('/api/auth/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
       .then(r=>r.json()).then(resp=>{

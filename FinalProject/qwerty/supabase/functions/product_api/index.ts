@@ -46,6 +46,7 @@ serve(async (req: Request) => {
           'GET /products',
           'GET /products/suggestions?q=term',
           'GET /products/search?q=term',
+          'GET /products/best-sellers?limit=12',
           'GET /products/:id',
           'GET /sellers',
         ],
@@ -83,6 +84,52 @@ serve(async (req: Request) => {
           .limit(50);
         if (error) return respondError(error.message, 500);
         return respondJson({ success: true, data });
+      }
+
+      if (maybeId === 'best-sellers') {
+        const limit = Number(url.searchParams.get('limit') || '12');
+        const category = url.searchParams.get('category');
+
+        const { data: orderRows, error: orderError } = await supabase
+          .from('order_items')
+          .select('product_id,quantity');
+        if (orderError) return respondError(orderError.message, 500);
+
+        const counts = (orderRows || []).reduce((acc, row) => {
+          const productId = Number(row.product_id);
+          const quantity = Number(row.quantity || 0);
+          if (!Number.isInteger(productId) || productId <= 0) return acc;
+          acc[productId] = (acc[productId] || 0) + quantity;
+          return acc;
+        }, {} as Record<number, number>);
+
+        const sortedIds = Object.entries(counts)
+          .sort(([, a], [, b]) => b - a)
+          .slice(0, limit)
+          .map(([id]) => Number(id));
+
+        if (!sortedIds.length) {
+          return respondJson({ success: true, data: { products: [] } });
+        }
+
+        let query = supabase
+          .from('products')
+          .select('id,title,description,price,stock,seller_id,category,img_url,created_at')
+          .in('id', sortedIds);
+        if (category) {
+          query = query.eq('category', category);
+        }
+
+        const { data: products, error: productsError } = await query;
+        if (productsError) return respondError(productsError.message, 500);
+
+        const productMap = (products || []).reduce((map, item) => {
+          map[Number(item.id)] = item;
+          return map;
+        }, {} as Record<number, unknown>);
+
+        const sortedProducts = sortedIds.map((id) => productMap[id]).filter(Boolean);
+        return respondJson({ success: true, data: { products: sortedProducts } });
       }
 
       const productId = parseId(maybeId);
