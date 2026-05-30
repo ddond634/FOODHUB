@@ -1628,10 +1628,23 @@ function sendOTP(email,type){
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body: JSON.stringify({ email: email, type: type })
-  }).then(r=>r.json()).then(j=>{
-    if(j && j.success){ showSuccess((type||'')+'Success', `OTP sent to ${email}`); if(type==='customer') switchCustomerStep(2); }
-    else { showError(type==='customer'?'custEmailError':`${type}EmailError`, j && j.error ? j.error : 'Failed to send OTP'); switchCustomerStep(2); }
-  }).catch(err=>{ console.error('sendOTP error',err); showError(type==='customer'?'custEmailError':`${type}EmailError`,'Server error'); });
+  }).then(async r => {
+    const text = await r.text().catch(() => '');
+    try { return { status: r.status, resp: JSON.parse(text), text }; }
+    catch (e) { return { status: r.status, resp: null, text }; }
+  }).then(({status, resp, text})=>{
+    if(resp && resp.success){ 
+      showSuccess((type||'')+'Success', `OTP sent to ${email}`); 
+      if(type==='customer') switchCustomerStep(2); 
+    } else { 
+      console.warn('sendOTP failed:', {status, resp, text});
+      showError(type==='customer'?'custEmailError':`${type}EmailError`, (resp && (resp.error || resp.message)) || 'Failed to send OTP'); 
+      switchCustomerStep(2); 
+    }
+  }).catch(err=>{ 
+    console.error('sendOTP error',err); 
+    showError(type==='customer'?'custEmailError':`${type}EmailError`,'Server error'); 
+  });
 }
 function resendOTP(type){ const p=pendingRegistrations[type]; if(!p?.email){ showError(type==='customer'?'custOTPError':`${type}OTPError`,'No pending registration to resend OTP for.'); return;} sendOTP(p.email,type); }
 const PSGC_API='https://psgc.gitlab.io/api'; let regionsCache={}, provincesCache={}, citiesCache={};
@@ -1677,18 +1690,11 @@ function handleLogin(ev){
     ok=false;
   } 
   if(ok){
-    // Try Supabase Auth first (client-side) so deployed frontend can authenticate without local backend
-    const SUPABASE_REF = 'sfeccfbdmbwoblixyoti';
-    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNmZWNjZmJkbWJ3b2JsaXh5b3RpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwODAwNTksImV4cCI6MjA5NTY1NjA1OX0.uM7DX7T-PQqPsMIwh-Fna1BUtVkkOhR4PiT2YqYlhIE';
-    const supaUrl = `https://${SUPABASE_REF}.supabase.co/auth/v1/token?grant_type=password`;
-
-    fetch(supaUrl, {
+    // Simplified login flow: try backend first (works for local + deployed), fallback to Supabase
+    // Always prefer backend JWT for API consistency
+    fetch('/api/auth/login', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': SUPABASE_ANON,
-        'Authorization': `Bearer ${SUPABASE_ANON}`
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password })
     })
     .then(async r => {
@@ -1696,142 +1702,113 @@ function handleLogin(ev){
       try { return { status: r.status, resp: JSON.parse(text), text }; }
       catch (e) { return { status: r.status, resp: null, text }; }
     })
-    .then(({ status, resp }) => {
-      if (resp && resp.access_token) {
-        // Supabase successful login — attempt to obtain a backend-signed JWT
-        // so frontend calls to /api/* (server) will validate the token.
-        fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})})
-          .then(async r => {
-            const text = await r.text().catch(() => '');
-            try { return { status: r.status, obj: JSON.parse(text), text }; }
-            catch (e) { return { status: r.status, obj: null, text }; }
-          })
-          .then(({status,obj,text})=>{
-            if(obj && obj.success && obj.token){
-              // Use backend token when available
-              localStorage.setItem('hub_access_token', obj.token);
-              if(obj.refresh_token) localStorage.setItem('hub_refresh_token', obj.refresh_token);
-              if(window.notify) window.notify.success('Login successful! Welcome back.');
-              document.getElementById('loginForm').reset();
-
-              let userRole = null;
-              if(obj.token){ try{ const parts = obj.token.split('.'); const decoded = JSON.parse(atob(parts[1])); userRole = decoded.role; }catch(e){}
-              const returnUrl = localStorage.getItem('returnUrl');
-              if(returnUrl){ localStorage.removeItem('returnUrl'); window.location.href = returnUrl; return; }
-              if(userRole==='seller') window.location.href='/seller_dashboard.html';
-              else if(userRole==='rider') window.location.href='/rider_dashboard.html';
-              else if(userRole==='admin') window.location.href='/admin_dashboard.html';
-              else window.location.href='/account.html';
-              return;
-            } else {
-              // Backend login failed — fall back to Supabase token so deployed static frontend still works
-              localStorage.setItem('hub_access_token', resp.access_token);
-              if (resp.refresh_token) localStorage.setItem('hub_refresh_token', resp.refresh_token);
-              if(window.notify) window.notify.success('Login successful (Supabase).');
-              document.getElementById('loginForm').reset();
-              let userRole = null; try{ if (resp.user && resp.user.role) userRole = resp.user.role; }catch(e){}
-              const returnUrl = localStorage.getItem('returnUrl');
-              if (returnUrl) { localStorage.removeItem('returnUrl'); window.location.href = returnUrl; return; }
-              if (userRole === 'seller') window.location.href = '/seller_dashboard.html';
-              else if (userRole === 'rider') window.location.href = '/rider_dashboard.html';
-              else if (userRole === 'admin') window.location.href = '/admin_dashboard.html';
-              else window.location.href = '/account.html';
-              return;
-            }
-          }).catch(err=>{
-            // If exchange fails unexpectedly, fall back to Supabase token
-            console.error('Backend login exchange failed, falling back to Supabase token', err);
-            localStorage.setItem('hub_access_token', resp.access_token);
-            if (resp.refresh_token) localStorage.setItem('hub_refresh_token', resp.refresh_token);
-            if(window.notify) window.notify.success('Login successful (Supabase).');
-            document.getElementById('loginForm').reset();
-            let userRole = null; try{ if (resp.user && resp.user.role) userRole = resp.user.role; }catch(e){}
-            const returnUrl = localStorage.getItem('returnUrl');
-            if (returnUrl) { localStorage.removeItem('returnUrl'); window.location.href = returnUrl; return; }
-            if (userRole === 'seller') window.location.href = '/seller_dashboard.html';
-            else if (userRole === 'rider') window.location.href = '/rider_dashboard.html';
-            else if (userRole === 'admin') window.location.href = '/admin_dashboard.html';
-            else window.location.href = '/account.html';
-            return;
-          });
+    .then(({ status, resp, text }) => {
+      // Backend login succeeded
+      if (resp && resp.success && resp.token) {
+        localStorage.setItem('hub_access_token', resp.token);
+        if (resp.refresh_token) localStorage.setItem('hub_refresh_token', resp.refresh_token);
+        if (window.notify) window.notify.success('Login successful! Welcome back.');
+        document.getElementById('loginForm').reset();
+        
+        // Extract role from token
+        let userRole = null;
+        try {
+          const parts = resp.token.split('.');
+          const decoded = JSON.parse(atob(parts[1]));
+          userRole = decoded.role;
+        } catch (e) { }
+        
+        // Redirect based on role
+        const returnUrl = localStorage.getItem('returnUrl');
+        if (returnUrl) {
+          localStorage.removeItem('returnUrl');
+          window.location.href = returnUrl;
+          return;
+        }
+        if (userRole === 'seller') window.location.href = '/seller_dashboard.html';
+        else if (userRole === 'rider') window.location.href = '/rider_dashboard.html';
+        else if (userRole === 'admin') window.location.href = '/admin_dashboard.html';
+        else window.location.href = '/account.html';
+        return;
       }
-
-      // Fallback: try legacy backend endpoint if Supabase auth fails
-      return fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})})
-        .then(async r => {
-          const text = await r.text().catch(() => '');
-          try { return { status: r.status, resp: JSON.parse(text), text }; }
-          catch (e) { return { status: r.status, resp: null, text }; }
-        })
-        .then(({status, resp, text})=>{
-          if (!resp) console.warn('/api/auth/login returned non-JSON response:', text);
-          if(resp && resp.success){
-            if(resp.token) localStorage.setItem('hub_access_token', resp.token);
-            if(resp.refresh_token) localStorage.setItem('hub_refresh_token', resp.refresh_token);
-            if(window.notify) window.notify.success('Login successful! Welcome back.');
-            document.getElementById('loginForm').reset();
-            let userRole = null;
-            if(resp.token){ try{ const parts = resp.token.split('.'); const decoded = JSON.parse(atob(parts[1])); userRole = decoded.role; }catch(e){}}
-            const returnUrl = localStorage.getItem('returnUrl');
-            if(returnUrl){ localStorage.removeItem('returnUrl'); window.location.href = returnUrl; return; }
-            if(userRole==='seller') window.location.href='/seller_dashboard.html';
-            else if(userRole==='rider') window.location.href='/rider_dashboard.html';
-            else if(userRole==='admin') window.location.href='/admin_dashboard.html';
-            else window.location.href='/account.html';
-          } else {
-            showError('loginPasswordError', (resp && (resp.error || resp.message)) || 'Login failed');
-            if(window.notify) window.notify.error((resp && (resp.error || resp.message)) || 'Login failed');
-          }
-        }).catch(err=>{ console.error('fallback login error', err); showError('loginPasswordError','Server error'); if(window.notify) window.notify.error('Server error'); });
-    }).catch(err => {
-      console.error('Supabase auth error', err);
-      // Fallback to legacy backend
-      fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})})
-        .then(r=>r.json()).then(resp=>{ if(resp && resp.success){ if(resp.token) localStorage.setItem('hub_access_token', resp.token); if(resp.refresh_token) localStorage.setItem('hub_refresh_token', resp.refresh_token); if(window.notify) window.notify.success('Login successful! Welcome back.'); document.getElementById('loginForm').reset(); window.location.href='/account.html'; } else { showError('loginPasswordError','Login failed'); } })
-        .catch(e=>{ console.error('fallback error',e); showError('loginPasswordError','Server error'); });
+      
+      // Backend login failed, show error
+      console.warn('Backend login failed:', { status, resp, text });
+      const errorMsg = (resp && (resp.error || resp.message)) || 'Login failed';
+      showError('loginPasswordError', errorMsg);
+      if (window.notify) window.notify.error(errorMsg);
+    })
+    .catch(err => {
+      console.error('Login error:', err);
+      showError('loginPasswordError', 'Server error');
+      if (window.notify) window.notify.error('Server error');
     });
   }
 }
 function handleCustomerRegistration(ev){ ev.preventDefault(); ['custFirstNameError','custLastNameError','custEmailError','custPasswordError','custConfirmPasswordError'].forEach(clearError); const firstName=document.getElementById('custFirstName').value.trim(); const lastName=document.getElementById('custLastName').value.trim(); const email=document.getElementById('custEmail').value.trim(); const password=document.getElementById('custPassword').value; const confirm=document.getElementById('custConfirmPassword').value; let ok=true; if(!firstName){ showError('custFirstNameError','First name is required'); ok=false;} if(!lastName){ showError('custLastNameError','Last name is required'); ok=false;} if(!validateEmail(email)){ showError('custEmailError','Please enter a valid email'); ok=false;} if(!validatePassword(password)){ showError('custPasswordError','Password must be at least 6 characters'); ok=false;} if(password!==confirm){ showError('custConfirmPasswordError','Passwords do not match'); ok=false;} if(ok){ const payload={ email, password, role:'customer', first_name:firstName, last_name:lastName };
     fetch('/api/auth/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
-      .then(r=>r.json()).then(resp=>{
+      .then(async r => {
+        const text = await r.text().catch(() => '');
+        try { return { status: r.status, resp: JSON.parse(text), text }; }
+        catch (e) { return { status: r.status, resp: null, text }; }
+      })
+      .then(({status, resp, text})=>{
         if(resp && resp.success){
           if(resp.token) localStorage.setItem('hub_access_token', resp.token);
           if(resp.refresh_token) localStorage.setItem('hub_refresh_token', resp.refresh_token);
           pendingRegistrations.customer={firstName,lastName,email}; sendOTP(email,'customer'); switchCustomerStep(4);
-        } else { showError('custEmailError', resp.error || 'Registration failed'); }
-      }).catch(err=>{ console.error(err); showError('custEmailError','Server error'); });
+        } else { 
+          console.warn('Customer registration failed:', {status, resp, text});
+          showError('custEmailError', (resp && (resp.error || resp.message)) || 'Registration failed'); 
+        }
+      }).catch(err=>{ console.error('customer registration error',err); showError('custEmailError','Server error'); });
   }
 }
 function handleSellerStep1(ev){ ev.preventDefault(); ['selFirstNameError','selLastNameError'].forEach(clearError); const first=document.getElementById('selFirstName').value.trim(); const last=document.getElementById('selLastName').value.trim(); let ok=true; if(!first){ showError('selFirstNameError','First name is required'); ok=false;} if(!last){ showError('selLastNameError','Last name is required'); ok=false;} if(ok) switchSellerStep(2); }
 function handleSellerStep2(ev){ ev.preventDefault(); ['selBusinessNameError','selBusinessDocError','selBusinessCategoryError','selRegionError','selProvinceError','selCityError'].forEach(clearError); const business=document.getElementById('selBusinessName').value.trim(); const doc=document.getElementById('selBusinessDoc').value; const cat=document.getElementById('selBusinessCategory').value; const region=document.getElementById('selRegion').value; const province=document.getElementById('selProvince').value; const city=document.getElementById('selCity').value; let ok=true; if(!business){ showError('selBusinessNameError','Business name is required'); ok=false;} if(!doc){ showError('selBusinessDocError','Business document is required'); ok=false;} if(!cat){ showError('selBusinessCategoryError','Please select a business category'); ok=false;} if(!region){ showError('selRegionError','Please select a region'); ok=false;} if(!province){ showError('selProvinceError','Please select a province'); ok=false;} if(!city){ showError('selCityError','Please select a city'); ok=false;} if(ok) switchSellerStep(3); }
 function handleSellerRegistration(ev){ ev.preventDefault(); ['selEmailError','selPasswordError','selConfirmPasswordError'].forEach(clearError); const first=document.getElementById('selFirstName').value.trim(); const email=document.getElementById('selEmail').value.trim(); const password=document.getElementById('selPassword').value; const confirm=document.getElementById('selConfirmPassword').value; let ok=true; if(!validateEmail(email)){ showError('selEmailError','Please enter a valid email'); ok=false;} if(!validatePassword(password)){ showError('selPasswordError','Password must be at least 6 characters'); ok=false;} if(password!==confirm){ showError('selConfirmPasswordError','Passwords do not match'); ok=false;} if(ok){ const payload={ email, password, role:'seller', first_name:first, business_name:document.getElementById('selBusinessName').value, category:document.getElementById('selBusinessCategory').value };
     fetch('/api/auth/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
-      .then(r=>r.json()).then(resp=>{
+      .then(async r => {
+        const text = await r.text().catch(() => '');
+        try { return { status: r.status, resp: JSON.parse(text), text }; }
+        catch (e) { return { status: r.status, resp: null, text }; }
+      })
+      .then(({status, resp, text})=>{
         if(resp && resp.success){
           if(resp.token) localStorage.setItem('hub_access_token', resp.token);
           if(resp.refresh_token) localStorage.setItem('hub_refresh_token', resp.refresh_token);
           pendingRegistrations.seller={...payload}; sendOTP(email,'seller'); switchSellerStep(4);
-        } else { showError('selEmailError', resp.error || 'Registration failed'); }
-      }).catch(err=>{ console.error(err); showError('selEmailError','Server error'); });
+        } else { 
+          console.warn('Seller registration failed:', {status, resp, text});
+          showError('selEmailError', (resp && (resp.error || resp.message)) || 'Registration failed'); 
+        }
+      }).catch(err=>{ console.error('seller registration error',err); showError('selEmailError','Server error'); });
   }
 }
 function handleRiderStep1(ev){ ev.preventDefault(); ['ridFirstNameError','ridLastNameError'].forEach(clearError); const first=document.getElementById('ridFirstName').value.trim(); const last=document.getElementById('ridLastName').value.trim(); let ok=true; if(!first){ showError('ridFirstNameError','First name is required'); ok=false;} if(!last){ showError('ridLastNameError','Last name is required'); ok=false;} if(ok) switchRiderStep(2); }
 function handleRiderStep2(ev){ ev.preventDefault(); ['ridVehicleTypeError','ridDriverLicenseError','ridPlateNumberError'].forEach(clearError); const vehicle=document.getElementById('ridVehicleType').value; const license=document.getElementById('ridDriverLicense').value; const plate=document.getElementById('ridPlateNumber').value.trim(); let ok=true; if(!vehicle){ showError('ridVehicleTypeError','Please select a vehicle type'); ok=false;} if(!license){ showError('ridDriverLicenseError','Driver license is required'); ok=false;} if(!plate){ showError('ridPlateNumberError','Plate number is required'); ok=false;} if(ok) switchRiderStep(3); }
 function handleRiderRegistration(ev){ ev.preventDefault(); ['ridEmailError','ridPasswordError','ridConfirmPasswordError'].forEach(clearError); const first=document.getElementById('ridFirstName').value.trim(); const email=document.getElementById('ridEmail').value.trim(); const password=document.getElementById('ridPassword').value; const confirm=document.getElementById('ridConfirmPassword').value; let ok=true; if(!validateEmail(email)){ showError('ridEmailError','Please enter a valid email'); ok=false;} if(!validatePassword(password)){ showError('ridPasswordError','Password must be at least 6 characters'); ok=false;} if(password!==confirm){ showError('ridConfirmPasswordError','Passwords do not match'); ok=false;} if(ok){ const payload={ email, password, role:'rider', first_name:first, vehicle_type:document.getElementById('ridVehicleType').value, driver_license:document.getElementById('ridDriverLicense').value };
     fetch('/api/auth/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
-      .then(r=>r.json()).then(resp=>{
+      .then(async r => {
+        const text = await r.text().catch(() => '');
+        try { return { status: r.status, resp: JSON.parse(text), text }; }
+        catch (e) { return { status: r.status, resp: null, text }; }
+      })
+      .then(({status, resp, text})=>{
         if(resp && resp.success){
           if(resp.token) localStorage.setItem('hub_access_token', resp.token);
           if(resp.refresh_token) localStorage.setItem('hub_refresh_token', resp.refresh_token);
           pendingRegistrations.rider={...payload}; sendOTP(email,'rider'); switchRiderStep(4);
-        } else { showError('ridEmailError', resp.error || 'Registration failed'); }
-      }).catch(err=>{ console.error(err); showError('ridEmailError','Server error'); });
+        } else { 
+          console.warn('Rider registration failed:', {status, resp, text});
+          showError('ridEmailError', (resp && (resp.error || resp.message)) || 'Registration failed'); 
+        }
+      }).catch(err=>{ console.error('rider registration error',err); showError('ridEmailError','Server error'); });
   }
 }
-function handleCustomerOTP(ev){ ev.preventDefault(); clearError('custOTPError'); const code=document.getElementById('custOTP').value.trim(); const email = pendingRegistrations.customer?.email || document.getElementById('custEmail')?.value; if(!email){ showError('custOTPError','Missing email'); return;} if(code.length<4){ showError('custOTPError','Enter the verification code'); return;} fetch('/api/auth/verify-otp',{ method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email: email, code: code }) }).then(r=>r.json()).then(j=>{ if(j && j.success){ showSuccess('customerSuccess',`Account verified for ${pendingRegistrations.customer?.firstName||''}`); pendingRegistrations.customer=null; document.getElementById('customerForm')?.reset(); document.getElementById('customerFormOTP')?.reset?.(); setTimeout(()=>switchForm('login'),1500); } else { showError('custOTPError', j && j.error ? j.error : 'Verification failed'); } }).catch(err=>{ console.error('verify-otp error',err); showError('custOTPError','Server error'); }); }
-function handleSellerOTP(ev){ ev.preventDefault(); clearError('sellerOTPError'); const code=document.getElementById('sellerOTP').value.trim(); const email = pendingRegistrations.seller?.email || document.getElementById('selEmail')?.value; if(!email){ showError('sellerOTPError','Missing email'); return;} if(code.length<4){ showError('sellerOTPError','Enter the verification code'); return;} fetch('/api/auth/verify-otp',{ method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email: email, code: code }) }).then(r=>r.json()).then(j=>{ if(j && j.success){ showSuccess('sellerSuccess','Seller account verified.'); pendingRegistrations.seller=null; ['sellerForm1','sellerForm2','sellerForm3'].forEach(id=>document.getElementById(id).reset?.()); setTimeout(()=>switchForm('login'),1500); } else { showError('sellerOTPError', j && j.error ? j.error : 'Verification failed'); } }).catch(err=>{ console.error('verify-otp error',err); showError('sellerOTPError','Server error'); }); }
-function handleRiderOTP(ev){ ev.preventDefault(); clearError('riderOTPError'); const code=document.getElementById('riderOTP').value.trim(); const email = pendingRegistrations.rider?.email || document.getElementById('ridEmail')?.value; if(!email){ showError('riderOTPError','Missing email'); return;} if(code.length<4){ showError('riderOTPError','Enter the verification code'); return;} fetch('/api/auth/verify-otp',{ method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email: email, code: code }) }).then(r=>r.json()).then(j=>{ if(j && j.success){ showSuccess('riderSuccess','Rider account verified.'); pendingRegistrations.rider=null; ['riderForm1','riderForm2','riderForm3'].forEach(id=>document.getElementById(id).reset?.()); setTimeout(()=>switchForm('login'),1500); } else { showError('riderOTPError', j && j.error ? j.error : 'Verification failed'); } }).catch(err=>{ console.error('verify-otp error',err); showError('riderOTPError','Server error'); }); }
+function handleCustomerOTP(ev){ ev.preventDefault(); clearError('custOTPError'); const code=document.getElementById('custOTP').value.trim(); const email = pendingRegistrations.customer?.email || document.getElementById('custEmail')?.value; if(!email){ showError('custOTPError','Missing email'); return;} if(code.length<4){ showError('custOTPError','Enter the verification code'); return;} fetch('/api/auth/verify-otp',{ method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email: email, code: code }) }).then(async r => { const text = await r.text().catch(() => ''); try { return { status: r.status, resp: JSON.parse(text), text }; } catch (e) { return { status: r.status, resp: null, text }; } }).then(({status, resp, text})=>{ if(resp && resp.success){ showSuccess('customerSuccess',`Account verified for ${pendingRegistrations.customer?.firstName||''}`); pendingRegistrations.customer=null; document.getElementById('customerForm')?.reset(); document.getElementById('customerFormOTP')?.reset?.(); setTimeout(()=>switchForm('login'),1500); } else { console.warn('OTP verification failed:', {status, resp, text}); showError('custOTPError', (resp && (resp.error || resp.message)) || 'Verification failed'); } }).catch(err=>{ console.error('verify-otp error',err); showError('custOTPError','Server error'); }); }
+function handleSellerOTP(ev){ ev.preventDefault(); clearError('sellerOTPError'); const code=document.getElementById('sellerOTP').value.trim(); const email = pendingRegistrations.seller?.email || document.getElementById('selEmail')?.value; if(!email){ showError('sellerOTPError','Missing email'); return;} if(code.length<4){ showError('sellerOTPError','Enter the verification code'); return;} fetch('/api/auth/verify-otp',{ method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email: email, code: code }) }).then(async r => { const text = await r.text().catch(() => ''); try { return { status: r.status, resp: JSON.parse(text), text }; } catch (e) { return { status: r.status, resp: null, text }; } }).then(({status, resp, text})=>{ if(resp && resp.success){ showSuccess('sellerSuccess','Seller account verified.'); pendingRegistrations.seller=null; ['sellerForm1','sellerForm2','sellerForm3'].forEach(id=>document.getElementById(id).reset?.()); setTimeout(()=>switchForm('login'),1500); } else { console.warn('Seller OTP verification failed:', {status, resp, text}); showError('sellerOTPError', (resp && (resp.error || resp.message)) || 'Verification failed'); } }).catch(err=>{ console.error('verify-otp error',err); showError('sellerOTPError','Server error'); }); }
+function handleRiderOTP(ev){ ev.preventDefault(); clearError('riderOTPError'); const code=document.getElementById('riderOTP').value.trim(); const email = pendingRegistrations.rider?.email || document.getElementById('ridEmail')?.value; if(!email){ showError('riderOTPError','Missing email'); return;} if(code.length<4){ showError('riderOTPError','Enter the verification code'); return;} fetch('/api/auth/verify-otp',{ method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email: email, code: code }) }).then(async r => { const text = await r.text().catch(() => ''); try { return { status: r.status, resp: JSON.parse(text), text }; } catch (e) { return { status: r.status, resp: null, text }; } }).then(({status, resp, text})=>{ if(resp && resp.success){ showSuccess('riderSuccess','Rider account verified.'); pendingRegistrations.rider=null; ['riderForm1','riderForm2','riderForm3'].forEach(id=>document.getElementById(id).reset?.()); setTimeout(()=>switchForm('login'),1500); } else { console.warn('Rider OTP verification failed:', {status, resp, text}); showError('riderOTPError', (resp && (resp.error || resp.message)) || 'Verification failed'); } }).catch(err=>{ console.error('verify-otp error',err); showError('riderOTPError','Server error'); }); }
 
 // Initialize auth only when on auth page
 window.addEventListener('DOMContentLoaded',()=>{ if(document.body.classList.contains('auth')){ switchForm('login'); } });
