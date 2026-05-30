@@ -73,7 +73,10 @@ async function hashPassword(password: string): Promise<string> {
 }
 
 async function checkPasswordHash(pwhash: string, password: string): Promise<boolean> {
-  if (!pwhash?.startsWith("pbkdf2:") || !password) return false;
+  if (!pwhash || !password) return false;
+  if (pwhash === "supabase" || pwhash === "flask-managed") return false;
+  if (!pwhash.startsWith("pbkdf2:")) return false;
+
   const parts = pwhash.split("$");
   if (parts.length !== 3) return false;
 
@@ -96,6 +99,52 @@ async function checkPasswordHash(pwhash: string, password: string): Promise<bool
   );
   const hex = Array.from(new Uint8Array(bits)).map((b) => b.toString(16).padStart(2, "0")).join("");
   return hex === storedHex;
+}
+
+async function authenticateWithSupabaseAuth(email: string, password: string): Promise<boolean> {
+  const anonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
+  if (!SUPABASE_URL || !anonKey) return false;
+
+  const response = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+    method: "POST",
+    headers: {
+      apikey: anonKey,
+      Authorization: `Bearer ${anonKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ email, password }),
+  });
+
+  return response.ok;
+}
+
+async function resolveUserAfterAuth(email: string, password: string, role?: string, firstName?: string, lastName?: string) {
+  const { data: user, error } = await admin
+    .from("users")
+    .select("id,email,password_hash,role,first_name,last_name,is_verified")
+    .eq("email", email)
+    .maybeSingle();
+
+  if (error) throw new Error(error.message);
+  if (user) return user;
+
+  const passwordHash = await hashPassword(password);
+  const { data: created, error: insertError } = await admin
+    .from("users")
+    .insert([{
+      email,
+      password_hash: passwordHash,
+      role: role ?? "customer",
+      first_name: firstName || null,
+      last_name: lastName || null,
+      is_verified: 1,
+      created_at: new Date().toISOString(),
+    }])
+    .select("id,email,password_hash,role,first_name,last_name,is_verified")
+    .single();
+
+  if (insertError) throw new Error(insertError.message);
+  return created;
 }
 
 serve(async (req: Request) => {
@@ -127,17 +176,39 @@ serve(async (req: Request) => {
         return json({ success: false, error: "Missing email or password" }, 400);
       }
 
-      const { data: user, error } = await admin
+      let user = await admin
         .from("users")
         .select("id,email,password_hash,role,first_name,last_name,is_verified")
         .eq("email", email)
-        .maybeSingle();
+        .maybeSingle()
+        .then(({ data, error }) => {
+          if (error) throw new Error(error.message);
+          return data;
+        });
 
-      if (error) return json({ success: false, error: error.message }, 500);
-      if (!user) return json({ success: false, error: "Invalid credentials" }, 401);
+      let authenticated = false;
 
-      const valid = await checkPasswordHash(String(user.password_hash ?? ""), password);
-      if (!valid) return json({ success: false, error: "Invalid credentials" }, 401);
+      if (user) {
+        authenticated = await checkPasswordHash(String(user.password_hash ?? ""), password);
+      }
+
+      if (!authenticated) {
+        authenticated = await authenticateWithSupabaseAuth(email, password);
+        if (authenticated && !user) {
+          user = await resolveUserAfterAuth(email, password);
+        } else if (authenticated && user) {
+          const passwordHash = await hashPassword(password);
+          await admin.from("users").update({ password_hash: passwordHash }).eq("id", user.id);
+        }
+      }
+
+      if (!authenticated) {
+        return json({ success: false, error: "Invalid credentials" }, 401);
+      }
+
+      if (!user) {
+        return json({ success: false, error: "Invalid credentials" }, 401);
+      }
 
       const token = await signJwt(Number(user.id), String(user.role ?? "customer"), String(user.email));
       return json({
@@ -173,6 +244,20 @@ serve(async (req: Request) => {
         .eq("email", email)
         .maybeSingle();
       if (existing) return json({ success: false, error: "User already exists" }, 400);
+
+      // Create Supabase Auth user so password login works across web + mobile
+      const anonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
+      if (SUPABASE_URL && anonKey) {
+        await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
+          method: "POST",
+          headers: {
+            apikey: anonKey,
+            Authorization: `Bearer ${anonKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, password }),
+        }).catch(() => null);
+      }
 
       const passwordHash = await hashPassword(password);
       const { data: created, error } = await admin
