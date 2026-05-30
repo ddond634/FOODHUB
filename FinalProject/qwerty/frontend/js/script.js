@@ -1694,24 +1694,58 @@ function handleLogin(ev){
     .then(r => r.json().then(resp => ({ status: r.status, resp })))
     .then(({ status, resp }) => {
       if (resp && resp.access_token) {
-        // Supabase successful login
-        localStorage.setItem('hub_access_token', resp.access_token);
-        if (resp.refresh_token) localStorage.setItem('hub_refresh_token', resp.refresh_token);
-        if(window.notify) window.notify.success('Login successful! Welcome back.');
-        document.getElementById('loginForm').reset();
+        // Supabase successful login — attempt to obtain a backend-signed JWT
+        // so frontend calls to /api/* (server) will validate the token.
+        fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})})
+          .then(r=>r.json().then(obj=>({status:r.status,obj})))
+          .then(({status,obj})=>{
+            if(obj && obj.success && obj.token){
+              // Use backend token when available
+              localStorage.setItem('hub_access_token', obj.token);
+              if(obj.refresh_token) localStorage.setItem('hub_refresh_token', obj.refresh_token);
+              if(window.notify) window.notify.success('Login successful! Welcome back.');
+              document.getElementById('loginForm').reset();
 
-        // Decode role if present in user metadata
-        let userRole = null;
-        try { if (resp.user && resp.user.role) userRole = resp.user.role; } catch(e){}
-
-        // Redirect by role or returnUrl
-        const returnUrl = localStorage.getItem('returnUrl');
-        if (returnUrl) { localStorage.removeItem('returnUrl'); window.location.href = returnUrl; return; }
-        if (userRole === 'seller') window.location.href = '/seller_dashboard.html';
-        else if (userRole === 'rider') window.location.href = '/rider_dashboard.html';
-        else if (userRole === 'admin') window.location.href = '/admin_dashboard.html';
-        else window.location.href = '/account.html';
-        return;
+              let userRole = null;
+              if(obj.token){ try{ const parts = obj.token.split('.'); const decoded = JSON.parse(atob(parts[1])); userRole = decoded.role; }catch(e){}
+              const returnUrl = localStorage.getItem('returnUrl');
+              if(returnUrl){ localStorage.removeItem('returnUrl'); window.location.href = returnUrl; return; }
+              if(userRole==='seller') window.location.href='/seller_dashboard.html';
+              else if(userRole==='rider') window.location.href='/rider_dashboard.html';
+              else if(userRole==='admin') window.location.href='/admin_dashboard.html';
+              else window.location.href='/account.html';
+              return;
+            } else {
+              // Backend login failed — fall back to Supabase token so deployed static frontend still works
+              localStorage.setItem('hub_access_token', resp.access_token);
+              if (resp.refresh_token) localStorage.setItem('hub_refresh_token', resp.refresh_token);
+              if(window.notify) window.notify.success('Login successful (Supabase).');
+              document.getElementById('loginForm').reset();
+              let userRole = null; try{ if (resp.user && resp.user.role) userRole = resp.user.role; }catch(e){}
+              const returnUrl = localStorage.getItem('returnUrl');
+              if (returnUrl) { localStorage.removeItem('returnUrl'); window.location.href = returnUrl; return; }
+              if (userRole === 'seller') window.location.href = '/seller_dashboard.html';
+              else if (userRole === 'rider') window.location.href = '/rider_dashboard.html';
+              else if (userRole === 'admin') window.location.href = '/admin_dashboard.html';
+              else window.location.href = '/account.html';
+              return;
+            }
+          }).catch(err=>{
+            // If exchange fails unexpectedly, fall back to Supabase token
+            console.error('Backend login exchange failed, falling back to Supabase token', err);
+            localStorage.setItem('hub_access_token', resp.access_token);
+            if (resp.refresh_token) localStorage.setItem('hub_refresh_token', resp.refresh_token);
+            if(window.notify) window.notify.success('Login successful (Supabase).');
+            document.getElementById('loginForm').reset();
+            let userRole = null; try{ if (resp.user && resp.user.role) userRole = resp.user.role; }catch(e){}
+            const returnUrl = localStorage.getItem('returnUrl');
+            if (returnUrl) { localStorage.removeItem('returnUrl'); window.location.href = returnUrl; return; }
+            if (userRole === 'seller') window.location.href = '/seller_dashboard.html';
+            else if (userRole === 'rider') window.location.href = '/rider_dashboard.html';
+            else if (userRole === 'admin') window.location.href = '/admin_dashboard.html';
+            else window.location.href = '/account.html';
+            return;
+          });
       }
 
       // Fallback: try legacy backend endpoint if Supabase auth fails
