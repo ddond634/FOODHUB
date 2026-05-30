@@ -1691,14 +1691,22 @@ function handleLogin(ev){
       },
       body: JSON.stringify({ email, password })
     })
-    .then(r => r.json().then(resp => ({ status: r.status, resp })))
+    .then(async r => {
+      const text = await r.text().catch(() => '');
+      try { return { status: r.status, resp: JSON.parse(text), text }; }
+      catch (e) { return { status: r.status, resp: null, text }; }
+    })
     .then(({ status, resp }) => {
       if (resp && resp.access_token) {
         // Supabase successful login — attempt to obtain a backend-signed JWT
         // so frontend calls to /api/* (server) will validate the token.
         fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})})
-          .then(r=>r.json().then(obj=>({status:r.status,obj})))
-          .then(({status,obj})=>{
+          .then(async r => {
+            const text = await r.text().catch(() => '');
+            try { return { status: r.status, obj: JSON.parse(text), text }; }
+            catch (e) { return { status: r.status, obj: null, text }; }
+          })
+          .then(({status,obj,text})=>{
             if(obj && obj.success && obj.token){
               // Use backend token when available
               localStorage.setItem('hub_access_token', obj.token);
@@ -1750,8 +1758,13 @@ function handleLogin(ev){
 
       // Fallback: try legacy backend endpoint if Supabase auth fails
       return fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})})
-        .then(r=>{ const status = r.status; return r.json().then(resp => ({status, resp})); })
-        .then(({status, resp})=>{
+        .then(async r => {
+          const text = await r.text().catch(() => '');
+          try { return { status: r.status, resp: JSON.parse(text), text }; }
+          catch (e) { return { status: r.status, resp: null, text }; }
+        })
+        .then(({status, resp, text})=>{
+          if (!resp) console.warn('/api/auth/login returned non-JSON response:', text);
           if(resp && resp.success){
             if(resp.token) localStorage.setItem('hub_access_token', resp.token);
             if(resp.refresh_token) localStorage.setItem('hub_refresh_token', resp.refresh_token);
