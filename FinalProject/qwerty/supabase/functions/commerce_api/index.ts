@@ -17,7 +17,7 @@ const failure = (error: string, status = 400) => json({ success: false, error },
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-hub-token',
   'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
 };
 
@@ -27,10 +27,98 @@ function withCors(res: Response) {
   return new Response(res.body, { status: res.status, headers });
 }
 
+async function verifyHubToken(token: string): Promise<{ user_id: number; email?: string; role?: string } | null> {
+  const secret = Deno.env.get('JWT_SECRET');
+  if (!secret || !token) return null;
+
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) return null;
+
+    const encoder = new TextEncoder();
+    const key = await crypto.subtle.importKey(
+      'raw',
+      encoder.encode(secret),
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['verify'],
+    );
+
+    const data = encoder.encode(`${parts[0]}.${parts[1]}`);
+    const signature = Uint8Array.from(
+      atob(parts[2].replace(/-/g, '+').replace(/_/g, '/')),
+      (c) => c.charCodeAt(0),
+    );
+    const valid = await crypto.subtle.verify('HMAC', key, signature, data);
+    if (!valid) return null;
+
+    const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+    if (payload.exp && Date.now() / 1000 > Number(payload.exp)) return null;
+
+    const userId = Number(payload.user_id);
+    if (!Number.isInteger(userId) || userId <= 0) return null;
+    return {
+      user_id: userId,
+      email: typeof payload.email === 'string' ? payload.email : undefined,
+      role: typeof payload.role === 'string' ? payload.role : 'customer',
+    };
+  } catch {
+    return null;
+  }
+}
+
+async function ensureHubUser(hubUser: { user_id: number; email?: string; role?: string }): Promise<number | null> {
+  const { data: userById } = await admin
+    .from('users')
+    .select('id')
+    .eq('id', hubUser.user_id)
+    .maybeSingle();
+  if (userById?.id) return userById.id;
+
+  if (hubUser.email) {
+    const { data: userByEmail } = await admin
+      .from('users')
+      .select('id')
+      .eq('email', hubUser.email)
+      .maybeSingle();
+    if (userByEmail?.id) return userByEmail.id;
+  }
+
+  if (!hubUser.email) return null;
+
+  const { data: created, error } = await admin
+    .from('users')
+    .upsert([{
+      id: hubUser.user_id,
+      email: hubUser.email,
+      role: hubUser.role || 'customer',
+      password_hash: 'flask-managed',
+      is_verified: 1,
+      created_at: new Date().toISOString(),
+    }], { onConflict: 'id' })
+    .select('id')
+    .maybeSingle();
+
+  if (error) {
+    console.error('Failed to provision Hub user in Supabase:', error.message);
+    return null;
+  }
+
+  return created?.id ?? hubUser.user_id;
+}
+
 async function getUserIdFromRequest(req: Request): Promise<number | null> {
+  const hubToken = req.headers.get('X-Hub-Token') || '';
+  if (hubToken) {
+    const hubUser = await verifyHubToken(hubToken);
+    if (hubUser) {
+      return await ensureHubUser(hubUser);
+    }
+  }
+
   const authHeader = req.headers.get('Authorization') || '';
   const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '';
-  if (!token) return null;
+  if (!token || token === Deno.env.get('SUPABASE_ANON_KEY')) return null;
 
   const { data, error } = await admin.auth.getUser(token);
   if (error || !data?.user?.email) return null;

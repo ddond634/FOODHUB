@@ -16,6 +16,21 @@
         return !!localStorage.getItem('hub_access_token');
     }
     
+    // Helper to build Supabase function headers (requires script.js loaded first)
+    function supabaseHeaders() {
+        if (window.getSupabaseFunctionHeaders) {
+            return window.getSupabaseFunctionHeaders();
+        }
+        const token = localStorage.getItem('hub_access_token');
+        const headers = { 'Content-Type': 'application/json' };
+        if (window.SUPABASE_ANON) {
+            headers['Authorization'] = `Bearer ${window.SUPABASE_ANON}`;
+            headers['apikey'] = window.SUPABASE_ANON;
+        }
+        if (token) headers['X-Hub-Token'] = token;
+        return headers;
+    }
+
     // Update cart badge from backend
     async function syncCartBadge() {
         const badge = document.querySelector('#cartBtn .badge');
@@ -29,9 +44,8 @@
         }
         
         try {
-            const token = localStorage.getItem('hub_access_token');
             const response = await fetch(`${API_BASE}/cart`, {
-                headers: { 'Authorization': `Bearer ${token}` }
+                headers: supabaseHeaders()
             });
             const data = await response.json();
             
@@ -70,9 +84,8 @@
         }
         
         try {
-            const token = localStorage.getItem('hub_access_token');
             const response = await fetch(`${API_BASE}/wishlist`, {
-                headers: { 'Authorization': `Bearer ${token}` }
+                headers: supabaseHeaders()
             });
             const data = await response.json();
             
@@ -104,9 +117,8 @@
         if (!dd) return;
         
         try {
-            const token = localStorage.getItem('hub_access_token');
             const response = await fetch(`${API_BASE}/cart`, {
-                headers: { 'Authorization': `Bearer ${token}` }
+                headers: supabaseHeaders()
             });
             const data = await response.json();
             
@@ -158,9 +170,8 @@
         if (!dd) return;
         
         try {
-            const token = localStorage.getItem('hub_access_token');
             const response = await fetch(`${API_BASE}/wishlist`, {
-                headers: { 'Authorization': `Bearer ${token}` }
+                headers: supabaseHeaders()
             });
             const data = await response.json();
             

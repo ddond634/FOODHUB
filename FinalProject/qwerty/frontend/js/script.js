@@ -160,25 +160,41 @@
         }
       };
 
-      const addSupabaseFunctionHeaders = (input, init) => {
-        const authHeaders = {
-          Authorization: `Bearer ${SUPABASE_ANON}`,
-          apikey: SUPABASE_ANON,
-        };
+      const applySupabaseGatewayHeaders = (headers) => {
+        const anonAuth = `Bearer ${SUPABASE_ANON}`;
+        const existingAuth = headers.get('Authorization') || '';
+        const hubToken = headers.get('X-Hub-Token') || '';
 
+        if (existingAuth && existingAuth !== anonAuth && !existingAuth.includes(SUPABASE_ANON)) {
+          if (!hubToken) {
+            headers.set('X-Hub-Token', existingAuth.replace(/^Bearer\s+/i, ''));
+          }
+        } else if (!hubToken && existingAuth && existingAuth !== anonAuth) {
+          headers.set('X-Hub-Token', existingAuth.replace(/^Bearer\s+/i, ''));
+        }
+
+        headers.set('Authorization', anonAuth);
+        headers.set('apikey', SUPABASE_ANON);
+        return headers;
+      };
+
+      window.getSupabaseFunctionHeaders = function(extraHeaders) {
+        const headers = new Headers(extraHeaders || {});
+        const token = localStorage.getItem('hub_access_token');
+        if (token && !headers.has('X-Hub-Token')) {
+          headers.set('X-Hub-Token', token);
+        }
+        return applySupabaseGatewayHeaders(headers);
+      };
+
+      const addSupabaseFunctionHeaders = (input, init) => {
         if (input instanceof Request) {
-          const headers = new Headers(input.headers || {});
-          Object.entries(authHeaders).forEach(([key, value]) => {
-            if (!headers.has(key)) headers.set(key, value);
-          });
+          const headers = applySupabaseGatewayHeaders(new Headers(input.headers || {}));
           return [new Request(input, { headers }), init];
         }
 
         init = init || {};
-        init.headers = new Headers(init.headers || {});
-        Object.entries(authHeaders).forEach(([key, value]) => {
-          if (!init.headers.has(key)) init.headers.set(key, value);
-        });
+        init.headers = applySupabaseGatewayHeaders(new Headers(init.headers || {}));
         return [input, init];
       };
 
@@ -310,9 +326,8 @@
     }
     
     try {
-      const token = localStorage.getItem('hub_access_token');
       const response = await fetch(`${window.SUPABASE_COMMERCE_API}/cart`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: window.getSupabaseFunctionHeaders ? window.getSupabaseFunctionHeaders() : {}
       });
       const data = await response.json();
       
@@ -349,9 +364,8 @@
     }
     
     try {
-      const token = localStorage.getItem('hub_access_token');
       const response = await fetch(`${window.SUPABASE_COMMERCE_API}/wishlist`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: window.getSupabaseFunctionHeaders ? window.getSupabaseFunctionHeaders() : {}
       });
       const data = await response.json();
       
@@ -398,9 +412,8 @@
     }
     
     try {
-      const token = localStorage.getItem('hub_access_token');
       const response = await fetch(`${window.SUPABASE_COMMERCE_API}/cart`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: window.getSupabaseFunctionHeaders ? window.getSupabaseFunctionHeaders() : {}
       });
       const data = await response.json();
       
@@ -450,9 +463,8 @@
     }
     
     try {
-      const token = localStorage.getItem('hub_access_token');
       const response = await fetch(`${window.SUPABASE_COMMERCE_API}/wishlist`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: window.getSupabaseFunctionHeaders ? window.getSupabaseFunctionHeaders() : {}
       });
       const data = await response.json();
       
@@ -495,7 +507,7 @@
     }
   }
 
-  function addToCartFromButton(btn){
+  async function addToCartFromButton(btn){
     // Check authentication first
     if (!isUserLoggedIn()) {
       if (window.notify) {
@@ -507,24 +519,54 @@
       return;
     }
     
-    if(!btn) return; let title=btn.getAttribute('data-product')||''; const card=btn.closest('.product-card,.product-shop-card,.arrival-product-card,.card-back')||document.createElement('div'); if(!title){ const h=card.querySelector('h4, h3, .product-shop-title'); title=h?h.textContent.trim():'Unknown product'; }
-    let priceRaw=btn.getAttribute('data-price')||''; let price=normalizePrice(priceRaw); if(!price){ const pt=card.querySelector('.price-tag,.product-price,.price,.price-current'); if(pt) price=normalizePrice(pt.textContent); }
-    const imgEl=card.querySelector('img'); const img=imgEl?imgEl.src:''; const descEl=card.querySelector('.product-info p, p'); const desc=descEl?descEl.textContent.trim():''; const seller=btn.getAttribute('data-seller')||'Unknown Seller';
-    // Try to get product_id from button or card data attributes
+    if(!btn) return;
+    let title=btn.getAttribute('data-product')||'';
+    const card=btn.closest('.product-card,.product-shop-card,.arrival-product-card,.card-back')||document.createElement('div');
+    if(!title){ const h=card.querySelector('h4, h3, .product-shop-title'); title=h?h.textContent.trim():'Unknown product'; }
+    let priceRaw=btn.getAttribute('data-price')||'';
+    let price=normalizePrice(priceRaw);
+    if(!price){ const pt=card.querySelector('.price-tag,.product-price,.price,.price-current'); if(pt) price=normalizePrice(pt.textContent); }
     const productId=btn.getAttribute('data-product-id')||card.getAttribute('data-product-id')||btn.getAttribute('data-id')||card.getAttribute('data-id')||null;
-    // Show loader while processing add-to-cart
+
+    if (!productId) {
+      showToast('Unable to add item — missing product ID');
+      return;
+    }
+
     const originalAria = btn.getAttribute('aria-busy');
     try { btn.setAttribute('aria-busy','true'); showGlobalLoader(); } catch(e){}
-    const cart=getCart(); // perform add after a small simulated delay to show loader
-    setTimeout(()=>{
-      const existing=findItem(cart,title);
-      if(existing){ existing.quantity=(existing.quantity||1)+1; if(productId && !existing.product_id) existing.product_id=productId; }
-      else { cart.push({title,price,img,desc,quantity:1,seller,product_id:productId||null}); }
-      saveCart(cart); updateBadges(); renderCartDropdown(); try{btn.classList.add('added'); setTimeout(()=>btn.classList.remove('added'),500);}catch(e){}
-      showToast(`${title} added to cart`);
+
+    try {
+      const token = localStorage.getItem('hub_access_token');
+      const response = await fetch('/api/cart', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          product_id: parseInt(productId, 10),
+          quantity: 1,
+          variation_id: null
+        })
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        updateBadges();
+        renderCartDropdown();
+        try { btn.classList.add('added'); setTimeout(()=>btn.classList.remove('added'),500); } catch(e){}
+        showToast(`${title} added to cart`);
+      } else {
+        showToast(data.error || data.message || 'Failed to add to cart');
+      }
+    } catch (error) {
+      console.error('Add to cart failed:', error);
+      showToast('Failed to add to cart. Please try again.');
+    } finally {
       try { btn.setAttribute('aria-busy', originalAria===null ? 'false' : originalAria); } catch(e){}
       hideGlobalLoader();
-    }, 350);
+    }
   }
 
   function showToast(text,timeout=2500){ let c=document.querySelector('.toast-container'); if(!c){ c=document.createElement('div'); c.className='toast-container'; document.body.appendChild(c);} const t=document.createElement('div'); t.className='toast'; t.textContent=text; c.appendChild(t); requestAnimationFrame(()=>t.classList.add('show')); setTimeout(()=>{ t.classList.remove('show'); setTimeout(()=>t.remove(),260); }, timeout); }
@@ -800,9 +842,7 @@
     if (token && productId) {
       fetch(`${window.SUPABASE_COMMERCE_API}/wishlist/${productId}`, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        headers: window.getSupabaseFunctionHeaders ? window.getSupabaseFunctionHeaders() : {}
       })
       .then(response => response.json())
       .then(data => {

@@ -280,11 +280,11 @@ class SafeQuery:
         
         if where:
             conditions = []
-                for col, val in where.items():
-                    if DB_ENGINE in ('mysql', 'postgres', 'supabase'):
-                        conditions.append(f"{col} = %s")
-                    else:
-                        conditions.append(f"{col} = ?")
+            for col, val in where.items():
+                if DB_ENGINE in ('mysql', 'postgres', 'supabase'):
+                    conditions.append(f"{col} = %s")
+                else:
+                    conditions.append(f"{col} = ?")
                 params.append(val)
             
             query += " WHERE " + " AND ".join(conditions)
@@ -308,11 +308,11 @@ class SafeQuery:
         
         if where:
             conditions = []
-                for col, val in where.items():
-                    if DB_ENGINE in ('mysql', 'postgres', 'supabase'):
-                        conditions.append(f"{col} = %s")
-                    else:
-                        conditions.append(f"{col} = ?")
+            for col, val in where.items():
+                if DB_ENGINE in ('mysql', 'postgres', 'supabase'):
+                    conditions.append(f"{col} = %s")
+                else:
+                    conditions.append(f"{col} = ?")
                 params.append(val)
             
             query += " WHERE " + " AND ".join(conditions)

@@ -440,7 +440,7 @@
             try {
                 console.log('🛒 Loading cart from API...');
                 const response = await fetch(`${API_BASE}/cart`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: window.getSupabaseFunctionHeaders ? window.getSupabaseFunctionHeaders() : { 'Authorization': `Bearer ${token}` }
                 });
 
                 console.log('📡 Response status:', response.status);

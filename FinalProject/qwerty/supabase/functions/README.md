@@ -13,6 +13,7 @@ Deploying functions
    - `SUPABASE_URL` (project URL)
    - `SUPABASE_SERVICE_ROLE_KEY` (service role key) for write operations
    - `SUPABASE_ANON_KEY` for read-only product endpoints if needed
+   - `JWT_SECRET` for `commerce_api` (must match Flask `.env` JWT_SECRET so Hub login tokens work)
 
 Example deploy commands:
 
@@ -20,6 +21,8 @@ Example deploy commands:
 supabase functions deploy get_users --project-ref sfeccfbdmbwoblixyoti
 supabase functions deploy create_order --project-ref sfeccfbdmbwoblixyoti
 supabase functions deploy product_api --project-ref sfeccfbdmbwoblixyoti
+supabase functions deploy commerce_api --project-ref sfeccfbdmbwoblixyoti
+supabase secrets set JWT_SECRET=your-secret-key-change-in-production --project-ref sfeccfbdmbwoblixyoti
 ```
 
 Call the functions
