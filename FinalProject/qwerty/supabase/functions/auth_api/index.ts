@@ -11,8 +11,8 @@ const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-hub-token",
+  "Access-Control-Allow-Methods": "GET,POST,PUT,OPTIONS",
 };
 
 const json = (body: unknown, status = 200) =>
@@ -118,6 +118,62 @@ async function authenticateWithSupabaseAuth(email: string, password: string): Pr
   return response.ok;
 }
 
+async function verifyHubToken(token: string): Promise<{ user_id: number; email?: string; role?: string } | null> {
+  if (!JWT_SECRET || !token) return null;
+
+  try {
+    const parts = token.split(".");
+    if (parts.length !== 3) return null;
+
+    const key = await crypto.subtle.importKey(
+      "raw",
+      new TextEncoder().encode(JWT_SECRET),
+      { name: "HMAC", hash: "SHA-256" },
+      false,
+      ["verify"],
+    );
+
+    const data = new TextEncoder().encode(`${parts[0]}.${parts[1]}`);
+    const signature = Uint8Array.from(
+      atob(parts[2].replace(/-/g, "+").replace(/_/g, "/")),
+      (c) => c.charCodeAt(0),
+    );
+    const valid = await crypto.subtle.verify("HMAC", key, signature, data);
+    if (!valid) return null;
+
+    const payload = JSON.parse(atob(parts[1].replace(/-/g, "+").replace(/_/g, "/")));
+    if (payload.exp && Date.now() / 1000 > Number(payload.exp)) return null;
+
+    const userId = Number(payload.user_id);
+    if (!Number.isInteger(userId) || userId <= 0) return null;
+    return {
+      user_id: userId,
+      email: typeof payload.email === "string" ? payload.email : undefined,
+      role: typeof payload.role === "string" ? payload.role : "customer",
+    };
+  } catch {
+    return null;
+  }
+}
+
+function getHubTokenFromRequest(req: Request): string {
+  const hubHeader = req.headers.get("x-hub-token") ?? req.headers.get("X-Hub-Token") ?? "";
+  if (hubHeader) return hubHeader.trim();
+
+  const auth = req.headers.get("authorization") ?? "";
+  const match = auth.match(/^Bearer\s+(.+)$/i);
+  if (!match) return "";
+  const token = match[1].trim();
+  const anonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
+  if (anonKey && token === anonKey) return "";
+  return token;
+}
+
+const USER_FIELDS = new Set([
+  "first_name", "middle_name", "last_name", "suffix", "email", "phone", "avatar_url",
+  "gender", "birthdate", "address_line1", "address_line2", "city", "province", "region", "postal_code",
+]);
+
 async function resolveUserAfterAuth(email: string, password: string, role?: string, firstName?: string, lastName?: string) {
   const { data: user, error } = await admin
     .from("users")
@@ -167,7 +223,66 @@ serve(async (req: Request) => {
       });
     }
 
-    const body = req.method === "POST" ? await req.json().catch(() => ({})) : {};
+    const body = req.method === "POST" || req.method === "PUT"
+      ? await req.json().catch(() => ({}))
+      : {};
+
+    if (action === "me" && req.method === "GET") {
+      const hubUser = await verifyHubToken(getHubTokenFromRequest(req));
+      if (!hubUser) return json({ success: false, error: "Unauthorized" }, 401);
+
+      const { data: user, error } = await admin
+        .from("users")
+        .select("*")
+        .eq("id", hubUser.user_id)
+        .maybeSingle();
+      if (error) return json({ success: false, error: error.message }, 500);
+      if (!user) return json({ success: false, error: "User not found" }, 404);
+
+      const profile: Record<string, unknown> = { ...user };
+      delete profile.password_hash;
+      delete profile.otp_code;
+
+      const role = String(hubUser.role ?? user.role ?? "customer");
+      if (role === "seller") {
+        const { data: seller } = await admin.from("sellers").select("*").eq("user_id", hubUser.user_id).maybeSingle();
+        if (seller) profile.seller = seller;
+      } else if (role === "rider") {
+        const { data: rider } = await admin.from("riders").select("*").eq("user_id", hubUser.user_id).maybeSingle();
+        if (rider) profile.rider = rider;
+      }
+
+      return json({ success: true, data: profile });
+    }
+
+    if (action === "me" && req.method === "PUT") {
+      const hubUser = await verifyHubToken(getHubTokenFromRequest(req));
+      if (!hubUser) return json({ success: false, error: "Unauthorized" }, 401);
+      if (!body || typeof body !== "object" || !Object.keys(body).length) {
+        return json({ success: false, error: "No data provided for update" }, 400);
+      }
+
+      const updates: Record<string, unknown> = {};
+      for (const [key, value] of Object.entries(body as Record<string, unknown>)) {
+        if (USER_FIELDS.has(key)) updates[key] = value;
+      }
+      if (!Object.keys(updates).length) {
+        return json({ success: false, error: "No valid fields to update" }, 400);
+      }
+
+      const { data: updated, error } = await admin
+        .from("users")
+        .update(updates)
+        .eq("id", hubUser.user_id)
+        .select("*")
+        .single();
+      if (error) return json({ success: false, error: error.message }, 400);
+
+      const profile: Record<string, unknown> = { ...updated };
+      delete profile.password_hash;
+      delete profile.otp_code;
+      return json({ success: true, data: profile });
+    }
 
     if (action === "login" && req.method === "POST") {
       const email = String(body.email ?? "").trim().toLowerCase();

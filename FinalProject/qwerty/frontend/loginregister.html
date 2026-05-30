@@ -53,6 +53,15 @@
                     }
                 }
                 
+                // Valid token exists - guard against account ↔ login redirect loops
+                const loopGuardKey = 'hub_auth_redirect_guard';
+                const lastRedirect = sessionStorage.getItem(loopGuardKey);
+                if (lastRedirect && Date.now() - parseInt(lastRedirect, 10) < 8000) {
+                    console.warn('Redirect loop guard — staying on login page');
+                    return;
+                }
+                sessionStorage.setItem(loopGuardKey, String(Date.now()));
+
                 // Valid token exists - check for return URL first
                 const returnUrl = localStorage.getItem('returnUrl');
                 if (returnUrl) {

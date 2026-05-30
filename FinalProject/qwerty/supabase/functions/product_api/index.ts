@@ -12,14 +12,23 @@ const supabase = createClient(SUPABASE_URL ?? '', SUPABASE_KEY ?? '', {
   auth: { persistSession: false },
 });
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-hub-token',
+  'Access-Control-Allow-Methods': 'GET,OPTIONS',
+};
+
 const respondJson = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
     status,
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...corsHeaders },
   });
 
 const respondError = (message: string, status = 400) =>
   respondJson({ success: false, error: message }, status);
+
+const respondOptions = () =>
+  new Response(null, { status: 204, headers: corsHeaders });
 
 const parseId = (value: string | undefined) => {
   if (!value) return null;
@@ -35,7 +44,7 @@ serve(async (req: Request) => {
     const [resource, maybeId, maybeAction] = segments;
 
     if (req.method === 'OPTIONS') {
-      return respondJson({ success: true });
+      return respondOptions();
     }
 
     if (!resource) {

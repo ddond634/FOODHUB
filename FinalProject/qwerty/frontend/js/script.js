@@ -152,6 +152,9 @@
           if (resourcePath.startsWith('/auth/register')) {
             return `${SUPABASE_AUTH_API}/register${query}`;
           }
+          if (resourcePath.startsWith('/account/me')) {
+            return `${SUPABASE_AUTH_API}/me${query}`;
+          }
           if (resourcePath.startsWith('/products/best-sellers')) {
             return `${SUPABASE_PRODUCT_API}/products/best-sellers${query}`;
           }
@@ -1881,6 +1884,8 @@ async function authFetch(input, init){
   if(init.body && !(init.body instanceof FormData) && !init.headers['Content-Type']) init.headers['Content-Type'] = 'application/json';
   let res = await fetch(input, init);
   if(res.status === 401){
+    const isStaticDeploy = window.SUPABASE_AUTH_API && !window.location.hostname.match(/^(localhost|127\.0\.0\.1)$/);
+    if (isStaticDeploy) return res;
     const refresh = localStorage.getItem('hub_refresh_token');
     if(!refresh) return res;
     try{

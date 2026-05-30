@@ -2004,10 +2004,24 @@
                 console.log('=== LOAD PROFILE SUCCESS ===');
             } catch (error) {
                 console.error('❌ Load profile error:', error);
-                console.error('Error stack:', error.stack);
-                alert('Failed to load profile. Redirecting to login.');
-                window.location.href = '/loginregister.html';
-                console.log('=== LOAD PROFILE FAILED ===');
+                populateProfileFromToken();
+                console.log('=== LOAD PROFILE FALLBACK (JWT) ===');
+            }
+        }
+
+        function populateProfileFromToken() {
+            const token = localStorage.getItem('hub_access_token');
+            if (!token) return;
+            try {
+                const decoded = JSON.parse(atob(token.split('.')[1]));
+                populateProfile({
+                    email: decoded.email || '',
+                    first_name: decoded.first_name || '',
+                    last_name: decoded.last_name || '',
+                    role: decoded.role || 'customer',
+                });
+            } catch (e) {
+                console.warn('Could not populate profile from token:', e);
             }
         }
 

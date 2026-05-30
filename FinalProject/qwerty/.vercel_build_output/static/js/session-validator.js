@@ -6,6 +6,12 @@
 
 (function() {
     'use strict';
+
+    // Static/Vercel + Supabase deploy has no Flask server — disable all session polling
+    if (window.SUPABASE_AUTH_API && !window.location.hostname.match(/^(localhost|127\.0\.0\.1)$/)) {
+        console.log('Static Supabase deploy — session validator disabled');
+        return;
+    }
     
     const SESSION_CHECK_KEY = 'hub_server_instance';
     const LAST_CHECK_KEY = 'hub_last_session_check';

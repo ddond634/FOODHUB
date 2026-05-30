@@ -424,6 +424,7 @@
 
 	<script src="js/notifications.js"></script>
 	<script src="js/session-validator.js"></script>
+	<script src="js/hub-events.js"></script>
 	<script src="js/cart-sync.js"></script>
 	<script>
 	if (typeof window.API_BASE === 'undefined') {
@@ -804,10 +805,12 @@
 		initializeProductSorting(); // Setup sorting
 		initializePaginationControls(); // Setup pagination buttons
 		
-		// Refresh shops every 30 seconds to catch newly approved sellers
-		setInterval(loadActiveShops, 30000);
-		// Refresh products every 60 seconds to catch new products
-		setInterval(loadProducts, 60000);
+		// Webhook-driven updates (via webhook_handler + Realtime broadcast) instead of polling
+		if (window.hubLiveUpdates) {
+			window.hubLiveUpdates.onShopsChanged(loadActiveShops);
+			window.hubLiveUpdates.onProductsChanged(loadProducts);
+			window.hubLiveUpdates.start();
+		}
 	});
 
 	// ============== Products Management ==============
