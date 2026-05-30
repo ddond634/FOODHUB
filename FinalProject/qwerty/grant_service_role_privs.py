@@ -20,7 +20,7 @@ except ImportError:
     print('psycopg2 not installed. Please run: pip install psycopg2-binary')
     sys.exit(1)
 
-tables = ['users','sellers','products']
+tables = ['users','sellers','products','cart_items','wishlist','product_variation_options','orders','order_items']
 grants = []
 for t in tables:
     grants.append(f"GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.{t} TO service_role;")

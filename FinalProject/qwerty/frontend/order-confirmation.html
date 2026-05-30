@@ -359,7 +359,7 @@
     <script src="js/cart-sync.js"></script>
     <script src="js/script.js"></script>
     <script>
-        const API_BASE = 'http://127.0.0.1:5000/api';
+        const API_BASE = window.SUPABASE_COMMERCE_API || 'http://127.0.0.1:5000/api';
 
         // Get order ID from URL
         const urlParams = new URLSearchParams(window.location.search);
@@ -427,7 +427,7 @@
             const itemsContainer = document.getElementById('orderItems');
             if (order.items && order.items.length > 0) {
                 itemsContainer.innerHTML = order.items.map(item => {
-                    const imageUrl = item.img_url ? `http://127.0.0.1:5000${item.img_url}` : 'https://via.placeholder.com/80';
+                    const imageUrl = item.img_url ? (window.resolveStorageUrl ? window.resolveStorageUrl(item.img_url) : item.img_url) : 'https://via.placeholder.com/80';
                     return `
                         <div class="order-item">
                             <img src="${imageUrl}" alt="${item.title || 'Product'}" onerror="this.src='https://via.placeholder.com/80'">

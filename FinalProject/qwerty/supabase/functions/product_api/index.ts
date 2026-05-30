@@ -87,6 +87,19 @@ serve(async (req: Request) => {
 
       const productId = parseId(maybeId);
       if (productId) {
+        if (maybeAction === 'variations') {
+          const { data, error } = await supabase
+            .from('product_variation_options')
+            .select('id,variation_type,variation_value,price_adjustment,stock,sku,is_available')
+            .eq('product_id', productId)
+            .eq('is_available', true)
+            .order('variation_type', { ascending: true })
+            .order('id', { ascending: true });
+
+          if (error) return respondJson({ success: true, data: [] });
+          return respondJson({ success: true, data: data || [] });
+        }
+
         const { data, error } = await supabase
           .from('products')
           .select('id,title,description,price,stock,seller_id,category,img_url,created_at')

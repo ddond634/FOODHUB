@@ -92,11 +92,13 @@
     const SUPABASE_PROJECT_REF = 'sfeccfbdmbwoblixyoti';
     const SUPABASE_FUNCTIONS_BASE = `https://${SUPABASE_PROJECT_REF}.functions.supabase.co`;
     const SUPABASE_PRODUCT_API = `${SUPABASE_FUNCTIONS_BASE}/product_api`;
+    const SUPABASE_COMMERCE_API = `${SUPABASE_FUNCTIONS_BASE}/commerce_api`;
     const SUPABASE_ORDER_API = `${SUPABASE_FUNCTIONS_BASE}/create_order`;
     const SUPABASE_STORAGE_BASE = `https://${SUPABASE_PROJECT_REF}.supabase.co/storage/v1/object/public/hub_uploads`;
 
     window.SUPABASE_FUNCTIONS_BASE = SUPABASE_FUNCTIONS_BASE;
     window.SUPABASE_PRODUCT_API = SUPABASE_PRODUCT_API;
+    window.SUPABASE_COMMERCE_API = SUPABASE_COMMERCE_API;
     window.SUPABASE_ORDER_API = SUPABASE_ORDER_API;
     window.SUPABASE_STORAGE_BASE = SUPABASE_STORAGE_BASE;
 
@@ -221,7 +223,7 @@
     
     try {
       const token = localStorage.getItem('hub_access_token');
-      const response = await fetch('http://127.0.0.1:5000/api/cart', {
+      const response = await fetch(`${window.SUPABASE_COMMERCE_API}/cart`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -260,7 +262,7 @@
     
     try {
       const token = localStorage.getItem('hub_access_token');
-      const response = await fetch('http://127.0.0.1:5000/api/wishlist', {
+      const response = await fetch(`${window.SUPABASE_COMMERCE_API}/wishlist`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -309,7 +311,7 @@
     
     try {
       const token = localStorage.getItem('hub_access_token');
-      const response = await fetch('http://127.0.0.1:5000/api/cart', {
+      const response = await fetch(`${window.SUPABASE_COMMERCE_API}/cart`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -361,7 +363,7 @@
     
     try {
       const token = localStorage.getItem('hub_access_token');
-      const response = await fetch('http://127.0.0.1:5000/api/wishlist', {
+      const response = await fetch(`${window.SUPABASE_COMMERCE_API}/wishlist`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -708,7 +710,7 @@
     // Save to backend API
     const token = localStorage.getItem('hub_access_token');
     if (token && productId) {
-      fetch(`http://127.0.0.1:5000/api/wishlist/${productId}`, {
+      fetch(`${window.SUPABASE_COMMERCE_API}/wishlist/${productId}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`

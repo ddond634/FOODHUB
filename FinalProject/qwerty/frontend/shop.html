@@ -436,7 +436,7 @@
 			const section = document.getElementById('modalVariationsSection');
 			const container = document.getElementById('modalVariations');
 			if(!section || !container || !productId) return;
-			const res = await fetch(`http://127.0.0.1:5000/api/products/${productId}/variations`);
+			const res = await fetch(`${window.SUPABASE_PRODUCT_API || '/api'}/products/${productId}/variations`);
 			const data = await res.json();
 			
 			// Handle different response structures
